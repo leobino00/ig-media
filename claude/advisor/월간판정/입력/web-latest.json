@@ -1,0 +1,59 @@
+{
+ "fetched_at": "2026-09-03 11:35",
+ "ISM_manufacturing": {
+  "value": null,
+  "error": "ISM 페이지에서 패턴 미발견",
+  "tried_months": 3
+ },
+ "ISM_services": {
+  "value": null,
+  "error": "ISM 페이지에서 패턴 미발견",
+  "tried_months": 3
+ },
+ "BOK_base_rate": {
+  "value": null,
+  "error": "한은 페이지에서 패턴 미발견",
+  "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643"
+ },
+ "FactSet_EPS_surprise_pct": {
+  "value": null,
+  "error": "FactSet 요약 문장 미발견",
+  "url": "https://insight.factset.com/topic/earnings"
+ },
+ "not_automated": {
+  "FedWatch": "JS 렌더링 — 검색 2출처 일치 규칙",
+  "NDX_forward_PE": "유료 — S&P 500 대체"
+ },
+ "debug": {
+  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/september/": {
+   "status": 200,
+   "len": 922,
+   "keyword": null,
+   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
+  },
+  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/august/": {
+   "status": 200,
+   "len": 922,
+   "keyword": null,
+   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
+  },
+  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/july/": {
+   "status": 200,
+   "len": 922,
+   "keyword": null,
+   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
+  },
+  "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643": {
+   "status": 200,
+   "len": 399826,
+   "keyword": "기준금리",
+   "around": " | 한국은행 기준금리 추이(목록) | 통화정책방향 결정회의 일정 및 자료 | 통화정책 | 정책/업무 | 한국은행 홈페이지 본문내용 바로가기 주메뉴 바로가기 --> --> 한국은행 --> 경제연구원 화폐박물관 지역본부 경제통계시스템(ECOS) 금융·경제 스냅샷 전자도서관 디지털아카이브 채용 전자계약시"
+  },
+  "https://insight.factset.com/topic/earnings": {
+   "status": 200,
+   "len": 100593,
+   "keyword": "EPS surprise",
+   "around": "report: Explore details behind the unusually large positive EPS surprise from Amazon. By John Butters &nbsp;&nbsp;|&nbsp;&nbsp; Earnings Read more July 31, 2026 S&amp;P 500 Earnings Season Update: July 31, 2026 Stay upda"
+  }
+ }
+}
