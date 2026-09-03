@@ -37,7 +37,17 @@ def ism(kind: str, today: dt.date):
         if hit:
             return {"value": float(hit.group(1)), "report_month": f"{y}-{m+1:02d}", "url": url,
                     "matched": hit.group(0)[:80], "fetched_at": dt.datetime.utcnow().isoformat(timespec="minutes")}
-    return {"value": None, "error": "ISM 페이지에서 패턴 미발견", "tried_months": 3}
+    # 폴백: ISM 사이트는 reCAPTCHA 봇 벽 (2026-09-03 확인). PR Newswire 배포문 제목에서 읽는다.
+    try:
+        html = get("https://www.prnewswire.com/news/institute-for-supply-management/")
+        text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).replace("&reg;", "®").replace("&#174;", "®")
+        hit = re.search(label.replace(" ", r"\s*") + r"\s*®?\s*at\s*(\d{2}\.\d)\s*%;?\s*([A-Z][a-z]+ 20\d\d)", text)
+        if hit:
+            return {"value": float(hit.group(1)), "report_month": hit.group(2), "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
+                    "matched": hit.group(0)[:80], "fetched_at": dt.datetime.utcnow().isoformat(timespec="minutes"), "note": "PR Newswire 폴백"}
+    except Exception as e:
+        return {"value": None, "error": f"ISM 봇 벽 + PR Newswire 실패: {e}"}
+    return {"value": None, "error": "ISM 페이지 봇 벽, PR Newswire 패턴 미발견", "tried_months": 3}
 
 def bok_base_rate():
     url = "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643"
@@ -46,9 +56,12 @@ def bok_base_rate():
     except Exception as e:
         return {"value": None, "error": f"{e}", "url": url}
     text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
-    hit = re.search(r"(20\d\d)\s*[.\-년]\s*(\d{1,2})\s*[.\-월]\s*(\d{1,2})[^\d]{0,80}?(\d\.\d{2})\s*%?", text) or \
-          re.search(r"(20\d\d)[.\-](\d{1,2})[.\-](\d{1,2})\D{0,80}?(\d\.\d{2})", text)
+    # 표 형식: "2026 08월 27일 3.00" 또는 "2026.08.27 3.00" — 첫 행이 최신
+    hit = re.search(r"(20\d\d)\s*[.\-년]?\s*(\d{1,2})\s*[.\-월]\s*(\d{1,2})\s*일?\s*(\d\.\d{2})", text) or \
+          re.search(r"(20\d\d)\D{1,3}(\d{1,2})\D{1,3}(\d{1,2})\D{0,40}?(\d\.\d{2})", text)
     if not hit:
+        i = text.find("2026")
+        DEBUG[url + "#near2026"] = {"around": text[max(0, i-80):i+220] if i >= 0 else "no 2026"}
         return {"value": None, "error": "한은 페이지에서 패턴 미발견", "url": url}
     return {"value": float(hit.group(4)), "decided_on": f"{hit.group(1)}-{int(hit.group(2)):02d}-{int(hit.group(3)):02d}",
             "url": url, "matched": hit.group(0)[:80], "fetched_at": dt.datetime.utcnow().isoformat(timespec="minutes")}
@@ -59,9 +72,16 @@ def factset_surprise():
         html = get(url)
     except Exception as e:
         return {"value": None, "error": f"{e}", "url": url}
+    # 토픽 페이지에는 제목만 있다 → 최신 "Earnings Season Update" 기사로 들어가서 읽는다
+    art = re.search(r'href="(https://insight\.factset\.com/[^"]*earnings-season-update[^"]*)"', html)
+    if art:
+        try:
+            html = get(art.group(1)); url = art.group(1)
+        except Exception as e:
+            return {"value": None, "error": f"FactSet 기사 열기 실패: {e}", "url": art.group(1)}
     text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).replace("&amp;", "&")
-    hit = re.search(r"(\d{2})%\s+of\s+S&P 500 companies have reported (?:a )?positive EPS surprise", text) or \
-          re.search(r"(\d{2})%[^.]{0,60}positive EPS surprise", text)
+    hit = re.search(r"(\d{2})%\s*(?:of (?:the |these )?(?:S&P 500 )?companies )?have reported (?:a )?positive EPS surprise", text) or \
+          re.search(r"(\d{2})%[^.]{0,80}positive EPS surprise", text)
     if not hit:
         return {"value": None, "error": "FactSet 요약 문장 미발견", "url": url}
     return {"value": float(hit.group(1)), "url": url, "matched": hit.group(0)[:100],

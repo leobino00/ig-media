@@ -155,6 +155,19 @@ def try_factset() -> tuple[float | None, str | None]:
     except Exception as e:
         return None, f"factset: {e}"
 
+def fetch_yahoo(sym: str) -> list[tuple[str, float]]:
+    """Yahoo Finance chart API (키 불필요). 1년 일봉 종가."""
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=1y&interval=1d"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.load(r)
+    res = data["chart"]["result"][0]
+    ts = res["timestamp"]; closes = res["indicators"]["quote"][0]["close"]
+    rows = [(dt.datetime.utcfromtimestamp(t).date().isoformat(), float(c)) for t, c in zip(ts, closes) if c is not None]
+    if not rows:
+        raise RuntimeError(f"yahoo {sym}: 0 rows")
+    return rows
+
 def fetch_stooq(sym: str) -> list[tuple[str, float]]:
     """stooq 일봉 CSV (키 불필요). sym 예: qqq.us"""
     url = f"https://stooq.com/q/d/l/?s={sym}&d1=20000101&i=d"
@@ -233,11 +246,14 @@ def main(out_dir: str):
         except Exception as e:
             errors.append(f"{code}: {e}")
     px = {}
-    for sym, code in (("qqq.us", "QQQ"), ("qqqe.us", "QQQE"), ("uup.us", "UUP")):
+    for sym, code in (("QQQ", "QQQ"), ("QQQE", "QQQE")):
         try:
-            px[code] = fetch_stooq(sym)
+            px[code] = fetch_yahoo(sym)
         except Exception as e:
-            errors.append(f"stooq {sym}: {e}")
+            try:
+                px[code] = fetch_stooq(sym.lower() + ".us")
+            except Exception as e2:
+                errors.append(f"{code}: yahoo {e} / stooq {e2}")
     mkt = market(px, series.get("DEXKOUS", []), today, ndx=series.get("NASDAQ100"), dxy=series.get("DTWEXBGS"))
     fs, fs_err = try_factset()
     if fs_err: errors.append(fs_err)
