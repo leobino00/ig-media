@@ -20,7 +20,11 @@ GitHub Actions (금요일 밤 · 매월 1일)          어드바이저 세션
 | B34 명목 · 연방기금 | DGS10 · DFF | 벤더 |
 | A3 (최선노력) | FactSet 페이지 파싱 | 결측 — 실패 시 null |
 
-**1차 출처 자동 수집 (`fetch_web.py` → `web-latest.json`):** B1 ISM 제조·서비스(ismworld.org), D2 한은 기준금리(bok.or.kr), A3 FactSet 서프라이즈. 실패 시 null → 검색 2출처 규칙 (PROTOCOL 부칙 3).
+**1차 출처 자동 수집 (`fetch_web.py` → `web-latest.json`):** B1 ISM 제조·서비스(ismworld.org는 reCAPTCHA 봇 벽 → **PR Newswire 배포문 제목**에서 읽음, 2026-09-03 검증), D2 한은 기준금리(bok.or.kr 표, 검증), A3 FactSet 서프라이즈(기사 본문 파싱, 문구 패턴 보강 중). 실패 시 null → 검색 2출처 규칙 (PROTOCOL 부칙 3).
+
+**시장 지표:** 지수는 FRED `NASDAQ100`(트리거 스킬의 NDX와 일치), 달러는 FRED `DTWEXBGS`, C2 비율은 Yahoo Finance(QQQE/QQQ). stooq는 봇 차단이라 폴백만.
+
+**검증 이력:** 2026-09-03 수동 실행 3회 — ① 푸시 경합 실패 → rebase 재시도 추가 ② FRED 전부 성공, 웹 파서 실패 → 폴백·정규식 보강 ③ ISM·한은·C2 성공, FactSet만 미해결.
 
 **자동화되지 않는 것:** FedWatch(JS 렌더링 — 검색, 상충 시 C), V1 나스닥100 선행 PER(유료 — S&P 대체), A2(벤더 종목별 집계).
 

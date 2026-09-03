@@ -81,6 +81,8 @@ def factset_surprise():
             return {"value": None, "error": f"FactSet 기사 열기 실패: {e}", "url": art.group(1)}
     text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).replace("&amp;", "&")
     hit = re.search(r"(\d{2})%\s*(?:of (?:the |these )?(?:S&P 500 )?companies )?have reported (?:a )?positive EPS surprise", text) or \
+          re.search(r"Of these companies,\s*(\d{2})%\s+have reported (?:actual )?EPS above (?:the )?mean EPS estimate", text) or \
+          re.search(r"(\d{2})%\s+have reported (?:actual )?EPS above (?:the )?mean", text) or \
           re.search(r"(\d{2})%[^.]{0,80}positive EPS surprise", text)
     if not hit:
         return {"value": None, "error": "FactSet 요약 문장 미발견", "url": url}
