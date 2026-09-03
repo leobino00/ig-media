@@ -1,4 +1,4 @@
-# FRED 자동 수집 — 2026-09-03 11:35 (UTC)
+# FRED 자동 수집 — 2026-09-03 11:38 (UTC)
 
 > 추정 없음. `null` = 결측. 스킬 채점은 어드바이저가 한다 — 이 파일은 값과 방향만 준다.
 
@@ -14,8 +14,9 @@
 | 참고 | 나스닥 종합 | ('2026-09-02', 26217.83) | 3개월 전 ('2026-06-04', 26830.96) | |
 | 참고 | 원달러 | ('2026-08-28', 1379.41) | 3개월 전 ('2026-06-04', 1531.91) | |
 | C1 · T1 · T5 | NDX (FRED NASDAQ100) | ('2026-09-02', 29143.33) · 200일선 26983.4 (+8.0%) | 사상최고 ('2026-06-02', 30660.6) · 3개월 -4.16% | 달러 낙폭 -4.95% · **T1a False · T1b False · T5 False** |
+| C2 (대체) | QQQE/QQQ | ('2026-09-02', 0.169) | 3개월 전 ('2026-06-04', 0.1639) | 3.12% |
 | D3 (대체) | FRED DTWEXBGS | ('2026-08-28', 118.7479) | 3개월 전 ('2026-06-04', 119.3615) | -0.51% |
 | D1 | 원달러 5년 밴드 | ('2026-08-28', 1379.41) | 1162.88 ~ 1555.96 | 위치 55.1% |
 | 부칙 4 | QQQ 원화 낙폭 | ('2026-09-02', 40200601) | 원화 사상최고 ('2026-06-30', 46891405) | **-14.27% · 경보(−25%) False** |
 
-**수집 실패:** stooq qqq.us: stooq qqq.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"></head><body><noscript>T', stooq qqqe.us: stooq qqqe.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"></head><body><noscript>T', stooq uup.us: stooq uup.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"></head><body><noscript>T', factset: 패턴 미발견
+**수집 실패:** factset: 패턴 미발견

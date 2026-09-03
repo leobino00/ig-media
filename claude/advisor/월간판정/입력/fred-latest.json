@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-03 11:35",
+ "fetched_at": "2026-09-03 11:38",
  "series_meta": {
   "IC4WSA": {
    "fred_id": "IC4WSA",
@@ -277,6 +277,17 @@
    "chg_3m_pct": -4.16,
    "T5_(3m>=+25%)": false
   },
+  "C2_breadth_QQQE_over_QQQ": {
+   "now": [
+    "2026-09-02",
+    0.169
+   ],
+   "3m_ago": [
+    "2026-06-04",
+    0.1639
+   ],
+   "chg_3m_pct": 3.12
+  },
   "D3_dollar": {
    "source": "FRED DTWEXBGS",
    "last": [
@@ -313,9 +324,6 @@
  },
  "factset_surprise_pct": null,
  "errors": [
-  "stooq qqq.us: stooq qqq.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"></head><body><noscript>T'",
-  "stooq qqqe.us: stooq qqqe.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"></head><body><noscript>T'",
-  "stooq uup.us: stooq uup.us: 0 rows; head='<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex,nofollow\"></head><body><noscript>T'",
   "factset: 패턴 미발견"
  ],
  "raw_recent": {

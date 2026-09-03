@@ -1,24 +1,32 @@
 {
- "fetched_at": "2026-09-03 11:35",
+ "fetched_at": "2026-09-03 11:38",
  "ISM_manufacturing": {
-  "value": null,
-  "error": "ISM 페이지에서 패턴 미발견",
-  "tried_months": 3
+  "value": 54.6,
+  "report_month": "August 2026",
+  "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
+  "matched": "Manufacturing PMI® at 54.6%; August 2026",
+  "fetched_at": "2026-09-03T11:38",
+  "note": "PR Newswire 폴백"
  },
  "ISM_services": {
-  "value": null,
-  "error": "ISM 페이지에서 패턴 미발견",
-  "tried_months": 3
+  "value": 54.1,
+  "report_month": "July 2026",
+  "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
+  "matched": "Services PMI® at 54.1%; July 2026",
+  "fetched_at": "2026-09-03T11:38",
+  "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
-  "value": null,
-  "error": "한은 페이지에서 패턴 미발견",
-  "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643"
+  "value": 3.0,
+  "decided_on": "2026-08-27",
+  "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
+  "matched": "2026 08월 27일 3.00",
+  "fetched_at": "2026-09-03T11:38"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
   "error": "FactSet 요약 문장 미발견",
-  "url": "https://insight.factset.com/topic/earnings"
+  "url": "https://insight.factset.com/sp-500-earnings-season-update-august-7-2026"
  },
  "not_automated": {
   "FedWatch": "JS 렌더링 — 검색 2출처 일치 규칙",
@@ -43,6 +51,12 @@
    "keyword": null,
    "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
   },
+  "https://www.prnewswire.com/news/institute-for-supply-management/": {
+   "status": 200,
+   "len": 243387,
+   "keyword": "PMI",
+   "around": "ge 100 per page Latest Sep 01, 2026, 10:00 ET Manufacturing PMI® at 54.6%; August 2026 ISM® Manufacturing PMI® Report Economic activity in the manufacturing sector expanded in August for the eighth consecutive month, say"
+  },
   "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643": {
    "status": 200,
    "len": 399826,
@@ -54,6 +68,12 @@
    "len": 100593,
    "keyword": "EPS surprise",
    "around": "report: Explore details behind the unusually large positive EPS surprise from Amazon. By John Butters &nbsp;&nbsp;|&nbsp;&nbsp; Earnings Read more July 31, 2026 S&amp;P 500 Earnings Season Update: July 31, 2026 Stay upda"
+  },
+  "https://insight.factset.com/sp-500-earnings-season-update-august-7-2026": {
+   "status": 200,
+   "len": 88674,
+   "keyword": "EPS surprise",
+   "around": "mpressive results, even if one excludes the unusually large EPS surprises reported by Alphabet and Amazon.com. Overall, both the percentage of S&amp;P 500 companies reporting positive earnings surprises and the magnitude"
   }
  }
 }
