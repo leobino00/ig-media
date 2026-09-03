@@ -124,6 +124,17 @@ def to_markdown(out: dict) -> str:
     r = g["fed_funds"]; s.append(f"| 연방기금 | DFF % | {r['latest']} | 3개월 전 {r['3m_ago']} | {r['chg_3m_pp']}p |")
     s.append(f"| 참고 | 나스닥 종합 | {g['NASDAQCOM']['latest']} | 3개월 전 {g['NASDAQCOM']['3m_ago']} | |")
     s.append(f"| 참고 | 원달러 | {g['DEXKOUS']['latest']} | 3개월 전 {g['DEXKOUS']['3m_ago']} | |")
+    m = out.get("market", {})
+    if m.get("QQQ"):
+        q = m["QQQ"]; s.append(f"| C1 · T1 · T5 | QQQ | {q['last']} · 200일선 {q['sma200']} ({q['pct_vs_sma200']:+}%) | 사상최고 {q['ath_close']} · 3개월 {q['chg_3m_pct']}% | 달러 낙폭 {q['drawdown_usd_pct']}% · **T1a {q['T1a_(<=-10%)']} · T1b {q['T1b_(<=-20%)']} · T5 {q['T5_(3m>=+25%)']}** |")
+    if m.get("C2_breadth_QQQE_over_QQQ"):
+        c = m["C2_breadth_QQQE_over_QQQ"]; s.append(f"| C2 (대체) | QQQE/QQQ | {c['now']} | 3개월 전 {c['3m_ago']} | {c['chg_3m_pct']}% |")
+    if m.get("D3_UUP"):
+        d3 = m["D3_UUP"]; s.append(f"| D3 (대체) | UUP | {d3['last']} | 3개월 전 {d3['3m_ago']} | {d3['chg_3m_pct']}% |")
+    if m.get("D1_USDKRW"):
+        d1 = m["D1_USDKRW"]; s.append(f"| D1 | 원달러 5년 밴드 | {d1['last']} | {d1['5y_low']} ~ {d1['5y_high']} | 위치 {d1['band_pos_pct']}% |")
+    if m.get("KRW_drawdown_(부칙4)"):
+        k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
     if out.get("factset_surprise_pct") is not None:
         s.append(f"| A3 | FactSet EPS 서프라이즈 비율 | {out['factset_surprise_pct']}% | (최선노력 파싱) | |")
     if out.get("errors"):
@@ -142,21 +153,92 @@ def try_factset() -> tuple[float | None, str | None]:
     except Exception as e:
         return None, f"factset: {e}"
 
+def fetch_stooq(sym: str) -> list[tuple[str, float]]:
+    """stooq 일봉 CSV (키 불필요). sym 예: qqq.us"""
+    url = f"https://stooq.com/q/d/l/?s={sym}&d1=20000101&i=d"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        text = r.read().decode("utf-8", "ignore")
+    rows = []
+    for rec in csv.DictReader(io.StringIO(text)):
+        try:
+            rows.append((rec["Date"], float(rec["Close"])))
+        except (KeyError, ValueError):
+            continue
+    return rows
+
+def market(px: dict, krw: list, today: dt.date) -> dict:
+    """벤더 도구가 없는 세션을 위한 시장 지표: C1·C2·D1·D3·T1·T5·원화 낙폭."""
+    out = {}
+    q = px.get("QQQ", [])
+    if q:
+        closes = [v for _, v in q]
+        last_d, last = q[-1]
+        sma200 = round(sum(closes[-200:]) / min(len(closes), 200), 2)
+        sma200_prev = round(sum(closes[-220:-20]) / min(len(closes[-220:-20]), 200), 2) if len(closes) > 220 else None
+        ath = max(q, key=lambda x: x[1])
+        m3 = at_or_before(q, (today - dt.timedelta(days=91)).isoformat())
+        out["QQQ"] = {"last": (last_d, last), "sma200": sma200, "sma200_20d_ago": sma200_prev,
+                      "pct_vs_sma200": round((last / sma200 - 1) * 100, 2),
+                      "ath_close": ath, "drawdown_usd_pct": round((last / ath[1] - 1) * 100, 2),
+                      "T1a_(<=-10%)": (last / ath[1] - 1) <= -0.10, "T1b_(<=-20%)": (last / ath[1] - 1) <= -0.20,
+                      "chg_3m_pct": round((last / m3[1] - 1) * 100, 2) if m3 else None,
+                      "T5_(3m>=+25%)": ((last / m3[1] - 1) >= 0.25) if m3 else None}
+    e = px.get("QQQE", [])
+    if q and e:
+        ed = {d: v for d, v in e}
+        pairs = [(d, ed[d] / v) for d, v in q if d in ed]
+        if pairs:
+            r_now = pairs[-1]; r_3m = at_or_before(pairs, (today - dt.timedelta(days=91)).isoformat())
+            out["C2_breadth_QQQE_over_QQQ"] = {"now": (r_now[0], round(r_now[1], 4)),
+                                               "3m_ago": (r_3m[0], round(r_3m[1], 4)) if r_3m else None,
+                                               "chg_3m_pct": round((r_now[1] / r_3m[1] - 1) * 100, 2) if r_3m else None}
+    u = px.get("UUP", [])
+    if u:
+        m3 = at_or_before(u, (today - dt.timedelta(days=91)).isoformat())
+        out["D3_UUP"] = {"last": u[-1], "3m_ago": m3, "chg_3m_pct": round((u[-1][1] / m3[1] - 1) * 100, 2) if m3 else None}
+    if krw:
+        five = [v for d, v in krw if d >= (today - dt.timedelta(days=365 * 5)).isoformat()]
+        lo, hi = min(five), max(five); last = krw[-1]
+        out["D1_USDKRW"] = {"last": last, "5y_low": lo, "5y_high": hi,
+                            "band_pos_pct": round((last[1] - lo) / (hi - lo) * 100, 1) if hi > lo else None}
+        if q:
+            kd = {d: v for d, v in krw}
+            kq = []
+            lastk = None
+            for d, v in q:
+                if d in kd: lastk = kd[d]
+                if lastk: kq.append((d, v * lastk))
+            if kq:
+                athk = max(kq, key=lambda x: x[1]); lk = kq[-1]
+                out["KRW_drawdown_(부칙4)"] = {"last": (lk[0], round(lk[1])), "ath": (athk[0], round(athk[1])),
+                                              "drawdown_krw_pct": round((lk[1] / athk[1] - 1) * 100, 2),
+                                              "alert_(<=-25%)": (lk[1] / athk[1] - 1) <= -0.25}
+    return out
+
 def main(out_dir: str):
     today = dt.date.today()
     start = (today - dt.timedelta(days=400)).isoformat()
     series, errors = {}, []
     for code, (fid, _, _) in SERIES.items():
         try:
-            series[code] = fetch_csv(fid, start)
+            series[code] = fetch_csv(fid, (today - dt.timedelta(days=365 * 5 + 30)).isoformat() if code == "DEXKOUS" else start)
         except Exception as e:
             errors.append(f"{code}: {e}")
+    px = {}
+    for sym, code in (("qqq.us", "QQQ"), ("qqqe.us", "QQQE"), ("uup.us", "UUP")):
+        try:
+            px[code] = fetch_stooq(sym)
+        except Exception as e:
+            errors.append(f"stooq {sym}: {e}")
+    mkt = market(px, series.get("DEXKOUS", []), today)
     fs, fs_err = try_factset()
     if fs_err: errors.append(fs_err)
     out = {"fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
            "series_meta": {k: {"fred_id": v[0], "desc": v[1], "skill_code": v[2]} for k, v in SERIES.items()},
            "last_values": {k: (v[-1] if v else None) for k, v in series.items()},
            "derived": derive(series, today),
+           "market": mkt,
            "factset_surprise_pct": fs,
            "errors": errors,
            "raw_recent": {k: v[-70:] for k, v in series.items()}}
