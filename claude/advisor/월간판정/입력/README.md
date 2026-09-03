@@ -20,7 +20,9 @@ GitHub Actions (금요일 밤 · 매월 1일)          어드바이저 세션
 | B34 명목 · 연방기금 | DGS10 · DFF | 벤더 |
 | A3 (최선노력) | FactSet 페이지 파싱 | 결측 — 실패 시 null |
 
-**자동화되지 않는 것:** B1 ISM(검색), FedWatch(검색·상충 시 C), 한은 기준금리(검색), V1 나스닥100 선행 PER(결측·S&P 대체), A2(벤더 종목별 집계).
+**1차 출처 자동 수집 (`fetch_web.py` → `web-latest.json`):** B1 ISM 제조·서비스(ismworld.org), D2 한은 기준금리(bok.or.kr), A3 FactSet 서프라이즈. 실패 시 null → 검색 2출처 규칙 (PROTOCOL 부칙 3).
+
+**자동화되지 않는 것:** FedWatch(JS 렌더링 — 검색, 상충 시 C), V1 나스닥100 선행 PER(유료 — S&P 대체), A2(벤더 종목별 집계).
 
 ## 켜는 법 (사용자, 1회)
 

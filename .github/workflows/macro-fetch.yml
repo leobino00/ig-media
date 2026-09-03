@@ -23,6 +23,8 @@ jobs:
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # 없어도 동작 (fredgraph.csv 사용)
         run: python scripts/fetch_fred.py "claude/advisor/월간판정/입력"
+      - name: Fetch primary-source web indicators (ISM · BOK · FactSet)
+        run: python scripts/fetch_web.py "claude/advisor/월간판정/입력" || true
       - name: Commit results
         run: |
           git config user.name "macro-fetch bot"
