@@ -85,6 +85,9 @@ def factset_surprise():
           re.search(r"(\d{2})%\s+have reported (?:actual )?EPS above (?:the )?mean", text) or \
           re.search(r"(\d{2})%[^.]{0,80}positive EPS surprise", text)
     if not hit:
+        # 다음 실행에서 정규식을 고치기 위해 "%"와 "EPS"가 같이 나오는 문장 3개를 남긴다
+        sents = [m.group(0) for m in re.finditer(r"[^.]{0,120}\d{1,2}%[^.]{0,120}EPS[^.]{0,80}\.", text)][:3]
+        DEBUG[url + "#eps-sentences"] = sents
         return {"value": None, "error": "FactSet 요약 문장 미발견", "url": url}
     return {"value": float(hit.group(1)), "url": url, "matched": hit.group(0)[:100],
             "fetched_at": dt.datetime.utcnow().isoformat(timespec="minutes")}
