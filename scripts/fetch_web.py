@@ -9,10 +9,17 @@ import json, os, re, sys, datetime as dt, urllib.request
 UA = {"User-Agent": "Mozilla/5.0 (advisor-macro-fetch)"}
 MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
 
+DEBUG = {}
 def get(url):
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read().decode("utf-8", "ignore")
+        html = r.read().decode("utf-8", "ignore")
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+    # 디버그: 상태·길이·키워드 주변 120자 (다음 실행에서 정규식을 고치기 위해)
+    kw = next((k for k in ("PMI", "기준금리", "EPS surprise") if k in text), None)
+    i = text.find(kw) if kw else -1
+    DEBUG[url] = {"status": r.status, "len": len(html), "keyword": kw, "around": text[max(0, i-60):i+160] if i >= 0 else text[:200]}
+    return html
 
 def ism(kind: str, today: dt.date):
     """kind: 'pmi'(제조) | 'services'. 이번 달 페이지 → 없으면 지난달 페이지 (직전 최신값 규정)."""
@@ -24,7 +31,9 @@ def ism(kind: str, today: dt.date):
             html = get(url)
         except Exception:
             continue
-        hit = re.search(label.replace(" ", r"\s*") + r"®?\s*(?:at|registered|was)\s*(\d{2}\.\d)\s*(?:percent|%)", html, re.I)
+        text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).replace("&reg;", "®").replace("&#174;", "®")
+        pat = label.replace(" ", r"\s*") + r"\s*®?\s*(?:at|registered|was|came in at|of)\s*(\d{2}\.\d)\s*(?:percent|%)?"
+        hit = re.search(pat, text, re.I) or re.search(r"PMI\s*®?\s*(?:at|registered)\s*(\d{2}\.\d)", text, re.I)
         if hit:
             return {"value": float(hit.group(1)), "report_month": f"{y}-{m+1:02d}", "url": url,
                     "matched": hit.group(0)[:80], "fetched_at": dt.datetime.utcnow().isoformat(timespec="minutes")}
@@ -36,8 +45,9 @@ def bok_base_rate():
         html = get(url)
     except Exception as e:
         return {"value": None, "error": f"{e}", "url": url}
-    text = re.sub(r"<[^>]+>", " ", html)
-    hit = re.search(r"(20\d\d)\s*[.\-년]\s*(\d{1,2})\s*[.\-월]\s*(\d{1,2})[^\d]{0,60}?(\d\.\d{2})\s*%?", text)
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+    hit = re.search(r"(20\d\d)\s*[.\-년]\s*(\d{1,2})\s*[.\-월]\s*(\d{1,2})[^\d]{0,80}?(\d\.\d{2})\s*%?", text) or \
+          re.search(r"(20\d\d)[.\-](\d{1,2})[.\-](\d{1,2})\D{0,80}?(\d\.\d{2})", text)
     if not hit:
         return {"value": None, "error": "한은 페이지에서 패턴 미발견", "url": url}
     return {"value": float(hit.group(4)), "decided_on": f"{hit.group(1)}-{int(hit.group(2)):02d}-{int(hit.group(3)):02d}",
@@ -49,8 +59,9 @@ def factset_surprise():
         html = get(url)
     except Exception as e:
         return {"value": None, "error": f"{e}", "url": url}
-    text = re.sub(r"<[^>]+>", " ", html).replace("&amp;", "&")
-    hit = re.search(r"(\d{2})%\s+of\s+S&P 500 companies have reported (?:a )?positive EPS surprise", text)
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).replace("&amp;", "&")
+    hit = re.search(r"(\d{2})%\s+of\s+S&P 500 companies have reported (?:a )?positive EPS surprise", text) or \
+          re.search(r"(\d{2})%[^.]{0,60}positive EPS surprise", text)
     if not hit:
         return {"value": None, "error": "FactSet 요약 문장 미발견", "url": url}
     return {"value": float(hit.group(1)), "url": url, "matched": hit.group(0)[:100],
@@ -61,7 +72,8 @@ def main(out_dir):
     out = {"fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
            "ISM_manufacturing": ism("pmi", today), "ISM_services": ism("services", today),
            "BOK_base_rate": bok_base_rate(), "FactSet_EPS_surprise_pct": factset_surprise(),
-           "not_automated": {"FedWatch": "JS 렌더링 — 검색 2출처 일치 규칙", "NDX_forward_PE": "유료 — S&P 500 대체"}}
+           "not_automated": {"FedWatch": "JS 렌더링 — 검색 2출처 일치 규칙", "NDX_forward_PE": "유료 — S&P 500 대체"},
+           "debug": DEBUG}
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "web-latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)

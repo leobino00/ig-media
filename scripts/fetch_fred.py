@@ -21,7 +21,9 @@ SERIES = {
     "DFII10":       ("DFII10",       "10년 TIPS 실질금리 (%)",              "B34 실질금리"),
     "DGS10":        ("DGS10",        "10년물 명목 (%)",                      "B34 참고"),
     "DFF":          ("DFF",          "실효 연방기금금리 (%)",                "B34·D2 참고"),
-    "NASDAQCOM":    ("NASDAQCOM",    "나스닥 종합 (참고, NDX 아님)",         "T1 참고"),
+    "NASDAQ100":    ("NASDAQ100",    "나스닥100 지수 (NDX)",                "C1 · T1 · T5 · 원화 낙폭"),
+    "DTWEXBGS":     ("DTWEXBGS",     "달러 광의 지수 (DXY 대체)",           "D3 대체"),
+    "NASDAQCOM":    ("NASDAQCOM",    "나스닥 종합 (참고)",                   "참고"),
     "DEXKOUS":      ("DEXKOUS",      "원달러 (참고)",                        "D1 참고"),
 }
 
@@ -125,12 +127,12 @@ def to_markdown(out: dict) -> str:
     s.append(f"| 참고 | 나스닥 종합 | {g['NASDAQCOM']['latest']} | 3개월 전 {g['NASDAQCOM']['3m_ago']} | |")
     s.append(f"| 참고 | 원달러 | {g['DEXKOUS']['latest']} | 3개월 전 {g['DEXKOUS']['3m_ago']} | |")
     m = out.get("market", {})
-    if m.get("QQQ"):
-        q = m["QQQ"]; s.append(f"| C1 · T1 · T5 | QQQ | {q['last']} · 200일선 {q['sma200']} ({q['pct_vs_sma200']:+}%) | 사상최고 {q['ath_close']} · 3개월 {q['chg_3m_pct']}% | 달러 낙폭 {q['drawdown_usd_pct']}% · **T1a {q['T1a_(<=-10%)']} · T1b {q['T1b_(<=-20%)']} · T5 {q['T5_(3m>=+25%)']}** |")
+    if m.get("NDX"):
+        q = m["NDX"]; s.append(f"| C1 · T1 · T5 | NDX ({m.get('index_source')}) | {q['last']} · 200일선 {q['sma200']} ({q['pct_vs_sma200']:+}%) | 사상최고 {q['ath_close']} · 3개월 {q['chg_3m_pct']}% | 달러 낙폭 {q['drawdown_usd_pct']}% · **T1a {q['T1a_(<=-10%)']} · T1b {q['T1b_(<=-20%)']} · T5 {q['T5_(3m>=+25%)']}** |")
     if m.get("C2_breadth_QQQE_over_QQQ"):
         c = m["C2_breadth_QQQE_over_QQQ"]; s.append(f"| C2 (대체) | QQQE/QQQ | {c['now']} | 3개월 전 {c['3m_ago']} | {c['chg_3m_pct']}% |")
-    if m.get("D3_UUP"):
-        d3 = m["D3_UUP"]; s.append(f"| D3 (대체) | UUP | {d3['last']} | 3개월 전 {d3['3m_ago']} | {d3['chg_3m_pct']}% |")
+    if m.get("D3_dollar"):
+        d3 = m["D3_dollar"]; s.append(f"| D3 (대체) | {d3['source']} | {d3['last']} | 3개월 전 {d3['3m_ago']} | {d3['chg_3m_pct']}% |")
     if m.get("D1_USDKRW"):
         d1 = m["D1_USDKRW"]; s.append(f"| D1 | 원달러 5년 밴드 | {d1['last']} | {d1['5y_low']} ~ {d1['5y_high']} | 위치 {d1['band_pos_pct']}% |")
     if m.get("KRW_drawdown_(부칙4)"):
@@ -165,12 +167,16 @@ def fetch_stooq(sym: str) -> list[tuple[str, float]]:
             rows.append((rec["Date"], float(rec["Close"])))
         except (KeyError, ValueError):
             continue
+    if not rows:
+        raise RuntimeError(f"stooq {sym}: 0 rows; head={text[:120]!r}")
     return rows
 
-def market(px: dict, krw: list, today: dt.date) -> dict:
-    """벤더 도구가 없는 세션을 위한 시장 지표: C1·C2·D1·D3·T1·T5·원화 낙폭."""
+def market(px: dict, krw: list, today: dt.date, ndx: list | None = None, dxy: list | None = None) -> dict:
+    """벤더 도구가 없는 세션을 위한 시장 지표: C1·C2·D1·D3·T1·T5·원화 낙폭.
+    지수는 FRED NASDAQ100(NDX) — 트리거 스킬 규정과 일치. stooq QQQ는 폴백."""
     out = {}
-    q = px.get("QQQ", [])
+    q = ndx if ndx else px.get("QQQ", [])
+    out["index_source"] = "FRED NASDAQ100" if ndx else ("stooq QQQ" if q else None)
     if q:
         closes = [v for _, v in q]
         last_d, last = q[-1]
@@ -178,25 +184,26 @@ def market(px: dict, krw: list, today: dt.date) -> dict:
         sma200_prev = round(sum(closes[-220:-20]) / min(len(closes[-220:-20]), 200), 2) if len(closes) > 220 else None
         ath = max(q, key=lambda x: x[1])
         m3 = at_or_before(q, (today - dt.timedelta(days=91)).isoformat())
-        out["QQQ"] = {"last": (last_d, last), "sma200": sma200, "sma200_20d_ago": sma200_prev,
+        out["NDX"] = {"last": (last_d, last), "sma200": sma200, "sma200_20d_ago": sma200_prev,
                       "pct_vs_sma200": round((last / sma200 - 1) * 100, 2),
                       "ath_close": ath, "drawdown_usd_pct": round((last / ath[1] - 1) * 100, 2),
                       "T1a_(<=-10%)": (last / ath[1] - 1) <= -0.10, "T1b_(<=-20%)": (last / ath[1] - 1) <= -0.20,
                       "chg_3m_pct": round((last / m3[1] - 1) * 100, 2) if m3 else None,
                       "T5_(3m>=+25%)": ((last / m3[1] - 1) >= 0.25) if m3 else None}
-    e = px.get("QQQE", [])
-    if q and e:
+    e = px.get("QQQE", []); qq = px.get("QQQ", [])
+    if qq and e:
         ed = {d: v for d, v in e}
-        pairs = [(d, ed[d] / v) for d, v in q if d in ed]
+        pairs = [(d, ed[d] / v) for d, v in qq if d in ed]
         if pairs:
             r_now = pairs[-1]; r_3m = at_or_before(pairs, (today - dt.timedelta(days=91)).isoformat())
             out["C2_breadth_QQQE_over_QQQ"] = {"now": (r_now[0], round(r_now[1], 4)),
                                                "3m_ago": (r_3m[0], round(r_3m[1], 4)) if r_3m else None,
                                                "chg_3m_pct": round((r_now[1] / r_3m[1] - 1) * 100, 2) if r_3m else None}
-    u = px.get("UUP", [])
+    u = dxy if dxy else px.get("UUP", [])
     if u:
         m3 = at_or_before(u, (today - dt.timedelta(days=91)).isoformat())
-        out["D3_UUP"] = {"last": u[-1], "3m_ago": m3, "chg_3m_pct": round((u[-1][1] / m3[1] - 1) * 100, 2) if m3 else None}
+        out["D3_dollar"] = {"source": "FRED DTWEXBGS" if dxy else "stooq UUP", "last": u[-1], "3m_ago": m3,
+                            "chg_3m_pct": round((u[-1][1] / m3[1] - 1) * 100, 2) if m3 else None}
     if krw:
         five = [v for d, v in krw if d >= (today - dt.timedelta(days=365 * 5)).isoformat()]
         lo, hi = min(five), max(five); last = krw[-1]
@@ -231,7 +238,7 @@ def main(out_dir: str):
             px[code] = fetch_stooq(sym)
         except Exception as e:
             errors.append(f"stooq {sym}: {e}")
-    mkt = market(px, series.get("DEXKOUS", []), today)
+    mkt = market(px, series.get("DEXKOUS", []), today, ndx=series.get("NASDAQ100"), dxy=series.get("DTWEXBGS"))
     fs, fs_err = try_factset()
     if fs_err: errors.append(fs_err)
     out = {"fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
