@@ -1,11 +1,11 @@
 {
- "fetched_at": "2026-09-03 11:38",
+ "fetched_at": "2026-09-03 11:39",
  "ISM_manufacturing": {
   "value": 54.6,
   "report_month": "August 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Manufacturing PMI® at 54.6%; August 2026",
-  "fetched_at": "2026-09-03T11:38",
+  "fetched_at": "2026-09-03T11:39",
   "note": "PR Newswire 폴백"
  },
  "ISM_services": {
@@ -13,7 +13,7 @@
   "report_month": "July 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Services PMI® at 54.1%; July 2026",
-  "fetched_at": "2026-09-03T11:38",
+  "fetched_at": "2026-09-03T11:39",
   "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
@@ -21,7 +21,7 @@
   "decided_on": "2026-08-27",
   "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
   "matched": "2026 08월 27일 3.00",
-  "fetched_at": "2026-09-03T11:38"
+  "fetched_at": "2026-09-03T11:39"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
