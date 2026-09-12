@@ -393,15 +393,35 @@ def main(argv=None):
     p.add_argument("--holdings", default=None, help="holdings.json 경로 (기본: out_dir/holdings.json)")
     p.add_argument("--stdout", action="store_true", help="파일을 쓰지 않고 md만 출력한다")
     p.add_argument("--probe-sector", default=None,
-                   help="티커 목록(쉼표)의 Yahoo 섹터 → 대응 ETF만 확인하고 끝낸다 (R4 점검용)")
+                   help="티커 목록(쉼표)의 섹터 → 대응 ETF만 확인하고 끝낸다 (R4 점검용)")
+    p.add_argument("--probe-out", default=None,
+                   help="점검 결과를 이 파일에 남긴다. 위성 편입 전까지 태깅이 사는지 보는 기록")
     args = p.parse_args(argv)
 
-    if args.probe_sector:                      # R4 점검 — 파일을 쓰지 않는다
+    if args.probe_sector:                      # R4 점검 — 관측 산출물은 건드리지 않는다
+        rows, ok = [], 0
         for tk in [t.strip().upper() for t in args.probe_sector.split(",") if t.strip()]:
             g = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network) or {}
+            etf = SECTOR_TO_TICKER.get(g.get("sector"))
+            ok += bool(etf)
+            rows.append((tk, g.get("sector"), g.get("source"), g.get("grade"), etf, g.get("errors")))
             print(f"{tk}: sector={g.get('sector') or '결측'} · 출처={g.get('source') or '-'}"
-                  f"({g.get('grade') or '-'}) → {SECTOR_TO_TICKER.get(g.get('sector')) or '대응 ETF 없음'}"
+                  f"({g.get('grade') or '-'}) → {etf or '대응 ETF 없음'}"
                   + (f" · 사유={g.get('errors')}" if not g.get("sector") else ""))
+        if args.probe_out:
+            L = ["# 보유 위성 섹터 태깅 점검 (R4)", "",
+                 f"| 점검 | {dt.datetime.now(KST).replace(microsecond=0).isoformat()} · "
+                 f"{PROGRAM} v{PROGRAM_VERSION} |", "|---|---|",
+                 f"| 결과 | {ok}/{len(rows)}종목 대응 |", "",
+                 "위성 슬롯은 아직 0/5다(첫 편입 2027-02~03). 그때 이 기능이 살아 있는지 보려고",
+                 "워크플로 수동 실행마다 남긴다. 실패하면 섹터는 결측이고 사유를 그대로 적는다 — 추정하지 않는다.", "",
+                 "| 티커 | 섹터 | 출처 | 등급 | 대응 ETF | 사유 |", "|---|---|---|---|---|---|"]
+            for tk, sec, src, gr, etf, err in rows:
+                L.append(f"| {tk} | {sec or '결측'} | {src or '-'} | {gr or '-'} | {etf or '없음'} "
+                         f"| {'' if sec else str(err)[:160]} |")
+            os.makedirs(os.path.dirname(os.path.abspath(args.probe_out)), exist_ok=True)
+            with open(args.probe_out, "w", encoding="utf-8") as f:
+                f.write("\n".join(L) + "\n")
         return 0
 
     doc = build(args)
