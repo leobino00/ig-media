@@ -130,7 +130,9 @@ def breadth_block(cache_dir, network, as_of=None):
         "nh_nl_ratio": calc.nh_nl_ratio(nh, nl) if n_hl else None,
         "n_52w_judged": n_hl,
         "price_fetch_errors": len(errs),
+        "price_fetch_failed": sorted(errs)[:10],
         "excluded_stale_last_bar": stale,
+        "constituents_attempt_errors": cons.get("attempt_errors") or None,
     }
     missing = {}
     if coverage is not None and coverage < 80:
@@ -245,6 +247,12 @@ def build(args):
         "반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
         "이 파일은 관측 입력이다. 판정 규칙이 아니고 월간 10지표에 들어가지 않는다 (제안서 §3).",
     ]
+    if breadth and breadth.get("constituents_attempt_errors"):
+        notes.append("구성종목 목록 출처 폴백: " + " / ".join(breadth["constituents_attempt_errors"])
+                     + f" → {breadth['constituents_source']}({breadth['constituents_grade']}) 사용.")
+    if breadth and breadth.get("price_fetch_failed"):
+        notes.append("구성종목 가격 실패: " + ", ".join(breadth["price_fetch_failed"])
+                     + f" (총 {breadth['price_fetch_errors']}종목 — 폭 지표 모집단에서 빠졌다).")
     if asof_date and asof_date.weekday() != 4:
         notes.append(f"기준일 {as_of}은 금요일이 아니다 (요일={asof_date.weekday()}). "
                      "마지막 거래일 종가 기준이며 주가 덜 끝났을 수 있다.")
@@ -308,7 +316,7 @@ def to_markdown(doc):
         used = s.get("ticker_used") or s["ticker"]
         tk = used if used == s["ticker"] else f"{used}(대체)"
         L.append(f"| {s['name']} | {tk} | {_f(s.get('rs_ratio'))} | {_f(s.get('rs_chg_4w'), sign=True)} "
-                 f"| {_f(s.get('rs_momentum'), 1, sign=True)} | {s.get('quadrant') or '결측'} "
+                 f"| {_f(s.get('rs_momentum'), 2, sign=True)} | {s.get('quadrant') or '결측'} "
                  f"| {s.get('weeks_in_quadrant') if s.get('weeks_in_quadrant') is not None else '결측'} "
                  f"| {_f(s.get('rs_dd_from_26w_high'), 1, sign=True)} | {' · '.join(flags)} |")
     b = doc["breadth"]

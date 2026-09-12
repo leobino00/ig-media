@@ -37,18 +37,23 @@ def by_year(pairs):
 
 
 def load_prices(rng, cache_dir, network):
-    bench = yahoo.chart(BENCH, rng=rng, cache_dir=cache_dir, network=network)["rows"]
-    bw = calc.to_weekly(bench)
+    """반환: (QQQ 주봉, {티커: R(t) 시계열}, 실패, 메타). 메타는 재현성 진단에 쓴다."""
+    b = yahoo.chart(BENCH, rng=rng, cache_dir=cache_dir, network=network)
+    bw = calc.to_weekly(b["rows"])
     out, errs = {}, {}
+    meta = {BENCH: {"used": BENCH, "price_field": b["price_field"], "rows": len(b["rows"]),
+                    "last": b["rows"][-1]}}
     for name, ticker, group, alts in UNIVERSE:
         for cand in [ticker] + alts:
             try:
-                rows = yahoo.chart(cand, rng=rng, cache_dir=cache_dir, network=network)["rows"]
-                out[ticker] = calc.ratio_series(calc.to_weekly(rows), bw)
+                c = yahoo.chart(cand, rng=rng, cache_dir=cache_dir, network=network)
+                out[ticker] = calc.ratio_series(calc.to_weekly(c["rows"]), bw)
+                meta[ticker] = {"used": cand, "price_field": c["price_field"],
+                                "rows": len(c["rows"]), "last": c["rows"][-1]}
                 break
             except Exception as e:
                 errs[ticker] = str(e)[:100]
-    return bw, out, errs
+    return bw, out, errs, meta
 
 
 def v1_quadrant_forward(bw, ratios):
@@ -173,8 +178,12 @@ def v2_breadth_forward(bw, hist):
     ly, ry = by_year(low), by_year(rest)
     years = sorted(set(ly) & set(ry))
     diffs = {y: round(ly[y] - ry[y], 3) for y in years}
+    pooled = None if not low or not rest else round(_mean([v for _, v in low]) - _mean([v for _, v in rest]), 3)
     return {
         "cutoff_pct_above_sma200": cut, "n_low": len(low), "n_rest": len(rest),
+        "years_with_low_weeks": sorted(ly), "all_years": sorted(set(ly) | set(ry)),
+        "pooled_and_yearly_sign_conflict": bool(
+            pooled is not None and diffs and (pooled < 0) == (min(diffs.values()) > 0)),
         "qqq_fwd4w_low_pct": _mean([v for _, v in low]), "qqq_fwd4w_rest_pct": _mean([v for _, v in rest]),
         "low_minus_rest_pp": None if not low or not rest else round(_mean([v for _, v in low]) - _mean([v for _, v in rest]), 3),
         "by_year_diff_pp": diffs, "years": len(years),
@@ -182,13 +191,34 @@ def v2_breadth_forward(bw, hist):
     }
 
 
-def v4_stability(bw, ratios, input_dir, cache_dir, network, rng):
-    """데이터 안정성 — ① 같은 입력 재계산 동일성 ② 저장된 스냅샷 대비 과거 값 변화."""
+def v4_stability(bw, ratios, input_dir, cache_dir, network, rng, meta1):
+    """데이터 안정성 — ① 같은 기준일에 두 번 받아 재계산한 값이 같은가 ② 저장된 스냅샷 대비 과거 값 변화.
+
+    다르면 「다르다」로 끝내지 않고 **무엇이 얼마나 달랐는지** 적는다. 어느 티커·어느 주·두 값,
+    대체 티커나 가격 필드가 바뀌었는지까지 남긴다 — 다음 실행에서 원인을 찾을 수 있어야 한다.
+    """
     out = {}
     a = {tk: [(d, round(v, 6)) for d, v in calc.rs_series(r)][-13:] for tk, r in ratios.items()}
-    bw2, ratios2, _ = load_prices(rng, cache_dir, network)
+    bw2, ratios2, _, meta2 = load_prices(rng, cache_dir, network)
     b = {tk: [(d, round(v, 6)) for d, v in calc.rs_series(r)][-13:] for tk, r in ratios2.items()}
-    out["recompute_identical"] = (a == b)
+    diffs = []
+    for tk in sorted(set(a) | set(b)):
+        x, y = dict(a.get(tk, [])), dict(b.get(tk, []))
+        for d in sorted(set(x) | set(y)):
+            if x.get(d) != y.get(d):
+                diffs.append({"ticker": tk, "week": d, "first": x.get(d), "second": y.get(d),
+                              "rel_pct": None if not x.get(d) or not y.get(d)
+                              else round(abs(y[d] - x[d]) / abs(x[d]) * 100, 6)})
+    src = {tk: {"first": meta1.get(tk), "second": meta2.get(tk)} for tk in sorted(set(meta1) | set(meta2))
+           if meta1.get(tk, {}).get("used") != meta2.get(tk, {}).get("used")
+           or meta1.get(tk, {}).get("price_field") != meta2.get(tk, {}).get("price_field")
+           or meta1.get(tk, {}).get("rows") != meta2.get(tk, {}).get("rows")
+           or meta1.get(tk, {}).get("last") != meta2.get(tk, {}).get("last")}
+    out["recompute_identical"] = not diffs
+    out["recompute_n_diff_points"] = len(diffs)
+    out["recompute_max_rel_pct"] = max([d["rel_pct"] for d in diffs if d["rel_pct"] is not None], default=0.0)
+    out["recompute_diffs_sample"] = diffs[:5]
+    out["source_changed_between_runs"] = src or None
     snaps = sorted(f for f in os.listdir(input_dir) if f.startswith("sector-us-2") and f.endswith(".json")) \
         if os.path.isdir(input_dir) else []
     if not snaps:
@@ -218,14 +248,25 @@ def caveat_lines(r):
         b = f"검증 미실시 — {(v2 or {}).get('error', '구성종목 시계열 미확보')}"
     else:
         b = (f"하위 {LOW_Q}% 주 이후 QQQ {FWD}주 {v2['qqq_fwd4w_low_pct']}% vs 나머지 {v2['qqq_fwd4w_rest_pct']}% "
-             f"(차 {v2['low_minus_rest_pp']:+}%p, {v2['years']}년 중 {v2['years_positive']}년 양수)")
+             f"(전체 차 {v2['low_minus_rest_pp']:+}%p · 하위 구간이 있던 {v2['years']}개 연도 중 "
+             f"{v2['years_positive']}년 양수)")
+        if v2.get("pooled_and_yearly_sign_conflict"):
+            b += " — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다"
     if v3["n_event_weeks"] == 0:
         d = f"표본 기간에 QQQ {FWD}주 {DD_EVENT}% 이하 하락 주가 없었다 — 비교 불가"
     else:
         d = (f"하락 직전 leading 수 {v3['leading_count_before_event']}개 vs 평상시 {v3['leading_count_other']}개"
              f" (차 {v3['leading_diff']:+}개), 분산도 차 {v3['dispersion_diff']:+}"
              f" (사건 {v3['n_event_weeks']}주)")
-    s = ("같은 입력 재계산 동일" if v4.get("recompute_identical") else "같은 입력 재계산 불일치 — 확인 필요")
+    if v4.get("recompute_identical"):
+        s = "같은 기준일 두 번 수집·재계산 동일"
+    else:
+        ex = (v4.get("recompute_diffs_sample") or [{}])[0]
+        s = (f"같은 기준일 두 번 수집했을 때 최근 13주 rs_ratio {v4.get('recompute_n_diff_points')}점이 달랐다"
+             f"(최대 {v4.get('recompute_max_rel_pct')}%, 예: {ex.get('ticker')} {ex.get('week')} "
+             f"{ex.get('first')}→{ex.get('second')})"
+             + (f" · 출처가 바뀐 티커 {list(v4['source_changed_between_runs'])}"
+                if v4.get("source_changed_between_runs") else " · 출처·가격필드·행수는 동일"))
     sc = v4.get("snapshot_compare")
     s += f" · 스냅샷 대비 과거 rs_ratio 최대 변화 {sc['max_abs_rel_change_pct']}% ({sc['compared_points']}점)" \
         if isinstance(sc, dict) else f" · {sc}"
@@ -264,8 +305,11 @@ def to_markdown(r):
         L += [f"- 하위 {LOW_Q}% 기준값 = 200일선 위 {v2['cutoff_pct_above_sma200']}%",
               f"- 이후 QQQ 4주 수익: 하위 구간 {v2['qqq_fwd4w_low_pct']}% (n={v2['n_low']}) vs 나머지 "
               f"{v2['qqq_fwd4w_rest_pct']}% (n={v2['n_rest']}) → 차 **{v2['low_minus_rest_pp']:+}%p**",
-              f"- 연도별 차이(%p): " + " · ".join(f"{y} {d:+}" for y, d in v2["by_year_diff_pp"].items()),
-              f"- 양수 연도 {v2['years_positive']}/{v2['years']}",
+              f"- 연도별 차이(%p): " + " · ".join(f"{y} {d:+}" for y, d in v2["by_year_diff_pp"].items())
+              + f" (하위 구간이 나타난 연도만. 표본 전체 연도는 {', '.join(v2.get('all_years', []))})",
+              f"- 양수 연도 {v2['years_positive']}/{v2['years']}"
+              + (" · **전체 차이와 연도별 부호가 반대다** — 하위 구간이 약세 연도에 몰린 결과이고, "
+                 "한쪽만 인용하면 안 된다" if v2.get("pooled_and_yearly_sign_conflict") else ""),
               f"- 모집단: {r['breadth_meta']['source']} ({r['breadth_meta']['grade']}) 현재 구성종목 "
               f"{r['breadth_meta']['n']}종목 · 주 표본 {r['breadth_meta']['weeks']}개 — **생존편향이 있다**"]
     v3 = r["v3_drawdown"]
@@ -274,9 +318,14 @@ def to_markdown(r):
           f"- 직전 주 leading 섹터 수: 사건 {v3['leading_count_before_event']} vs 그 외 {v3['leading_count_other']} "
           f"(차 {v3['leading_diff']})",
           f"- 직전 주 분산도: 사건 {v3['dispersion_before_event']} vs 그 외 {v3['dispersion_other']} "
-          f"(차 {v3['dispersion_diff']})", "",
+          f"(차 {v3['dispersion_diff']})",
+          f"- 사건 {v3['n_event_weeks']}주는 작은 표본이다. 차이의 부호를 근거로 예고력을 주장하지 않는다.", "",
           "## 4. 데이터 안정성", "",
-          f"- 같은 입력 재계산: {'동일' if r['v4_stability'].get('recompute_identical') else '불일치'}",
+          f"- 같은 기준일 두 번 수집·재계산: {'동일' if r['v4_stability'].get('recompute_identical') else '불일치'}"
+          + ("" if r["v4_stability"].get("recompute_identical") else
+             f" — 다른 점 {r['v4_stability'].get('recompute_n_diff_points')}개 · 최대 상대차 "
+             f"{r['v4_stability'].get('recompute_max_rel_pct')}% · 예 {r['v4_stability'].get('recompute_diffs_sample')}"
+             f" · 출처 변화 {r['v4_stability'].get('source_changed_between_runs') or '없음'}"),
           f"- 스냅샷 대비: {_snap_line(r['v4_stability'].get('snapshot_compare'))}",
           "- Yahoo 수정종가는 배당·분할 시 과거 값이 소급 변경된다. 그래서 주간 스냅샷을 덮어쓰지 않는다.", "",
           "## md 꼬리에 들어가는 문구", ""]
@@ -297,7 +346,7 @@ def main(argv=None):
     a = p.parse_args(argv)
     network = not a.no_network
 
-    bw, ratios, errs = load_prices(a.range, a.cache_dir, network)
+    bw, ratios, errs, meta1 = load_prices(a.range, a.cache_dir, network)
     weeks = sorted({d for r in ratios.values() for d, _ in r})
     r = {"run_at": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
          "calc_version": calc.CALC_VERSION, "range": a.range,
@@ -316,7 +365,7 @@ def main(argv=None):
     else:
         r["breadth_meta"] = None
         r["v2_breadth"] = {"error": "--with-breadth 없이 실행 — 구성종목 시계열 미수집"}
-    r["v4_stability"] = v4_stability(bw, ratios, a.input_dir, a.cache_dir, network, a.range)
+    r["v4_stability"] = v4_stability(bw, ratios, a.input_dir, a.cache_dir, network, a.range, meta1)
     r["caveat_lines"] = caveat_lines(r)
 
     os.makedirs(a.out_dir, exist_ok=True)
