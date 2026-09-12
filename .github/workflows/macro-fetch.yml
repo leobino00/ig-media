@@ -31,6 +31,9 @@ jobs:
         run: |
           python scripts/sector_us/fetch.py "claude/advisor/월간판정/입력" || true
           python scripts/sector_us/lint_no_judgment.py "claude/advisor/월간판정/입력/sector-us-latest.md" || true
+      - name: Probe sector tagging (R4, 수동 실행 때만 · 파일을 쓰지 않는다)
+        if: github.event_name == 'workflow_dispatch'
+        run: python scripts/sector_us/fetch.py --probe-sector "NVDA,XOM,JNJ,PLD" || true
       - name: Validate sector program (§9, 수동 실행 때만)
         if: github.event_name == 'workflow_dispatch'
         run: |

@@ -22,6 +22,13 @@ GitHub Actions (금요일 밤 · 매월 1일)          어드바이저 세션
 
 **1차 출처 자동 수집 (`fetch_web.py` → `web-latest.json`):** B1 ISM 제조·서비스(ismworld.org는 reCAPTCHA 봇 벽 → **PR Newswire 배포문 제목**에서 읽음, 2026-09-03 검증), D2 한은 기준금리(bok.or.kr 표, 검증), A3 FactSet 서프라이즈(기사 본문 파싱, 문구 패턴 보강 중). 실패 시 null → 검색 2출처 규칙 (PROTOCOL 부칙 3).
 
+**미국 섹터 상대강도 (`scripts/sector_us/` → `sector-us-latest.{json,md}` + `sector-us-YYYY-MM-DD.json`):**
+QQQ 대비 14개 섹터의 상대강도·4분면·연속 주수 플래그와 나스닥100 구성종목 폭(200일선 위 비율·52주 신고저).
+같은 워크플로(`macro-fetch.yml`)가 금요일 종가 기준으로 만든다. **관측 입력이지 판정 규칙이 아니다** —
+월간 10지표에 넣지 않는다(20회 전진검증 전 변경 금지). 루틴은 `sectors[].quadrant` · `quadrant_changed` ·
+`weeks_in_quadrant` · `rs_dd_15`(−15%) · `rs_up_30`(+30%) · `events` · `breadth`만 읽으면 된다.
+설계·검증 결과·한계는 `scripts/sector_us/README.md`와 `검증결과.md`에 있다. 첫 용도는 위성 판정 P1(2027-02~)이다.
+
 **시장 지표:** 지수는 FRED `NASDAQ100`(트리거 스킬의 NDX와 일치), 달러는 FRED `DTWEXBGS`, C2 비율은 Yahoo Finance(QQQE/QQQ). stooq는 봇 차단이라 폴백만.
 
 **검증 이력:** 2026-09-03 수동 실행 3회 — ① 푸시 경합 실패 → rebase 재시도 추가 ② FRED 전부 성공, 웹 파서 실패 → 폴백·정규식 보강 ③ ISM·한은·C2 성공, FactSet만 미해결.

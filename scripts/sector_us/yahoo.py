@@ -149,7 +149,8 @@ def ndx_constituents(cache_dir=None, network=True, allow_wikipedia=True):
             asof = next((str(r.get(c)) for r in rows[:1] for c in r
                          if c and "date" in c.strip().lower()), None)
             return {"tickers": tick, "source": "invesco_qqq_holdings", "grade": "A-",
-                    "as_of": asof, "url": INVESCO_CSV, "n": len(tick), "attempt_errors": errors}
+                    "as_of": asof, "url": INVESCO_CSV, "n": len(tick), "attempt_errors": errors,
+                    "fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")}
         errors.append(f"invesco: 티커 {len(tick)}개 (열={col}) 받은 내용 앞머리={text[:120]!r}")
     except Exception as e:
         errors.append(f"invesco: {e}")
@@ -171,7 +172,8 @@ def ndx_constituents(cache_dir=None, network=True, allow_wikipedia=True):
         tick = sorted({_norm(r.get("symbol")) for r in rows if _norm(r.get("symbol"))})
         if len(tick) >= 90:
             return {"tickers": tick, "source": "nasdaq_api", "grade": "A-",
-                    "as_of": None, "url": NASDAQ_API, "n": len(tick), "attempt_errors": errors}
+                    "as_of": None, "url": NASDAQ_API, "n": len(tick), "attempt_errors": errors,
+                    "fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")}
         errors.append(f"nasdaq_api: 티커 {len(tick)}개")
     except Exception as e:
         errors.append(f"nasdaq_api: {e}")
@@ -197,7 +199,8 @@ def ndx_constituents(cache_dir=None, network=True, allow_wikipedia=True):
                 tick = sorted({_norm(m) for m in re.findall(r"<td>([A-Z]{1,5}(?:\.[A-Z])?)\n?</td>", html)} - {None})
             if len(tick) >= 90:
                 return {"tickers": tick, "source": "wikipedia", "grade": "C",
-                        "as_of": None, "url": WIKI_NDX, "n": len(tick), "attempt_errors": errors}
+                        "as_of": None, "url": WIKI_NDX, "n": len(tick), "attempt_errors": errors,
+                        "fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")}
             errors.append(f"wikipedia: 티커 {len(tick)}개")
         except Exception as e:
             errors.append(f"wikipedia: {e}")

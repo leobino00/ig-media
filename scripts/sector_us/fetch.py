@@ -126,7 +126,10 @@ def breadth_block(cache_dir, network, as_of=None):
         "n_sma200_judged": n_pct,            # 200일분 이상 있어 200일선 판정이 된 종목 수 = 비율의 분모
         "coverage_pct": coverage,            # n_sma200_judged / n
         "constituents_source": cons["source"], "constituents_grade": cons["grade"],
-        "constituents_as_of": cons.get("as_of"), "constituents_url": cons.get("url"),
+        "constituents_as_of": cons.get("as_of"),
+        "constituents_fetched_at": cons.get("fetched_at"),
+        "constituents_url": cons.get("url"),
+        "constituents_tickers": cons["tickers"],
         "pct_above_sma200": pct, "pct_above_sma200_4w_ago": pct_4w,
         "new_highs_5d": nh if n_hl else None, "new_lows_5d": nl if n_hl else None,
         "nh_nl_ratio": calc.nh_nl_ratio(nh, nl) if n_hl else None,
@@ -237,7 +240,8 @@ def build(args):
                 "price_field": bench["price_field"], "range": SECTOR_RANGE}]
     if breadth:
         sources.append({"name": breadth["constituents_source"], "grade": breadth["constituents_grade"],
-                        "url": breadth.get("constituents_url"), "as_of": breadth.get("constituents_as_of")})
+                        "url": breadth.get("constituents_url"), "as_of": breadth.get("constituents_as_of"),
+                        "fetched_at": breadth.get("constituents_fetched_at")})
     if any(h.get("yahoo_sector") for h in holdings):
         sources.append({"name": "yahoo_quote_summary_assetProfile", "grade": "B", "url": yahoo.QUOTE_SUMMARY})
 
@@ -328,7 +332,8 @@ def to_markdown(doc):
         nh, nl = b.get("new_highs_5d"), b.get("new_lows_5d")
         ratio = "신저가 0 → 비율 결측" if (nl == 0 and nh is not None) else _f(b.get("nh_nl_ratio"))
         L.append(f"| 52주 신고가/신저가 (5일) | {nh if nh is not None else '결측'} / {nl if nl is not None else '결측'} | 비율 {ratio} |")
-        L.append(f"| 출처·커버리지 | {b['constituents_source']} ({b['constituents_grade']}) "
+        L.append(f"| 출처·커버리지 | {b['constituents_source']} ({b['constituents_grade']}) · 목록 "
+                 f"{b.get('constituents_as_of') or b.get('constituents_fetched_at') or '시각 결측'} "
                  f"| 200일선 판정 {b['n_sma200_judged']}/{b['n']}종목 |")
     else:
         L.append(f"| 200일선 위 비율 · 52주 신고저 | 결측 | {doc['missing_detail'].get('constituents', doc['missing_detail'].get('breadth', ''))[:60]} |")
@@ -374,7 +379,15 @@ def main(argv=None):
     p.add_argument("--no-breadth", action="store_true", help="구성종목 폭 지표를 생략한다")
     p.add_argument("--holdings", default=None, help="holdings.json 경로 (기본: out_dir/holdings.json)")
     p.add_argument("--stdout", action="store_true", help="파일을 쓰지 않고 md만 출력한다")
+    p.add_argument("--probe-sector", default=None,
+                   help="티커 목록(쉼표)의 Yahoo 섹터 → 대응 ETF만 확인하고 끝낸다 (R4 점검용)")
     args = p.parse_args(argv)
+
+    if args.probe_sector:                      # R4 점검 — 파일을 쓰지 않는다
+        for tk in [t.strip().upper() for t in args.probe_sector.split(",") if t.strip()]:
+            ysec = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network)
+            print(f"{tk}: yahoo_sector={ysec or '결측'} → {YAHOO_SECTOR_TO_TICKER.get(ysec) or '대응 ETF 없음'}")
+        return 0
 
     doc = build(args)
     md = to_markdown(doc)
