@@ -156,6 +156,27 @@ class HoldingsCSV(unittest.TestCase):
         self.assertIsNone(_norm(""))
 
 
+class SectorMapping(unittest.TestCase):
+    """R4 섹터 이름 → ETF 대응. 두 출처의 분류 이름이 다르다."""
+
+    def test_두_출처의_이름이_모두_대응된다(self):
+        from fetch import SECTOR_TO_TICKER
+        yahoo_names = ["Technology", "Healthcare", "Financial Services", "Consumer Cyclical",
+                       "Communication Services", "Industrials", "Consumer Defensive", "Energy",
+                       "Utilities", "Real Estate", "Basic Materials"]
+        nasdaq_names = ["Technology", "Health Care", "Finance", "Consumer Discretionary",
+                        "Telecommunications", "Industrials", "Consumer Staples", "Energy",
+                        "Public Utilities", "Real Estate", "Basic Industries"]
+        for n in yahoo_names + nasdaq_names:
+            self.assertIn(SECTOR_TO_TICKER.get(n), ("XLK", "XLV", "XLF", "XLY", "XLC", "XLI",
+                                                    "XLP", "XLE", "XLU", "XLRE", "XLB"), n)
+
+    def test_대응_없는_값은_None으로_명시한다(self):
+        from fetch import SECTOR_TO_TICKER
+        self.assertIsNone(SECTOR_TO_TICKER["Miscellaneous"])       # 추정하지 않는다
+        self.assertIsNone(SECTOR_TO_TICKER.get("없는 섹터"))
+
+
 class Lint(unittest.TestCase):
     def test_판단_어휘를_잡고_한계절은_건너뛴다(self):
         from lint_no_judgment import scan

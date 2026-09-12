@@ -39,14 +39,22 @@ UNIVERSE = [
     ("소재",       "XLB",  "gics", []),
 ]
 
-# R4 — Yahoo assetProfile.sector(자체 분류) → 위 유니버스 티커. GICS와 완전히 같지 않다.
-# 반도체·소프트웨어·바이오는 Yahoo에서 각각 Technology·Technology·Healthcare로 오므로
-# 하위섹터 3종으로는 매핑되지 않는다. 이 한계를 json의 note에 남긴다.
-YAHOO_SECTOR_TO_TICKER = {
-    "Technology": "XLK", "Healthcare": "XLV", "Financial Services": "XLF",
-    "Financial": "XLF", "Consumer Cyclical": "XLY", "Communication Services": "XLC",
-    "Industrials": "XLI", "Consumer Defensive": "XLP", "Energy": "XLE",
-    "Utilities": "XLU", "Real Estate": "XLRE", "Basic Materials": "XLB",
+# R4 — 섹터 이름 → 위 유니버스 티커. 두 출처의 분류 이름을 함께 받는다.
+# Yahoo 분류(Technology·Consumer Cyclical…)와 나스닥 분류(Technology·Consumer Discretionary…)는
+# 이름이 다르고 GICS와도 완전히 같지 않다. 반도체·소프트웨어·바이오는 두 출처 모두
+# Technology·Health Care로 오므로 하위섹터 3종으로는 매핑되지 않는다. json의 note에 남긴다.
+SECTOR_TO_TICKER = {
+    # Yahoo 분류
+    "Technology": "XLK", "Healthcare": "XLV", "Financial Services": "XLF", "Financial": "XLF",
+    "Consumer Cyclical": "XLY", "Communication Services": "XLC", "Industrials": "XLI",
+    "Consumer Defensive": "XLP", "Energy": "XLE", "Utilities": "XLU",
+    "Real Estate": "XLRE", "Basic Materials": "XLB",
+    # 나스닥 분류
+    "Health Care": "XLV", "Finance": "XLF", "Consumer Discretionary": "XLY",
+    "Telecommunications": "XLC", "Consumer Staples": "XLP", "Basic Industries": "XLB",
+    "Capital Goods": "XLI", "Public Utilities": "XLU", "Transportation": "XLI",
+    # 대응 ETF가 없는 값 (명시적으로 비워 둔다 — 추정하지 않는다)
+    "Miscellaneous": None,
 }
 
 KST = dt.timezone(dt.timedelta(hours=9))
@@ -165,12 +173,15 @@ def holdings_block(out_dir, sectors, args):
     out = []
     for sat in h.get("satellites", []) or []:
         tk = (sat.get("ticker") or "").upper()
-        ysec = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network) if tk else None
-        etf = YAHOO_SECTOR_TO_TICKER.get(ysec)
+        got = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network) if tk else None
+        ysec = (got or {}).get("sector")
+        etf = SECTOR_TO_TICKER.get(ysec)
         row = by_ticker.get(etf) if etf else None
         out.append({
             "ticker": tk, "since": sat.get("since"),
-            "yahoo_sector": ysec, "sector_grade": "B" if ysec else None,
+            "sector": ysec, "sector_source": (got or {}).get("source"),
+            "sector_grade": (got or {}).get("grade"),
+            "sector_missing_reason": None if ysec else (got or {}).get("errors"),
             "sector_etf": etf,
             "sector_row": None if row is None else {
                 k: row.get(k) for k in ("name", "ticker", "rs_ratio", "rs_momentum", "quadrant",
@@ -242,14 +253,15 @@ def build(args):
         sources.append({"name": breadth["constituents_source"], "grade": breadth["constituents_grade"],
                         "url": breadth.get("constituents_url"), "as_of": breadth.get("constituents_as_of"),
                         "fetched_at": breadth.get("constituents_fetched_at")})
-    if any(h.get("yahoo_sector") for h in holdings):
-        sources.append({"name": "yahoo_quote_summary_assetProfile", "grade": "B", "url": yahoo.QUOTE_SUMMARY})
+    for h in holdings:
+        if h.get("sector_source") and not any(s["name"] == h["sector_source"] for s in sources):
+            sources.append({"name": h["sector_source"], "grade": h.get("sector_grade")})
 
     val = load_validation()
     notes = [
         "분모는 QQQ 수정종가다. SPY가 아니다 (제안서 R1).",
         f"가격 필드는 {bench['price_field']} — 배당 재투자 반영. Yahoo가 과거 수정종가를 소급 변경하면 과거 값이 바뀔 수 있다.",
-        "보유 위성 섹터 태깅은 Yahoo 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, "
+        "보유 위성 섹터 태깅은 출처의 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, "
         "반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
         "이 파일은 관측 입력이다. 판정 규칙이 아니고 월간 10지표에 들어가지 않는다 (제안서 §3).",
     ]
@@ -353,11 +365,12 @@ def to_markdown(doc):
     if not doc["holdings"]:
         L.append(f"없음 — {doc['holdings_meta'].get('note') or doc['holdings_meta'].get('error') or '위성 0건'}")
     else:
-        L += ["| 티커 | 섹터(Yahoo) | 대응 ETF | 분면 | 연속(주) | DD26w% | 플래그 |", "|---|---|---|---|---|---|---|"]
+        L += ["| 티커 | 섹터 (출처) | 대응 ETF | 분면 | 연속(주) | DD26w% | 플래그 |", "|---|---|---|---|---|---|---|"]
         for h in doc["holdings"]:
             row = h.get("sector_row") or {}
             fl = " · ".join([k for k in ("rs_dd_15", "rs_up_30") if row.get(k)])
-            L.append(f"| {h['ticker']} | {h.get('yahoo_sector') or '결측'} | {h.get('sector_etf') or '결측'} "
+            L.append(f"| {h['ticker']} | {(h.get('sector') or '결측')} "
+                     f"({h.get('sector_source') or '출처 없음'}) | {h.get('sector_etf') or '결측'} "
                      f"| {row.get('quadrant') or '결측'} | {row.get('weeks_in_quadrant', '결측')} "
                      f"| {_f(row.get('rs_dd_from_26w_high'), 1, sign=True)} | {fl} |")
     L += ["", "## 한계 (고정 · §9 검증 결과)", "",
@@ -385,8 +398,10 @@ def main(argv=None):
 
     if args.probe_sector:                      # R4 점검 — 파일을 쓰지 않는다
         for tk in [t.strip().upper() for t in args.probe_sector.split(",") if t.strip()]:
-            ysec = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network)
-            print(f"{tk}: yahoo_sector={ysec or '결측'} → {YAHOO_SECTOR_TO_TICKER.get(ysec) or '대응 ETF 없음'}")
+            g = yahoo.sector_of(tk, cache_dir=args.cache_dir, network=not args.no_network) or {}
+            print(f"{tk}: sector={g.get('sector') or '결측'} · 출처={g.get('source') or '-'}"
+                  f"({g.get('grade') or '-'}) → {SECTOR_TO_TICKER.get(g.get('sector')) or '대응 ETF 없음'}"
+                  + (f" · 사유={g.get('errors')}" if not g.get("sector") else ""))
         return 0
 
     doc = build(args)

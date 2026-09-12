@@ -15,6 +15,7 @@ QUOTE_SUMMARY = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"
 INVESCO_CSV = ("https://www.invesco.com/us/financial-products/etfs/holdings/main/holdings/0"
                "?audienceType=Investor&action=download&ticker=QQQ")
 NASDAQ_API = "https://api.nasdaq.com/api/quote/list-type/nasdaq100"
+NASDAQ_PROFILE = "https://api.nasdaq.com/api/company/{}/company-profile"
 WIKI_NDX = "https://en.wikipedia.org/wiki/Nasdaq-100"
 
 
@@ -76,29 +77,69 @@ def chart(symbol, rng="5y", interval="1d", cache_dir=None, network=True, retries
 
 
 def sector_of(symbol, cache_dir=None, network=True):
-    """Yahoo quoteSummary assetProfile.sector (B등급). 실패하면 None — 추정하지 않는다."""
+    """티커의 섹터. 출처 순서 ① Yahoo quoteSummary(B) → ② api.nasdaq.com 기업개요(A−) → 결측.
+
+    반환: {"sector","source","grade"} 또는 {"sector": None, "errors": [...]}.
+    추정하지 않는다 — 둘 다 실패하면 섹터는 결측이고 그 사유를 그대로 돌려준다.
+    (2026-09-12 러너 확인: Yahoo quoteSummary는 크럼·쿠키를 요구해 단독으로는 안 된다.)
+    """
+    errors = []
+
+    # ① Yahoo quoteSummary
     url = f"{QUOTE_SUMMARY}{symbol}?modules=assetProfile"
     cp = _cache_path(cache_dir, f"profile_{symbol}")
     raw = None
-    if cp and os.path.exists(cp):
-        with open(cp, "rb") as f:
-            raw = f.read()
-    elif network:
-        try:
-            raw = _get(url, retries=2)
-        except Exception:
-            return None
-        if cp:
-            os.makedirs(cache_dir, exist_ok=True)
-            with open(cp, "wb") as f:
-                f.write(raw)
-    else:
-        return None
     try:
-        res = json.loads(raw)["quoteSummary"]["result"]
-        return (res[0]["assetProfile"] or {}).get("sector") or None
-    except Exception:
-        return None
+        if cp and os.path.exists(cp):
+            with open(cp, "rb") as f:
+                raw = f.read()
+        elif network:
+            raw = _get(url, retries=2)
+            if cp:
+                os.makedirs(cache_dir, exist_ok=True)
+                with open(cp, "wb") as f:
+                    f.write(raw)
+    except Exception as e:
+        errors.append(f"yahoo_quote_summary: {str(e)[:120]}")
+    if raw:
+        try:
+            res = json.loads(raw)["quoteSummary"]["result"]
+            sec = (res[0]["assetProfile"] or {}).get("sector")
+            if sec:
+                return {"sector": sec, "source": "yahoo_quote_summary_assetProfile", "grade": "B"}
+            errors.append("yahoo_quote_summary: assetProfile.sector 없음")
+        except Exception as e:
+            errors.append(f"yahoo_quote_summary 파싱: {str(e)[:80]}")
+
+    # ② 나스닥 기업개요 (구성종목 목록과 같은 호스트 — 그쪽이 되면 이쪽도 된다)
+    url2 = NASDAQ_PROFILE.format(symbol)
+    cp2 = _cache_path(cache_dir, f"nasdaq_profile_{symbol}")
+    raw2 = None
+    try:
+        if cp2 and os.path.exists(cp2):
+            with open(cp2, "rb") as f:
+                raw2 = f.read()
+        elif network:
+            raw2 = _get(url2, retries=2)
+            if cp2:
+                os.makedirs(cache_dir, exist_ok=True)
+                with open(cp2, "wb") as f:
+                    f.write(raw2)
+    except Exception as e:
+        errors.append(f"nasdaq_profile: {str(e)[:120]}")
+    if not network and not (raw or raw2):
+        errors.append("네트워크 꺼짐 + 캐시 없음")
+    if raw2:
+        try:
+            d = (json.loads(raw2).get("data") or {})
+            sec = ((d.get("Sector") or {}).get("value") or "").strip()
+            if sec:
+                return {"sector": sec, "source": "nasdaq_company_profile", "grade": "A-"}
+            errors.append("nasdaq_profile: Sector 값 없음")
+        except Exception as e:
+            errors.append(f"nasdaq_profile 파싱: {str(e)[:80]}")
+
+    return {"sector": None, "errors": errors}
 
 
 def _parse_holdings_csv(text):

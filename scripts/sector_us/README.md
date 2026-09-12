@@ -75,7 +75,8 @@ GICS 11: `XLK` `XLV` `XLF` `XLY` `XLC` `XLI` `XLP` `XLE` `XLU` `XLRE` `XLB`
 | Invesco QQQ 보유종목 CSV | A− | 나스닥100 구성종목 ① — **러너에서 쓸 수 없다(3회 확인)**. 아래 참조 |
 | `api.nasdaq.com` 나스닥100 목록 | A− | 구성종목 ② — **실제로 쓰이는 출처** (102종목, 목록 수집시각을 남긴다) |
 | Wikipedia Nasdaq-100 | C | 구성종목 ③ 최후 수단. 쓰면 `missing`에 `breadth_source_grade_C`를 남긴다 |
-| Yahoo `quoteSummary.assetProfile.sector` | B | 보유 위성 섹터 태깅 (R4) |
+| Yahoo `quoteSummary.assetProfile.sector` | B | 보유 위성 섹터 태깅 ① — **러너에서 안 된다**(크럼·쿠키 요구, 2026-09-12 NVDA·XOM·JNJ·PLD 4종목 전부 결측) |
+| `api.nasdaq.com` 기업개요 `Sector` | A− | 섹터 태깅 ② 폴백. 구성종목 목록과 같은 호스트다 |
 
 **Invesco CSV 확인 결과 (제안서 R3이 요구한 항목):** 다운로드 URL이 CSV가 아니라 HTML을 돌려준다 —
 받은 내용 앞머리가 `<!-- This file is created specifically to update lang attribute in html tag …`다.
@@ -155,7 +156,9 @@ Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연�
 | 2 | 2026-09-12 07:40 UTC · 수동 | 성공. 1회차에서 보강한 진단이 원인을 찍었다 (아래) | 약 3분 |
 | 3 | 2026-09-12 07:58 UTC · 수동 | 성공. Invesco 실패가 HTML 응답임을 확인, 재현성 문구가 허용치와 함께 찍혔다 | 약 3분 |
 
-**무인 실행 3회 연속 성공** (§10 완료 기준). 주간 스케줄(금 22:30 UTC)에서는 §9 검증을 돌리지 않으므로
+| 4 | 2026-09-12 07:39 UTC · 수동 (`34681302517`) | 성공. `--probe-sector`로 **Yahoo quoteSummary가 러너에서 안 된다**는 것을 확인(4종목 전부 결측) → `api.nasdaq.com` 기업개요 폴백 추가 | 3분 4초 |
+
+**무인 실행 4회 연속 성공** (§10 완료 기준은 3회). 주간 스케줄(금 22:30 UTC)에서는 §9 검증을 돌리지 않으므로
 수집 단계 1분 내외로 끝난다 — 어드바이저 수집 사이클(토 07:30 KST) 안에 들어온다.
 
 1회차에서 드러난 것과 한 일:
@@ -199,7 +202,7 @@ Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연�
 | 금요일 종가 기준 `brief.md`·`brief.json`이 §6 스키마로 생성된다 | 충족 — 기준일 2026-09-11(금) |
 | 14개 섹터 전부 R1~R5 값이 있고, 결측은 `null` + `missing[]` | 충족 — 3회 모두 `missing: []` |
 | 나스닥100 구성종목 폭 2종이 출처·기준일과 함께 나온다 | 충족 — 출처 `nasdaq_api`(A−) + 수집시각 + 티커 목록. 목록 자체의 기준일은 출처가 주지 않는다(Invesco가 복구되면 채워진다) |
-| `holdings.json`이 있을 때 섹터 태깅, 없을 때 빈 배열로 정상 종료 | 없을 때: 러너 3회 충족. 있을 때: 합성 캐시로 확인, **실제 Yahoo `quoteSummary` 응답은 `--probe-sector`로 러너에서 확인한다** |
+| `holdings.json`이 있을 때 섹터 태깅, 없을 때 빈 배열로 정상 종료 | 없을 때: 러너 4회 충족. 있을 때: `--probe-sector`로 러너에서 확인했고 **Yahoo quoteSummary가 결측**이라 `api.nasdaq.com` 기업개요를 폴백으로 넣었다. 둘 다 실패하면 섹터는 결측이고 사유(`sector_missing_reason`)가 남는다 — 위성 편입(2027-02) 전까지 소비처가 없으므로 막는 요소는 아니다 |
 | GitHub Actions 무인 실행 3회 연속 성공, 소요 시간 기록 | 충족 — 위 표 |
 | §9 검증 4건이 README에 결과와 함께 있고 md 꼬리가 그것을 인용한다 | 충족 |
 | 관측 절에 금지 어휘가 없다 (단어 검사 스크립트) | 충족 — `lint_no_judgment.py`가 매 실행 |
