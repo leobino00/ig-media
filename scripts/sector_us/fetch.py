@@ -121,8 +121,10 @@ def breadth_block(cache_dir, network, as_of=None):
     n_req = len(cons["tickers"])
     coverage = round(n_pct / n_req * 100, 1) if n_req else None
     block = {
-        "universe": "NDX-100 constituents", "n": n_req, "n_priced": n_pct,
-        "coverage_pct": coverage,
+        "universe": "NDX-100 constituents", "n": n_req,
+        "n_priced": len(px),                 # 가격을 받은 종목 수
+        "n_sma200_judged": n_pct,            # 200일분 이상 있어 200일선 판정이 된 종목 수 = 비율의 분모
+        "coverage_pct": coverage,            # n_sma200_judged / n
         "constituents_source": cons["source"], "constituents_grade": cons["grade"],
         "constituents_as_of": cons.get("as_of"), "constituents_url": cons.get("url"),
         "pct_above_sma200": pct, "pct_above_sma200_4w_ago": pct_4w,
@@ -326,7 +328,8 @@ def to_markdown(doc):
         nh, nl = b.get("new_highs_5d"), b.get("new_lows_5d")
         ratio = "신저가 0 → 비율 결측" if (nl == 0 and nh is not None) else _f(b.get("nh_nl_ratio"))
         L.append(f"| 52주 신고가/신저가 (5일) | {nh if nh is not None else '결측'} / {nl if nl is not None else '결측'} | 비율 {ratio} |")
-        L.append(f"| 출처·커버리지 | {b['constituents_source']} ({b['constituents_grade']}) | 가격 {b['n_priced']}/{b['n']}종목 |")
+        L.append(f"| 출처·커버리지 | {b['constituents_source']} ({b['constituents_grade']}) "
+                 f"| 200일선 판정 {b['n_sma200_judged']}/{b['n']}종목 |")
     else:
         L.append(f"| 200일선 위 비율 · 52주 신고저 | 결측 | {doc['missing_detail'].get('constituents', doc['missing_detail'].get('breadth', ''))[:60]} |")
     r = doc["regime"]

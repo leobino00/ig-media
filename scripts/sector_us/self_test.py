@@ -130,6 +130,32 @@ class Breadth(unittest.TestCase):
         self.assertEqual(calc.new_highs_lows({"F": flat}), (1, 1, 1))
 
 
+class HoldingsCSV(unittest.TestCase):
+    """구성종목 CSV 파서. 1회차 러너에서 Invesco 파일의 티커 열을 못 찾아 폴백했다 — 그 경로를 고정한다."""
+
+    def test_안내문이_앞에_붙어도_읽는다(self):
+        from yahoo import _parse_holdings_csv
+        text = ("Invesco QQQ Trust\nAs of 09/11/2026\n\n"
+                "Fund Ticker,Holding Ticker,Name,Weight\nQQQ,NVDA,NVIDIA,9.1\nQQQ,BRK.B,Berkshire,1.0\n")
+        rows, col = _parse_holdings_csv(text)
+        self.assertEqual(col, "Holding Ticker")
+        self.assertEqual([r[col] for r in rows], ["NVDA", "BRK.B"])
+
+    def test_열_이름이_Ticker_하나여도_읽는다(self):
+        from yahoo import _parse_holdings_csv
+        self.assertEqual(_parse_holdings_csv("Ticker,Name\nMSFT,Microsoft\n")[1], "Ticker")
+
+    def test_CSV가_아니면_열을_못_찾고_None(self):
+        from yahoo import _parse_holdings_csv
+        self.assertIsNone(_parse_holdings_csv("<html><body>Access Denied</body></html>")[1])
+
+    def test_티커_정규화(self):
+        from yahoo import _norm
+        self.assertEqual(_norm("brk.b"), "BRK-B")          # Yahoo 표기
+        self.assertIsNone(_norm("USD"))                    # 현금 행은 버린다
+        self.assertIsNone(_norm(""))
+
+
 class Lint(unittest.TestCase):
     def test_판단_어휘를_잡고_한계절은_건너뛴다(self):
         from lint_no_judgment import scan

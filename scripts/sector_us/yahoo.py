@@ -101,6 +101,21 @@ def sector_of(symbol, cache_dir=None, network=True):
         return None
 
 
+def _parse_holdings_csv(text):
+    """보유종목 CSV를 읽는다. 받은 파일에 안내문·빈 줄이 앞에 붙어 있을 수 있어
+    「Ticker」가 들어간 첫 줄을 머리글로 잡는다. 반환: (행 목록, 티커 열 이름)."""
+    lines = text.splitlines()
+    start = next((i for i, ln in enumerate(lines[:40]) if "ticker" in ln.lower() and ln.count(",") >= 2), 0)
+    rows = list(csv.DictReader(io.StringIO("\n".join(lines[start:]))))
+    keys = [k for k in (rows[0].keys() if rows else []) if k]
+    for want in ("holding ticker", "ticker", "holdingticker", "security ticker", "symbol"):
+        col = next((k for k in keys if k.strip().lower() == want), None) \
+            or next((k for k in keys if want in k.strip().lower()), None)
+        if col:
+            return rows, col
+    return rows, None
+
+
 def _norm(t):
     """Yahoo 표기로 맞춘다: BRK.B → BRK-B. 현금·선물 행은 버린다."""
     t = (t or "").strip().upper().replace(".", "-").replace("/", "-")
@@ -128,18 +143,14 @@ def ndx_constituents(cache_dir=None, network=True, allow_wikipedia=True):
                 open(cp, "w", encoding="utf-8").write(text)
         else:
             raise RuntimeError("캐시 없음 + 네트워크 꺼짐")
-        rows = list(csv.DictReader(io.StringIO(text)))
-        col = next((c for c in (rows[0].keys() if rows else [])
-                    if c and "holding ticker" in c.strip().lower()), None) \
-            or next((c for c in (rows[0].keys() if rows else [])
-                     if c and c.strip().lower() == "ticker"), None)
+        rows, col = _parse_holdings_csv(text)
         tick = sorted({_norm(r[col]) for r in rows if _norm(r.get(col))}) if col else []
         if len(tick) >= 90:
             asof = next((str(r.get(c)) for r in rows[:1] for c in r
                          if c and "date" in c.strip().lower()), None)
             return {"tickers": tick, "source": "invesco_qqq_holdings", "grade": "A-",
                     "as_of": asof, "url": INVESCO_CSV, "n": len(tick), "attempt_errors": errors}
-        errors.append(f"invesco: 티커 {len(tick)}개 (열={col})")
+        errors.append(f"invesco: 티커 {len(tick)}개 (열={col}) 받은 내용 앞머리={text[:120]!r}")
     except Exception as e:
         errors.append(f"invesco: {e}")
 

@@ -20,6 +20,8 @@ from fetch import UNIVERSE, BENCH, KST
 FWD = 4            # 주 — 선행 구간 (고정)
 DD_EVENT = -10.0   # % — QQQ 4주 하락 사건 기준 (고정)
 LOW_Q = 20         # % — 폭 하위 분위 (고정)
+REPRO_TOL_PCT = 0.005   # % — 재현성 허용 상대차. rs_ratio는 4자리로 저장·2자리로 표시하므로
+                        #      이보다 작은 차이는 산출물의 어느 자리에도 나타나지 않는다
 
 
 def _mean(xs):
@@ -214,9 +216,12 @@ def v4_stability(bw, ratios, input_dir, cache_dir, network, rng, meta1):
            or meta1.get(tk, {}).get("price_field") != meta2.get(tk, {}).get("price_field")
            or meta1.get(tk, {}).get("rows") != meta2.get(tk, {}).get("rows")
            or meta1.get(tk, {}).get("last") != meta2.get(tk, {}).get("last")}
+    mx = max([d["rel_pct"] for d in diffs if d["rel_pct"] is not None], default=0.0)
     out["recompute_identical"] = not diffs
+    out["recompute_within_tolerance"] = (not diffs) or (mx <= REPRO_TOL_PCT and not src)
+    out["recompute_tolerance_pct"] = REPRO_TOL_PCT
     out["recompute_n_diff_points"] = len(diffs)
-    out["recompute_max_rel_pct"] = max([d["rel_pct"] for d in diffs if d["rel_pct"] is not None], default=0.0)
+    out["recompute_max_rel_pct"] = mx
     out["recompute_diffs_sample"] = diffs[:5]
     out["source_changed_between_runs"] = src or None
     snaps = sorted(f for f in os.listdir(input_dir) if f.startswith("sector-us-2") and f.endswith(".json")) \
@@ -259,7 +264,11 @@ def caveat_lines(r):
              f" (차 {v3['leading_diff']:+}개), 분산도 차 {v3['dispersion_diff']:+}"
              f" (사건 {v3['n_event_weeks']}주)")
     if v4.get("recompute_identical"):
-        s = "같은 기준일 두 번 수집·재계산 동일"
+        s = "같은 기준일 두 번 수집·재계산 완전 동일"
+    elif v4.get("recompute_within_tolerance"):
+        s = (f"같은 기준일 두 번 수집 — 표시 자리수 안에서 동일(최근 13주 rs_ratio "
+             f"{v4.get('recompute_n_diff_points')}점이 최대 {v4.get('recompute_max_rel_pct')}% 달랐고, "
+             f"허용 {v4.get('recompute_tolerance_pct')}% 이하다. 출처·가격필드·행수는 동일)")
     else:
         ex = (v4.get("recompute_diffs_sample") or [{}])[0]
         s = (f"같은 기준일 두 번 수집했을 때 최근 13주 rs_ratio {v4.get('recompute_n_diff_points')}점이 달랐다"
@@ -321,7 +330,10 @@ def to_markdown(r):
           f"(차 {v3['dispersion_diff']})",
           f"- 사건 {v3['n_event_weeks']}주는 작은 표본이다. 차이의 부호를 근거로 예고력을 주장하지 않는다.", "",
           "## 4. 데이터 안정성", "",
-          f"- 같은 기준일 두 번 수집·재계산: {'동일' if r['v4_stability'].get('recompute_identical') else '불일치'}"
+          f"- 같은 기준일 두 번 수집·재계산: "
+          + ("완전 동일" if r["v4_stability"].get("recompute_identical")
+             else f"표시 자리수 안에서 동일 (허용 {REPRO_TOL_PCT}%)" if r["v4_stability"].get("recompute_within_tolerance")
+             else "불일치")
           + ("" if r["v4_stability"].get("recompute_identical") else
              f" — 다른 점 {r['v4_stability'].get('recompute_n_diff_points')}개 · 최대 상대차 "
              f"{r['v4_stability'].get('recompute_max_rel_pct')}% · 예 {r['v4_stability'].get('recompute_diffs_sample')}"
