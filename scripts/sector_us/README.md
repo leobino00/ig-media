@@ -1,0 +1,161 @@
+# us-sector-strength
+
+미국 섹터의 **QQQ 대비** 상대강도·분면·폭을 매주 금요일 종가 기준으로 관측해, 판단 없이 사실만
+`sector-us-latest.md` + `sector-us-latest.json`으로 낸다.
+발주 문서는 `claude/advisor/연동/us-sector-strength-제안서.md`이고, 이 README는 그 문서에 대한 구현 보고다.
+
+소비자는 사람이 아니라 어드바이저의 예약 세션(루틴)이다. 그래서 **형식·기준일·출처·결측 규칙이 내용만큼 중요하다.**
+판정은 하지 않는다. 플래그만 낸다 (제안서 §3 · R5).
+
+## 파일
+
+| 파일 | 역할 |
+|---|---|
+| `calc.py` | 계산 정의 (제안서 §5). `CALC_VERSION`이 `brief.json.version`이 된다 |
+| `yahoo.py` | Yahoo 차트 API · 나스닥100 구성종목 · 섹터 태깅. 표준 라이브러리만 쓴다 |
+| `fetch.py` | 주간 관측 산출 (`sector-us-latest.{md,json}` + 주간 스냅샷) |
+| `validate.py` | §9 검증 4건 → `검증결과.{md,json}` |
+| `lint_no_judgment.py` | 「관측」 절 판단 어휘 검사 (§10) |
+| `self_test.py` | 계산 정의 단위 시험 19건. 네트워크 불필요 |
+
+## 실행
+
+```bash
+python scripts/sector_us/self_test.py                                  # 경계값 시험
+python scripts/sector_us/fetch.py "claude/advisor/월간판정/입력"        # 주간 관측
+python scripts/sector_us/lint_no_judgment.py "claude/advisor/월간판정/입력/sector-us-latest.md"
+python scripts/sector_us/validate.py scripts/sector_us --with-breadth  # §9 검증 (종목 100개 수집)
+
+# 네트워크가 막힌 환경: 원본 응답을 캐시에 받아두고 그것만으로 재현한다
+python scripts/sector_us/fetch.py OUT --cache-dir /tmp/c              # 받으면서 캐시
+python scripts/sector_us/fetch.py OUT --cache-dir /tmp/c --no-network # 캐시만으로 재계산
+```
+
+자동 실행은 `.github/workflows/macro-fetch.yml`이 한다 — FRED 수집과 **같은 사이클**이다.
+
+| 트리거 | 시각 | 하는 일 |
+|---|---|---|
+| `cron 30 22 * * 5` | 금 22:30 UTC = **토 07:30 KST** | 자기시험 → 주간 관측 → 어휘 검사 → 커밋 (제안서 R9 마감과 같다) |
+| `cron 30 0 2 * *` | 매월 2일 | 같음. 기준일이 금요일이 아니면 json `notes`에 적힌다 |
+| 수동 실행 (`workflow_dispatch`) | — | 위 + **§9 검증 재실행** 후 한계 문구 갱신 |
+
+## 계산 정의 (제안서 §5 · `calc.py`)
+
+주간 종가 기준. 일봉을 받아 **ISO 주의 마지막 거래일**로 집계한다.
+
+| 기호 | 정의 |
+|---|---|
+| `R(t)` | 섹터 수정종가 ÷ QQQ 수정종가 |
+| `rs_ratio` | `R(t) / mean(R, 최근 26주)` |
+| `rs_momentum` | `rs_ratio(t)/rs_ratio(t−4주) − 1`, % |
+| `quadrant` | `rs>1 & mom>0` leading · `>1 & ≤0` weakening · `≤1 & ≤0` lagging · `≤1 & >0` improving |
+| `rs_chg_4w` | `rs_ratio(t) − rs_ratio(t−4주)` |
+| `rs_dd_from_26w_high` | `R(t)/max(R,26주) − 1`, % → `rs_dd_15 = (≤ −15)` |
+| `rs_up_from_26w_low` | `R(t)/min(R,26주) − 1`, % → `rs_up_30 = (≥ +30)` |
+| `dispersion` | 같은 주 `rs_ratio`들의 **표본표준편차(n−1)**, `dispersion_pctile_2y`는 직전 104주 대비 백분위 |
+| `pct_above_sma200` | 나스닥100 구성종목 중 종가 > 200일 단순이동평균 비율(%) |
+| `nh_nl_ratio` | 최근 5거래일 52주 신고가 수 ÷ 신저가 수 (종가 기준, 신저가 0이면 `null`) |
+
+**경계값은 약한 쪽으로 센다** (`rs_ratio = 1`이면 강세가 아니고, `momentum = 0`이면 상승이 아니다).
+`self_test.py`가 `=1` · `=0` · `−15.00%` · `+30.00%` 네 경계를 못 박아 둔다.
+정의를 바꾸면 `calc.CALC_VERSION`을 올린다 — 어드바이저는 소급 채점을 하지 않으므로 버전이 바뀐 시점을 알아야 한다.
+
+## 유니버스 (제안서 R2 — 14행, 늘리지 않는다)
+
+나스닥 하위 3: `SMH`(실패 시 `SOXX`) · `IGV` · `XBI`
+GICS 11: `XLK` `XLV` `XLF` `XLY` `XLC` `XLI` `XLP` `XLE` `XLU` `XLRE` `XLB`
+
+표 순서는 고정이다(하위 3 → GICS 11). RS 순으로 정렬하지 않는다 — 주간 diff가 읽히게.
+
+## 출처와 등급 (R7)
+
+| 출처 | 등급 | 쓰는 곳 |
+|---|---|---|
+| Yahoo 차트 API (`query1.finance.yahoo.com/v8`) | B | 모든 가격. **수정종가** |
+| Invesco QQQ 보유종목 CSV | A− | 나스닥100 구성종목 ① |
+| `api.nasdaq.com` 나스닥100 목록 | A− | 구성종목 ② |
+| Wikipedia Nasdaq-100 | C | 구성종목 ③ 최후 수단. 쓰면 `missing`에 `breadth_source_grade_C`를 남긴다 |
+| Yahoo `quoteSummary.assetProfile.sector` | B | 보유 위성 섹터 태깅 (R4) |
+
+**수정종가를 쓰는 이유:** XLU·XLP는 배당수익률이 QQQ보다 2%p 이상 높다. 미수정 종가로 비율을 만들면
+배당만큼 매년 흘러내려 상대강도가 구조적으로 낮게 나온다. 대가로 Yahoo가 과거 수정종가를 소급 변경하면
+과거 값이 바뀐다 — 그래서 주간 스냅샷을 **덮어쓰지 않고** §9-4에서 변화량을 측정한다.
+
+## 결측 규칙 (R7 · 프로토콜 P1-2)
+
+추정하지 않는다. 채우지 않는다.
+
+- 값은 `null`, 이름은 `missing[]`, 사유는 `missing_detail{}`.
+- 섹터 하나가 실패해도 나머지는 낸다. 26주 워밍업이 모자라면 그 섹터만 결측.
+- 구성종목 가격 커버리지가 **80% 미만이면 폭 지표 전체를 결측 처리**한다 (일부 종목만으로 계산한 비율은 폭이 아니다).
+- 구성종목 목록을 Wikipedia에서 받으면 등급 C다. 출처 등급표에서 C는 결측 취급이므로 값 옆에 플래그를 남긴다.
+- 부분 실패로 종료코드를 1로 올리지 않는다. **결측을 기록해 커밋하는 것이 목적**이다.
+
+## 출력 (R6 · R10 · R11)
+
+```
+claude/advisor/월간판정/입력/sector-us-latest.md     ← 사람용, 80행 이내 (실측 57행)
+claude/advisor/월간판정/입력/sector-us-latest.json   ← 루틴용, 100 KB 이내 (실측 약 20 KB)
+claude/advisor/월간판정/입력/sector-us-YYYY-MM-DD.json  ← 주간 스냅샷, 덮어쓰지 않는다
+```
+
+루틴이 읽는 최상위 키는 고정이다: `as_of` `generated_at` `benchmark` `sources` `missing`
+`sectors[]` `breadth` `regime` `events` `holdings` `caveats` `version`.
+`sectors[].quadrant` · `quadrant_changed` · `weeks_in_quadrant` · `rs_dd_15` · `rs_up_30`이 사전등록 조건 대조용 플래그다.
+발동 판정은 하지 않는다 — `true/false`만 낸다 (`fred-latest.json`의 `T1a_(<=-10%)`와 같은 방식).
+
+`holdings.json`(§8-1)이 있으면 위성 티커에 섹터를 붙여 해당 섹터 행을 `holdings[]`에 복사한다.
+없으면 빈 배열로 정상 종료한다. 평단·손익은 계산하지 않는다 — T4는 어드바이저가 한다.
+
+## 제안서와 다르게 한 것
+
+| 항목 | 제안서 | 구현 | 이유 |
+|---|---|---|---|
+| 수집 구간 | `range=2y` | **`5y`** | 26주 워밍업에는 2y로 충분하지만 `dispersion_pctile_2y`의 「과거 2년」을 채우려면 2년치 분산도 시계열 + 26주 워밍업이 필요하다. 호출 수는 같다 |
+| 가격 필드 | 명시 없음 | **수정종가** | 위 「수정종가를 쓰는 이유」 |
+| 분산도 | 「표준편차」 | 표본표준편차(n−1) | 14개는 표본이다. `calc` 블록에 정의를 적어 둔다 |
+| 폭 커버리지 | 명시 없음 | 80% 미만이면 결측 | 일부 종목만으로 낸 비율은 폭이 아니다 |
+| 워크플로우 | 새 수집 단계 | 기존 `macro-fetch.yml`에 단계 추가 | Q1 기본값(같은 저장소)이라 배관을 재사용한다. 푸시 대상을 `main` 고정에서 `GITHUB_REF_NAME`으로 바꿨다 — 기능 브랜치에서 수동 실행할 수 있어야 검증이 된다 |
+
+§11 열린 질문은 **기본값대로** 갔다: Q1 같은 저장소(`scripts/sector_us/`) · Q2 A2 출처 격상 제외 ·
+Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연동/kr-sector-strength.md`는 연동 답변서이고 계산 정의가 없다) 제안서 §5.
+국내판 정의가 따로 있으면 그쪽이 우선이므로 **`calc.py`만 고치면 된다** — `fetch.py`·`validate.py`는 정의를 품지 않는다.
+
+## §9 검증
+
+방법은 `validate.py`에 있고 결과는 **`검증결과.md`**에 있다. 임계치(선행 4주 · 하락 −10% · 폭 하위 20%)는
+코드에 고정했고 연도별 수치를 전부 싣는다 — 창을 골라 싣지 않는다.
+
+| 검증 | 방법 |
+|---|---|
+| 분면의 선행력 | 각 주 각 섹터의 분면별 **4주 후 QQQ 대비 초과수익**(= `R(t+4)/R(t) − 1`) 평균. `leading` − 전체 평균을 연도별로 |
+| 폭의 선행력 | `pct_above_sma200` 하위 20% 주 이후 4주 QQQ 수익 vs 나머지. 연도별 |
+| 하락 예고 여부 | QQQ 4주 −10% 이하 하락 직전 주의 `leading` 수·분산도가 평상시와 다른가 |
+| 데이터 안정성 | 같은 기준일 두 번 수집·재계산 동일성 + 저장된 스냅샷 대비 과거 `rs_ratio` 변화량(수정종가 소급 변경 측정) |
+
+**폭 검증의 모집단은 현재 구성종목이다 — 생존편향이 있다.** 과거 시점의 편출입을 반영하지 않는다.
+이 한계는 `검증결과.md`와 주간 md 꼬리에 함께 적는다.
+
+**아직 검증 결과가 없으면** 주간 md 꼬리에 「검증 미실시(러너 첫 실행 대기)」가 그대로 찍힌다.
+좋은 값을 적어 두고 나중에 확인하는 순서를 만들지 않기 위한 것이다.
+
+## 이 세션에서 확인한 것 / 못 한 것
+
+| 항목 | 상태 |
+|---|---|
+| 계산 정의 경계값 19건 | 통과 (`self_test.py`) |
+| 수집→집계→md·json→스냅샷 전 경로 | 통과 (합성 캐시로 end-to-end). md 57행 · json 19 KB · 두 번 돌려 동일 |
+| 결측 경로 (섹터 1개 실패 · 구성종목 목록 실패 · `SMH`→`SOXX` 대체 · `holdings.json` 없음) | 통과 |
+| 판단 어휘 검사 | 통과 |
+| **Yahoo·Invesco 실 수집** | **이 세션에서는 못 한다** — 프록시가 `query1.finance.yahoo.com`·`www.invesco.com`에 CONNECT 403을 준다 (FRED와 같은 상황, `월간판정/입력/README.md` 참조). GitHub Actions 러너에서 확인한다 |
+
+합성 캐시로 만든 값은 저장소에 넣지 않았다. `sector-us-latest.*`는 **러너가 실제 가격으로 처음 만든 파일**이어야 한다.
+
+## 남은 연동 (제안서 §8-3 · 발주자)
+
+- [ ] 주간 루틴 프롬프트에 `월간판정/입력/sector-us-latest.json` 경로 한 줄 추가
+- [ ] `advisor-global` 스킬 P1 입력표에 「후보 섹터 상태」 행 추가
+- [ ] `holdings.json` 생성 (위성 첫 편입 시 · 2027-02~03)
+- [ ] `월간판정/입력/README.md`에 섹터 입력 행 추가
+
+이 프로그램은 **관측 입력**이다. 월간 10지표에 들어가지 않고(20회 전진검증 전 변경 금지), 판정 규칙이 아니다.
