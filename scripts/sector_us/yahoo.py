@@ -36,7 +36,7 @@ def _cache_path(cache_dir, key):
     return os.path.join(cache_dir, key.replace("/", "_") + ".json") if cache_dir else None
 
 
-def chart(symbol, rng="5y", interval="1d", cache_dir=None, network=True):
+def chart(symbol, rng="5y", interval="1d", cache_dir=None, network=True, retries=3):
     """일봉 수정종가. 반환: {"symbol","rows":[(날짜, 종가)],"price_field","source_url"}.
 
     배당 차이가 큰 섹터(XLU·XLP vs QQQ)의 비율이 배당만큼 흘러내리지 않게 수정종가를 쓴다.
@@ -49,7 +49,7 @@ def chart(symbol, rng="5y", interval="1d", cache_dir=None, network=True):
         with open(cp, "rb") as f:
             raw = f.read()
     elif network:
-        raw = _get(url)
+        raw = _get(url, retries=retries)
         if cp:
             os.makedirs(cache_dir, exist_ok=True)
             with open(cp, "wb") as f:
@@ -194,12 +194,23 @@ def ndx_constituents(cache_dir=None, network=True, allow_wikipedia=True):
     raise RuntimeError(" / ".join(errors))
 
 
-def charts(symbols, rng="2y", cache_dir=None, network=True, pause=0.25):
-    """여러 종목 일봉. 실패한 종목은 errors에 남기고 계속한다 (부분 결측 허용)."""
+def charts(symbols, rng="2y", cache_dir=None, network=True, pause=0.25,
+           retries=2, deadline_s=600):
+    """여러 종목 일봉. 실패한 종목은 errors에 남기고 계속한다 (부분 결측 허용).
+
+    구성종목 100종목을 도는 경로라 시간 예산(deadline_s)을 둔다. 예산을 넘기면 남은 종목을
+    결측으로 남기고 멈춘다 — 커버리지가 80% 미만이면 호출 쪽이 폭 지표 전체를 결측 처리한다.
+    재시도는 2회로 줄인다: 여기서는 한 종목을 끝까지 받아내는 것보다 전체가 제때 끝나는 것이 중요하다.
+    """
     ok, errors = {}, {}
-    for s in symbols:
+    t0 = time.monotonic()
+    for i, s in enumerate(symbols):
+        if deadline_s and time.monotonic() - t0 > deadline_s:
+            for rest in symbols[i:]:
+                errors[rest] = f"시간 예산 {deadline_s}초 초과 — 수집하지 않았다"
+            break
         try:
-            ok[s] = chart(s, rng=rng, cache_dir=cache_dir, network=network)["rows"]
+            ok[s] = chart(s, rng=rng, cache_dir=cache_dir, network=network, retries=retries)["rows"]
         except Exception as e:
             errors[s] = str(e)[:120]
         if network and pause:

@@ -63,9 +63,8 @@ def load_validation():
         return {"as_of": None, "lines": {}}
 
 
-def fetch_sectors(cache_dir, network):
-    """QQQ + 14섹터 일봉 → 주봉 → §5 지표. 실패한 섹터는 None으로 남긴다."""
-    bench = yahoo.chart(BENCH, rng=SECTOR_RANGE, cache_dir=cache_dir, network=network)
+def fetch_sectors(bench, cache_dir, network):
+    """14섹터 일봉 → 주봉 → §5 지표. 실패한 섹터는 None으로 남긴다."""
     bench_weekly = calc.to_weekly(bench["rows"])
     sectors, rs_by_ticker, errors = [], {}, {}
     for name, ticker, group, alts in UNIVERSE:
@@ -100,16 +99,22 @@ def fetch_sectors(cache_dir, network):
         rec["ticker_used"] = used
         rec.update(m)
         sectors.append(rec)
-    return bench, bench_weekly, sectors, rs_by_ticker, errors
+    return bench_weekly, sectors, rs_by_ticker, errors
 
 
-def breadth_block(cache_dir, network):
+def breadth_block(cache_dir, network, as_of=None):
     """R3 — 나스닥100 구성종목 폭. 구성종목 목록이나 커버리지가 모자라면 결측."""
     try:
         cons = yahoo.ndx_constituents(cache_dir=cache_dir, network=network)
     except Exception as e:
         return None, {"constituents": str(e)[:200]}
     px, errs = yahoo.charts(cons["tickers"], rng=BREADTH_RANGE, cache_dir=cache_dir, network=network)
+    stale = 0
+    if as_of:                       # 마지막 거래일이 기준일과 다른 종목은 쓰지 않는다 (기준일 혼선 방지)
+        for s in [s for s, rows in px.items() if rows[-1][0] != as_of]:
+            errs[s] = f"마지막 거래일 {px[s][-1][0]} ≠ 기준일 {as_of}"
+            del px[s]
+            stale += 1
     pct, n_pct = calc.pct_above_sma200(px)
     pct_4w, _ = calc.pct_above_sma200(px, offset=20)
     nh, nl, n_hl = calc.new_highs_lows(px)
@@ -125,6 +130,7 @@ def breadth_block(cache_dir, network):
         "nh_nl_ratio": calc.nh_nl_ratio(nh, nl) if n_hl else None,
         "n_52w_judged": n_hl,
         "price_fetch_errors": len(errs),
+        "excluded_stale_last_bar": stale,
     }
     missing = {}
     if coverage is not None and coverage < 80:
@@ -168,10 +174,36 @@ def holdings_block(out_dir, sectors, args):
     return out, {"source": path, "as_of": h.get("as_of"), "account": h.get("account")}
 
 
+def degraded(reason):
+    """분모(QQQ)를 받지 못하면 아무 값도 만들 수 없다. 직전 파일을 그대로 두지 않고
+    전부 결측인 파일을 새로 쓴다 — 루틴이 지난주 값을 이번 주 값으로 읽는 일을 막는다."""
+    return {
+        "program": PROGRAM, "program_version": PROGRAM_VERSION, "version": calc.CALC_VERSION,
+        "as_of": None, "generated_at": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
+        "benchmark": BENCH, "calc": {}, "sources": [{"name": "yahoo_chart", "grade": "B",
+                                                    "url": yahoo.CHART, "price_field": None}],
+        "missing": [BENCH] + [t for _, t, _, _ in UNIVERSE] + ["breadth"],
+        "missing_detail": {BENCH: reason},
+        "sectors": [{"name": n, "ticker": t, "group": g, "rs_ratio": None, "quadrant": None,
+                     "missing_reason": f"분모 {BENCH} 결측"} for n, t, g, _ in UNIVERSE],
+        "breadth": None, "regime": {"dispersion": None, "dispersion_pctile_2y": None,
+                                    "dispersion_history_weeks": 0, "dispersion_universe_n": 0},
+        "events": {"quadrant_changes": [], "rs_dd_15": [], "rs_up_30": []},
+        "holdings": [], "holdings_meta": {"source": None, "note": "분모 결측으로 태깅하지 않았다"},
+        "validation": {"file": "scripts/sector_us/검증결과.md", "run_at": None, "summary": None},
+        "caveats": ["benchmark_missing"],
+        "notes": [f"분모 {BENCH}를 받지 못해 이번 주 관측은 전부 결측이다: {reason}"],
+    }
+
+
 def build(args):
     out_dir = args.out_dir
     network = not args.no_network
-    bench, bench_weekly, sectors, rs_by_ticker, errors = fetch_sectors(args.cache_dir, network)
+    try:
+        bench = yahoo.chart(BENCH, rng=SECTOR_RANGE, cache_dir=args.cache_dir, network=network)
+    except Exception as e:
+        return degraded(str(e)[:200])
+    bench_weekly, sectors, rs_by_ticker, errors = fetch_sectors(bench, args.cache_dir, network)
     as_of = bench_weekly[-1][0] if bench_weekly else None
     asof_date = dt.date.fromisoformat(as_of) if as_of else None
 
@@ -187,7 +219,7 @@ def build(args):
     for tk, e in errors.items():
         missing[tk] = e
     breadth, b_missing = (None, {"breadth": "--no-breadth로 생략"}) if args.no_breadth \
-        else breadth_block(args.cache_dir, network)
+        else breadth_block(args.cache_dir, network, as_of=as_of)
     missing.update(b_missing)
     holdings, h_meta = holdings_block(out_dir, sectors, args)
 
@@ -257,9 +289,9 @@ def to_markdown(doc):
     miss = ", ".join(doc["missing"]) if doc["missing"] else "없음"
     L = [f"# 미국 섹터 상대강도 (QQQ 대비) — 주간 관측", "",
          "| | |", "|---|---|",
-         f"| 기준일 | {doc['as_of']} |",
+         f"| 기준일 | {doc['as_of'] or '결측 — 분모를 받지 못했다'} |",
          f"| 생성 | {doc['generated_at']} · {doc['program']} v{doc['program_version']} (계산정의 v{doc['version']}) |",
-         f"| 분모 | QQQ {doc['sources'][0]['price_field']} |",
+         f"| 분모 | QQQ {doc['sources'][0]['price_field'] or '(결측)'} |",
          f"| 출처 | {src} |",
          f"| 결측 | {miss} |", "",
          "## 관측 — 사실만", "",
