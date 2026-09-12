@@ -3,7 +3,7 @@
  "program_version": "0.1",
  "version": "0.1",
  "as_of": "2026-09-11",
- "generated_at": "2026-09-12T16:42:33+09:00",
+ "generated_at": "2026-09-12T16:49:37+09:00",
  "benchmark": "QQQ",
  "calc": {
   "rs_window_weeks": 26,
@@ -26,7 +26,7 @@
    "grade": "A-",
    "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
    "as_of": null,
-   "fetched_at": "2026-09-12T07:41Z"
+   "fetched_at": "2026-09-12T07:48Z"
   }
  ],
  "missing": [],
@@ -952,7 +952,7 @@
   "constituents_source": "nasdaq_api",
   "constituents_grade": "A-",
   "constituents_as_of": null,
-  "constituents_fetched_at": "2026-09-12T07:41Z",
+  "constituents_fetched_at": "2026-09-12T07:48Z",
   "constituents_url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
   "constituents_tickers": [
    "AAPL",
@@ -1099,12 +1099,12 @@
  },
  "validation": {
   "file": "scripts/sector_us/검증결과.md",
-  "run_at": "2026-09-12T16:41:08+09:00",
+  "run_at": "2026-09-12T16:47:51+09:00",
   "summary": {
    "quadrant": "10년 중 3년 양수, 전체 평균 +0.037%p (leading -0.305% vs 전체 -0.342%, n=6754, 4주 선행)",
    "breadth": "하위 20% 주 이후 QQQ 4주 0.824% vs 나머지 1.34% (전체 차 -0.516%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
    "drawdown": "하락 직전 leading 수 4.4개 vs 평상시 3.444개 (차 +0.956개), 분산도 차 +0.008 (사건 15주)",
-   "stability": "같은 기준일 두 번 수집 — 표시 자리수 안에서 동일(최근 13주 rs_ratio 1점이 최대 0.0001% 달랐고, 허용 0.005% 이하다. 출처·가격필드·행수는 동일) · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0% (182점)"
+   "stability": "같은 기준일 두 번 수집·재계산 완전 동일 · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0% (182점)"
   }
  },
  "caveats": [
@@ -1116,7 +1116,7 @@
  "notes": [
   "분모는 QQQ 수정종가다. SPY가 아니다 (제안서 R1).",
   "가격 필드는 adjclose — 배당 재투자 반영. Yahoo가 과거 수정종가를 소급 변경하면 과거 값이 바뀔 수 있다.",
-  "보유 위성 섹터 태깅은 Yahoo 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, 반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
+  "보유 위성 섹터 태깅은 출처의 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, 반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
   "이 파일은 관측 입력이다. 판정 규칙이 아니고 월간 10지표에 들어가지 않는다 (제안서 §3).",
   "구성종목 목록 출처 폴백: invesco: 티커 0개 (열=None) 받은 내용 앞머리='<!--\\n* This file is created specifically to update\\n* lang attribute in html tag and\\n* data-language attribute body tag\\n*' → nasdaq_api(A-) 사용."
  ],
