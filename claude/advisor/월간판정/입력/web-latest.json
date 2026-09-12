@@ -1,11 +1,11 @@
 {
- "fetched_at": "2026-09-05 00:17",
+ "fetched_at": "2026-09-12 00:30",
  "ISM_manufacturing": {
   "value": 54.6,
   "report_month": "August 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Manufacturing PMI® at 54.6%; August 2026",
-  "fetched_at": "2026-09-05T00:18",
+  "fetched_at": "2026-09-12T00:30",
   "note": "PR Newswire 폴백"
  },
  "ISM_services": {
@@ -13,7 +13,7 @@
   "report_month": "August 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Services PMI® at 55.4%; August 2026",
-  "fetched_at": "2026-09-05T00:18",
+  "fetched_at": "2026-09-12T00:30",
   "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
@@ -21,7 +21,7 @@
   "decided_on": "2026-08-27",
   "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
   "matched": "2026 08월 27일 3.00",
-  "fetched_at": "2026-09-05T00:18"
+  "fetched_at": "2026-09-12T00:30"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
@@ -47,9 +47,9 @@
   },
   "https://www.prnewswire.com/news/institute-for-supply-management/": {
    "status": 200,
-   "len": 243445,
+   "len": 243378,
    "keyword": "PMI",
-   "around": "er page 100 per page Latest Sep 03, 2026, 10:00 ET Services PMI® at 55.4%; August 2026 ISM® Services PMI® Report Economic activity in the services sector continued to expand in August, say the nation's purchasing and sup"
+   "around": "ocurement, named Neal J.... Sep 03, 2026, 10:00 ET Services PMI® at 55.4%; August 2026 ISM® Services PMI® Report Economic activity in the services sector continued to expand in August, say the nation's purchasing and sup"
   },
   "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/services/september/": {
    "status": 200,
@@ -65,13 +65,13 @@
   },
   "https://insight.factset.com/topic/earnings": {
    "status": 200,
-   "len": 100646,
+   "len": 100455,
    "keyword": "EPS surprise",
    "around": "report: Explore details behind the unusually large positive EPS surprise from Amazon. By John Butters &nbsp;&nbsp;|&nbsp;&nbsp; Earnings Read more July 31, 2026 S&amp;P 500 Earnings Season Update: July 31, 2026 Stay upda"
   },
   "https://insight.factset.com/sp-500-earnings-season-update-august-7-2026": {
    "status": 200,
-   "len": 88545,
+   "len": 88929,
    "keyword": "EPS surprise",
    "around": "mpressive results, even if one excludes the unusually large EPS surprises reported by Alphabet and Amazon.com. Overall, both the percentage of S&amp;P 500 companies reporting positive earnings surprises and the magnitude"
   },
