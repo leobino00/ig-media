@@ -16,7 +16,9 @@
 | `fetch.py` | 주간 관측 산출 (`sector-us-latest.{md,json}` + 주간 스냅샷) |
 | `validate.py` | §9 검증 4건 → `검증결과.{md,json}` |
 | `lint_no_judgment.py` | 「관측」 절 판단 어휘 검사 (§10) |
-| `self_test.py` | 계산 정의 단위 시험 19건. 네트워크 불필요 |
+| `self_test.py` | 단위 시험 25건(계산 경계값·CSV 파서·섹터 이름 대응·어휘 검사). 네트워크 불필요 |
+| `검증결과.{md,json}` | §9 검증 결과. 러너가 수동 실행 때 갱신한다 |
+| `섹터태깅점검.md` | R4 점검 기록. 위성 편입 전까지 태깅이 사는지 본다 |
 
 ## 실행
 
@@ -25,6 +27,8 @@ python scripts/sector_us/self_test.py                                  # 경계�
 python scripts/sector_us/fetch.py "claude/advisor/월간판정/입력"        # 주간 관측
 python scripts/sector_us/lint_no_judgment.py "claude/advisor/월간판정/입력/sector-us-latest.md"
 python scripts/sector_us/validate.py scripts/sector_us --with-breadth  # §9 검증 (종목 100개 수집)
+python scripts/sector_us/fetch.py --probe-sector "NVDA,XOM" \
+       --probe-out scripts/sector_us/섹터태깅점검.md                   # R4 태깅 점검 (산출물 건드리지 않음)
 
 # 네트워크가 막힌 환경: 원본 응답을 캐시에 받아두고 그것만으로 재현한다
 python scripts/sector_us/fetch.py OUT --cache-dir /tmp/c              # 받으면서 캐시
@@ -37,7 +41,7 @@ python scripts/sector_us/fetch.py OUT --cache-dir /tmp/c --no-network # 캐시�
 |---|---|---|
 | `cron 30 22 * * 5` | 금 22:30 UTC = **토 07:30 KST** | 자기시험 → 주간 관측 → 어휘 검사 → 커밋 (제안서 R9 마감과 같다) |
 | `cron 30 0 2 * *` | 매월 2일 | 같음. 기준일이 금요일이 아니면 json `notes`에 적힌다 |
-| 수동 실행 (`workflow_dispatch`) | — | 위 + **§9 검증 재실행** 후 한계 문구 갱신 |
+| 수동 실행 (`workflow_dispatch`) | — | 위 + **R4 태깅 점검** + **§9 검증 재실행** 후 한계 문구 갱신 |
 
 ## 계산 정의 (제안서 §5 · `calc.py`)
 
@@ -75,8 +79,8 @@ GICS 11: `XLK` `XLV` `XLF` `XLY` `XLC` `XLI` `XLP` `XLE` `XLU` `XLRE` `XLB`
 | Invesco QQQ 보유종목 CSV | A− | 나스닥100 구성종목 ① — **러너에서 쓸 수 없다(3회 확인)**. 아래 참조 |
 | `api.nasdaq.com` 나스닥100 목록 | A− | 구성종목 ② — **실제로 쓰이는 출처** (102종목, 목록 수집시각을 남긴다) |
 | Wikipedia Nasdaq-100 | C | 구성종목 ③ 최후 수단. 쓰면 `missing`에 `breadth_source_grade_C`를 남긴다 |
-| Yahoo `quoteSummary.assetProfile.sector` | B | 보유 위성 섹터 태깅 ① — **러너에서 안 된다**(크럼·쿠키 요구, 2026-09-12 NVDA·XOM·JNJ·PLD 4종목 전부 결측) |
-| `api.nasdaq.com` 기업개요 `Sector` | A− | 섹터 태깅 ② 폴백. 구성종목 목록과 같은 호스트다 |
+| Yahoo `quoteSummary.assetProfile.sector` | B | 보유 위성 섹터 태깅 ① — **러너에서 안 된다**(크럼·쿠키 요구, 2026-09-12 NVDA·XOM·JNJ·PLD 전부 결측) |
+| `api.nasdaq.com` 기업개요 `Sector` | A− | 섹터 태깅 ② — **실제로 쓰이는 출처.** 6종목 점검 6/6 대응 (`섹터태깅점검.md`) |
 
 **Invesco CSV 확인 결과 (제안서 R3이 요구한 항목):** 다운로드 URL이 CSV가 아니라 HTML을 돌려준다 —
 받은 내용 앞머리가 `<!-- This file is created specifically to update lang attribute in html tag …`다.
@@ -103,8 +107,8 @@ json에 남겨 모집단을 사후에 확인할 수 있게 했다.
 ## 출력 (R6 · R10 · R11)
 
 ```
-claude/advisor/월간판정/입력/sector-us-latest.md     ← 사람용, 80행 이내 (실측 57행)
-claude/advisor/월간판정/입력/sector-us-latest.json   ← 루틴용, 100 KB 이내 (실측 약 20 KB)
+claude/advisor/월간판정/입력/sector-us-latest.md     ← 사람용, 80행 이내 (실측 54행)
+claude/advisor/월간판정/입력/sector-us-latest.json   ← 루틴용, 100 KB 이내 (실측 24 KB)
 claude/advisor/월간판정/입력/sector-us-YYYY-MM-DD.json  ← 주간 스냅샷, 덮어쓰지 않는다
 ```
 
@@ -157,8 +161,11 @@ Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연�
 | 3 | 2026-09-12 07:58 UTC · 수동 | 성공. Invesco 실패가 HTML 응답임을 확인, 재현성 문구가 허용치와 함께 찍혔다 | 약 3분 |
 
 | 4 | 2026-09-12 07:39 UTC · 수동 (`34681302517`) | 성공. `--probe-sector`로 **Yahoo quoteSummary가 러너에서 안 된다**는 것을 확인(4종목 전부 결측) → `api.nasdaq.com` 기업개요 폴백 추가 | 3분 4초 |
+| 5 | 2026-09-12 07:46 UTC · 수동 (`34681591931`) | 성공. 재현성 검증이 이번엔 **완전 동일**로 나왔다 — 4회차의 0.0001% 차이는 일시적 부동소수 차이였고, 허용치 설계가 맞았다 | 3분 18초 |
+| 6 | 2026-09-12 07:53 UTC · 수동 | 성공. 섹터 태깅 **6/6종목 대응**(`nasdaq_company_profile`, A−)을 `섹터태깅점검.md`에 기록 | 약 3분 |
 
-**무인 실행 4회 연속 성공** (§10 완료 기준은 3회). 주간 스케줄(금 22:30 UTC)에서는 §9 검증을 돌리지 않으므로
+**무인 실행 6회 연속 성공** (§10 완료 기준은 3회). 주간 스케줄 실행은 §9 검증·태깅 점검을 돌리지 않아
+수집 단계만 50초 내외로 끝난다. 주간 스케줄(금 22:30 UTC)에서는 §9 검증을 돌리지 않으므로
 수집 단계 1분 내외로 끝난다 — 어드바이저 수집 사이클(토 07:30 KST) 안에 들어온다.
 
 1회차에서 드러난 것과 한 일:
@@ -187,7 +194,7 @@ Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연�
 
 | 항목 | 상태 |
 |---|---|
-| 계산 정의·파서 단위시험 23건 | 통과 (`self_test.py`, 러너에서도 통과) |
+| 계산 정의·파서·섹터대응 단위시험 25건 | 통과 (`self_test.py`, 러너에서도 통과) |
 | 수집→집계→md·json→스냅샷 전 경로 | 통과 (합성 캐시 end-to-end). md 57행 · json 19 KB · 두 번 돌려 동일 |
 | 결측 경로 | 통과 — 섹터 1개 실패 · 구성종목 목록 실패 · `SMH`→`SOXX` 대체 · `holdings.json` 없음 · **분모 QQQ 결측(전부 결측 파일을 새로 쓴다)** |
 | 판단 어휘 검사 | 통과 |
@@ -202,7 +209,7 @@ Q3 국내판 계산 정의가 이 저장소에 없으므로(`claude/advisor/연�
 | 금요일 종가 기준 `brief.md`·`brief.json`이 §6 스키마로 생성된다 | 충족 — 기준일 2026-09-11(금) |
 | 14개 섹터 전부 R1~R5 값이 있고, 결측은 `null` + `missing[]` | 충족 — 3회 모두 `missing: []` |
 | 나스닥100 구성종목 폭 2종이 출처·기준일과 함께 나온다 | 충족 — 출처 `nasdaq_api`(A−) + 수집시각 + 티커 목록. 목록 자체의 기준일은 출처가 주지 않는다(Invesco가 복구되면 채워진다) |
-| `holdings.json`이 있을 때 섹터 태깅, 없을 때 빈 배열로 정상 종료 | 없을 때: 러너 4회 충족. 있을 때: `--probe-sector`로 러너에서 확인했고 **Yahoo quoteSummary가 결측**이라 `api.nasdaq.com` 기업개요를 폴백으로 넣었다. 둘 다 실패하면 섹터는 결측이고 사유(`sector_missing_reason`)가 남는다 — 위성 편입(2027-02) 전까지 소비처가 없으므로 막는 요소는 아니다 |
+| `holdings.json`이 있을 때 섹터 태깅, 없을 때 빈 배열로 정상 종료 | 충족. 없을 때: 러너 6회. 있을 때: `--probe-sector`로 러너에서 **6/6종목 대응 확인**(`nasdaq_company_profile` A−). Yahoo quoteSummary(①)는 러너에서 결측이라 ②가 실제 출처다. 둘 다 실패하면 섹터는 결측이고 사유(`sector_missing_reason`)가 남는다 |
 | GitHub Actions 무인 실행 3회 연속 성공, 소요 시간 기록 | 충족 — 위 표 |
 | §9 검증 4건이 README에 결과와 함께 있고 md 꼬리가 그것을 인용한다 | 충족 |
 | 관측 절에 금지 어휘가 없다 (단어 검사 스크립트) | 충족 — `lint_no_judgment.py`가 매 실행 |
