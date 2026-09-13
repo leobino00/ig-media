@@ -249,6 +249,52 @@ def test_daily_tr_and_periods():
     check("짝의 길이비가 5배다", ("sma40_b0", "sma200_b0") in pr)
 
 
+def test_vol_and_weights():
+    ds = wk(30)
+    # 변동성이 0 인 시계열
+    flat = [100.0] * 30
+    v = S.realized_vol(ds, flat, 13)
+    check("변동 없으면 변동성 0", near(v[ds[-1]], 0.0, 1e-9))
+    check("워밍업 부족 주는 값이 없다", ds[5] not in v)
+
+    g = S.vol_gate_abs({ds[-1]: 20.0}, 20.0)
+    check("변동성 경계: 같으면 통과 아님(strict)", g[ds[-1]] is False)
+    check("변동성 경계: 미만이면 통과", S.vol_gate_abs({ds[-1]: 19.99}, 20.0)[ds[-1]] is True)
+
+    st_ = {ds[i]: S.UP for i in range(30)}
+    gated = S.gate_states(st_, {ds[i]: (i % 2 == 0) for i in range(30)})
+    check("게이트 막히면 UP이 NEUTRAL이 된다",
+          gated[ds[0]] == S.UP and gated[ds[1]] == S.NEUTRAL)
+    check("게이트 값이 없으면 들어가지 않는다", S.gate_states(st_, {})[ds[0]] == S.NEUTRAL)
+    check("추세가 DOWN이면 게이트 통과해도 UP 아님",
+          S.gate_states({ds[0]: S.DOWN}, {ds[0]: True})[ds[0]] == S.NEUTRAL)
+
+    w = S.vol_target_weight({ds[0]: 40.0, ds[1]: 10.0}, 20.0)
+    check("타게팅 비중 = 목표/실현", near(w[ds[0]], 0.5, 1e-12))
+    check("타게팅 비중 상한 1", near(w[ds[1]], 1.0, 1e-12))
+
+    # 백분위 게이트는 과거만 본다
+    vv = {ds[i]: float(i) for i in range(30)}
+    gp = S.vol_gate_pct(vv, ds, 50.0, 10)
+    check("백분위 게이트 워밍업", ds[5] not in gp)
+    check("백분위 게이트: 상승 시계열의 최신값은 항상 상위 → 막힌다", gp[ds[-1]] is False)
+
+    # 연속 비중 엔진
+    d4 = wk(4)
+    rets = {"A": {d4[1]: 0.10, d4[2]: 0.10, d4[3]: 0.10}}
+    r1 = BT.run_weights(d4, {d: 1.0 for d in d4}, rets, "A", FlatRate(0.0), switch_cost_bps=0.0)
+    check("비중 1 = 바이앤홀드", near(r1.curve[-1][1], 1.1 ** 3, 1e-12))
+    r0 = BT.run_weights(d4, {d: 0.0 for d in d4}, rets, "A", FlatRate(5.2), switch_cost_bps=0.0)
+    check("비중 0 = 현금", near(r0.curve[-1][1], (1 + 0.052 / 52) ** 3, 1e-12))
+    rh = BT.run_weights(d4, {d: 0.5 for d in d4}, rets, "A", FlatRate(0.0), switch_cost_bps=0.0)
+    check("비중 0.5 = 절반", near(rh.curve[-1][1], 1.05 ** 3, 1e-12))
+    rc_ = BT.run_weights(d4, {d4[0]: 0.0, d4[1]: 1.0, d4[2]: 1.0, d4[3]: 1.0},
+                         rets, "A", FlatRate(0.0), switch_cost_bps=100.0)
+    check("비용은 비중 변화량에 비례", near(rc_.turnover, 1.0, 1e-12))
+    check("결측 비중은 현금으로 둔다", near(
+        BT.run_weights(d4, {}, rets, "A", FlatRate(0.0), switch_cost_bps=0.0).curve[-1][1], 1.0, 1e-12))
+
+
 def test_real_data():
     """저장소 실 데이터로 대조군이 벤치마크와 정확히 일치하는지 본다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -285,6 +331,7 @@ def main():
             test_loader(tmp)
             test_leverage()
             test_daily_tr_and_periods()
+            test_vol_and_weights()
             test_real_data()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

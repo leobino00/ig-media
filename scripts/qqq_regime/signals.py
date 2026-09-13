@@ -121,3 +121,76 @@ def pair_weekly_daily():
         for t in (0.0, 3.0, 6.0):
             out.append(("mom%d_t%.0f" % (n, t), "mom%d_t%.0f" % (W[n], t)))
     return out
+
+
+# ---------------------------------------------------------------- 변동성 게이트
+
+def realized_vol(dates, closes, n, periods_per_year=52):
+    """최근 n개 수익률의 표본표준편차(n-1)를 연율화한 %. 기준주까지만 쓴다.
+
+    표본이 모자란 구간은 아예 넣지 않는다 (0으로 채우지 않는다).
+    """
+    import math
+    out = {}
+    rets = [closes[i] / closes[i - 1] - 1.0 for i in range(1, len(closes))]
+    for i in range(n, len(closes)):
+        w = rets[i - n:i]
+        m = sum(w) / n
+        sd = math.sqrt(sum((x - m) ** 2 for x in w) / (n - 1))
+        out[dates[i]] = sd * math.sqrt(periods_per_year) * 100.0
+    return out
+
+
+def vol_gate_abs(vol_by_date, threshold_pct):
+    """연율 변동성이 임계치 **미만**이면 통과(True). 같으면 통과가 아니다 — 약한 쪽으로 센다.
+
+    임계치는 적합하지 않고 이론에서 온다. 일간리셋 L배 상품의 변동성 끌림은 대략
+    (L^2-L)/2 * sigma^2 이고 L=3 이면 3*sigma^2 다. 3배 위험프리미엄(연 15~18%)을
+    끌림이 넘어서는 지점이 sigma ~= 22% 라서, 20~35% 구간을 훑는다.
+    """
+    return {d: (v < threshold_pct) for d, v in vol_by_date.items()}
+
+
+def vol_gate_pct(vol_by_date, dates, pct, lookback):
+    """변동성이 **직전 lookback 기간 분포의 pct 백분위 미만**이면 통과.
+
+    절대 임계치와 달리 수준이 시대에 따라 변하는 것을 흡수한다.
+    기준주 자신을 포함한 과거만 쓴다 — 미래를 보지 않는다.
+    """
+    ds = [d for d in dates if d in vol_by_date]
+    out = {}
+    for i, d in enumerate(ds):
+        if i + 1 < lookback:
+            continue
+        w = sorted(vol_by_date[x] for x in ds[i + 1 - lookback:i + 1])
+        k = int(len(w) * pct / 100.0)
+        k = min(max(k, 0), len(w) - 1)
+        out[d] = vol_by_date[d] < w[k]
+    return out
+
+
+def gate_states(states, gate):
+    """추세 UP 이면서 게이트를 통과한 주만 UP. 나머지는 NEUTRAL(현금).
+
+    게이트 값이 없는 주(워밍업 부족)는 **통과시키지 않는다** — 모르면 들어가지 않는다.
+    """
+    return {d: (UP if (st == UP and gate.get(d) is True) else NEUTRAL) for d, st in states.items()}
+
+
+def vol_target_weight(vol_by_date, target_pct, max_weight=1.0):
+    """변동성 타게팅 비중 = min(max_weight, target / 실현변동성). 0~max_weight."""
+    out = {}
+    for d, v in vol_by_date.items():
+        out[d] = 0.0 if v <= 0 else min(max_weight, target_pct / v)
+    return out
+
+
+def build_vol_configs():
+    """검토할 변동성 게이트 전수. 절대 임계 4 + 백분위 6 = 10개."""
+    cfg = []
+    for n in (13, 26):
+        for th in (20.0, 25.0, 30.0, 35.0):
+            cfg.append(("vol%dw<%.0f" % (n, th), n, ("abs", th, None)))
+        for pct in (50.0, 70.0, 80.0):
+            cfg.append(("vol%dw_p%.0f" % (n, pct), n, ("pct", pct, 104)))
+    return cfg

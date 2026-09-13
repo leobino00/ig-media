@@ -147,3 +147,66 @@ def buy_and_hold(dates, ret_by_symbol, symbol, periods_per_year=52):
     rs = [ret_by_symbol[symbol][dates[i]] for i in range(1, len(dates))]
     res.vol_pct = stdev(rs) * math.sqrt(periods_per_year) * 100.0
     return res
+
+
+def run_weights(dates, weight_by_date, ret_by_symbol, symbol, rate_curve,
+                switch_cost_bps=10.0, periods_per_year=52, default_weight=0.0):
+    """연속 비중 백테스트 — `symbol` 에 w, 나머지 (1-w) 는 현금.
+
+    변동성 타게팅처럼 0/1 이 아닌 포지션을 위한 경로다. 타이밍 규약은 `run` 과 같다:
+    t주 종가의 w(t) 를 t+1 주 수익률에 적용한다.
+
+    비용은 **비중 변화량에 비례**한다 — |w(t) - w(t-1)| x 비용. 전량 교체가 1회분이다.
+    w 가 없는 주는 default_weight (기본 0 = 현금) 로 둔다. 모르면 들어가지 않는다.
+    """
+    cost = switch_cost_bps / 10000.0
+    eq = 1.0
+    curve = [(dates[0], 1.0)]
+    weekly = []
+    prev_w = None
+    turnover = 0.0
+    missing = 0
+
+    for i in range(1, len(dates)):
+        d_sig, d_end = dates[i - 1], dates[i]
+        w = weight_by_date.get(d_sig)
+        if w is None:
+            missing += 1
+            w = default_weight
+        w = min(max(w, 0.0), 1.0)
+
+        ra = ret_by_symbol[symbol].get(d_end)
+        if ra is None:
+            raise ValueError("%s 수익률 결측: %s" % (symbol, d_end))
+        rc_ = rate_curve.period_return(d_sig, periods_per_year)
+        if rc_ is None:
+            raise ValueError("금리 결측: %s" % d_sig)
+
+        if prev_w is not None and w != prev_w:
+            d = abs(w - prev_w)
+            eq *= (1.0 - cost * d)
+            turnover += d
+        prev_w = w
+
+        r = w * ra + (1.0 - w) * rc_
+        eq *= (1.0 + r)
+        curve.append((d_end, eq))
+        weekly.append((d_end, r, w))
+
+    res = Result()
+    res.curve = curve
+    res.weekly = weekly
+    res.turnover = turnover
+    res.missing_signal = missing
+    res.weeks_in = None
+    res.years = (dates[-1] - dates[0]).days / 365.25
+    res.total_pct = (eq - 1.0) * 100.0
+    res.cagr_pct = ((eq ** (1.0 / res.years)) - 1.0) * 100.0 if res.years > 0 else None
+    res.mdd_pct = max_drawdown_pct(curve)
+    res.annual = annual_returns(curve)
+    rs = [r for _, r, _ in weekly]
+    res.vol_pct = (stdev(rs) * math.sqrt(periods_per_year) * 100.0) if len(rs) > 1 else None
+    res.switches = None
+    res.switches_per_year = turnover / res.years if res.years > 0 else None
+    res.mean_weight = sum(w for _, _, w in weekly) / len(weekly) if weekly else None
+    return res

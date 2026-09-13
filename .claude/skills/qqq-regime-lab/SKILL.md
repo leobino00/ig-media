@@ -22,7 +22,7 @@ description: 추세 레짐에 따라 TQQQ(상승)·SQQQ(하락)·현금(횡보)�
 ## 절차
 
 ```bash
-python3 scripts/qqq_regime/self_test.py            # 1. 시험 51건 — 깨지면 멈춘다
+python3 scripts/qqq_regime/self_test.py            # 1. 시험 67건 — 깨지면 멈춘다
 
 python3 scripts/qqq_regime/experiment.py           # 2a. 3상태 (TQQQ/SQQQ/현금)
 python3 scripts/qqq_regime/report.py               #     → 출력/보고서.md
@@ -32,12 +32,33 @@ python3 scripts/qqq_regime/report_2state.py        #     → 출력/보고서-2�
 
 python3 scripts/qqq_regime/experiment_daily.py     # 2c. 일간전환 vs 주간전환 짝 비교
 python3 scripts/qqq_regime/report_daily.py         #     → 출력/보고서-일간전환.md
+
+python3 scripts/qqq_regime/experiment_vol.py       # 2d. 변동성 게이트 · 타게팅
+python3 scripts/qqq_regime/report_vol.py           #     → 출력/보고서-변동성게이트.md
 ```
 
 산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
 
 **질문에 맞는 보고서를 고른다.** 숏을 쓰는 이야기면 3상태, 아니면 2상태다.
 2상태 쪽이 규칙 60개로 더 넓고 2000년 구간(닷컴·금융위기)까지 있으므로 기본은 2상태다.
+
+### 세 가설의 결말 — 먼저 이것부터 말한다
+
+| 시도 | 결과 |
+|---|---|
+| SQQQ 숏 다리 | **기각.** 35개 규칙 전부 악화 |
+| 일간 전환 | **기각.** 톱질로 두 구간 모두 악화 |
+| 변동성 게이트 | **부분 채택.** 낙폭을 58/60 규칙에서 줄인다. 수익률은 국면에 따라 갈린다 |
+
+### 변동성 게이트를 물으면
+
+**낙폭에는 듣고 수익률에는 국면을 탄다.** 추세 규칙 60개 짝 비교에서 낙폭이
+2000~2026 구간 58/60, 2010~2026 구간 56/60 개선됐다. 수익률은 붕괴 포함 구간에서 +2.91%p,
+상승만 있던 구간에서 −1.68%p다. 닷컴에서 노출 6.5%→0.7%, 손실 −37.19%→−1.24%.
+대가는 2020 V자 회복(+186%→+93%)이고, 그래서 표본외 수익률은 깎였다.
+**「게이트가 사고파는 것은 수익이 아니라 낙폭」이라고 말한다.** 자세한 것은 `출력/보고서-변동성게이트.md`.
+
+변동성 타게팅 **단독은 쓰지 않는다** — 추세 없이는 하락장을 못 벗어난다(구간 B 낙폭 −97.23%).
 
 ### 일간 전환을 물으면
 
