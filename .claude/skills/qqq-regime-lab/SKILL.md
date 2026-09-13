@@ -22,12 +22,26 @@ description: 추세 레짐에 따라 TQQQ(상승)·SQQQ(하락)·현금(횡보)�
 ## 절차
 
 ```bash
-python3 scripts/qqq_regime/self_test.py     # 1. 시험 33건 — 깨지면 멈춘다
-python3 scripts/qqq_regime/experiment.py    # 2. 전수 백테스트
-python3 scripts/qqq_regime/report.py        # 3. 보고서
+python3 scripts/qqq_regime/self_test.py            # 1. 시험 41건 — 깨지면 멈춘다
+
+python3 scripts/qqq_regime/experiment.py           # 2a. 3상태 (TQQQ/SQQQ/현금)
+python3 scripts/qqq_regime/report.py               #     → 출력/보고서.md
+
+python3 scripts/qqq_regime/experiment_2state.py    # 2b. 2상태 (TQQQ/현금) + 2000년 확장
+python3 scripts/qqq_regime/report_2state.py        #     → 출력/보고서-2상태.md
 ```
 
-산출물이 최신이면 다시 돌리지 않고 `출력/보고서.md` 를 읽어 답한다.
+산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
+
+**질문에 맞는 보고서를 고른다.** 숏을 쓰는 이야기면 3상태, 아니면 2상태다.
+2상태 쪽이 규칙 60개로 더 넓고 2000년 구간(닷컴·금융위기)까지 있으므로 기본은 2상태다.
+
+### 2상태 결과를 인용할 때
+
+**기간을 반드시 함께 말한다 — 답이 뒤집힌다.** 2010~2026만 보면 규칙 60개 중 **0개**가
+TQQQ 바이앤홀드(+41.67%)를 이기지 못했고, 2000~2026으로 늘리면 바이앤홀드가
+**CAGR −1.38%·MDD −99.97%** 로 소멸하고 규칙 중앙값은 **+12.30%** 다.
+한쪽만 인용하면 정반대 인상을 준다.
 
 ## 규칙을 바꿔달라고 하면
 

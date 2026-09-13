@@ -60,16 +60,33 @@ def always(dates, closes, state):
     return {d: state for d in dates}
 
 
-def build_grid():
-    """검토할 규칙 전체. **일부만 골라 싣지 않는다** — 전수를 보고한다."""
+def _grid(sma_n, sma_b, dual_fs, dual_b, mom_n, mom_t):
     grid = []
-    for n in (10, 20, 30, 40, 52):
-        for b in (0.0, 2.0, 4.0):
+    for n in sma_n:
+        for b in sma_b:
             grid.append(("sma%d_b%.0f" % (n, b), lambda ds, cs, n=n, b=b: sma_band(ds, cs, n, b)))
-    for f, s in ((5, 20), (10, 30), (10, 40), (20, 50)):
-        for b in (0.0, 2.0):
+    for f, s in dual_fs:
+        for b in dual_b:
             grid.append(("dual%d-%d_b%.0f" % (f, s, b), lambda ds, cs, f=f, s=s, b=b: dual_sma(ds, cs, f, s, b)))
-    for n in (4, 13, 26, 52):
-        for t in (0.0, 3.0, 6.0):
+    for n in mom_n:
+        for t in mom_t:
             grid.append(("mom%d_t%.0f" % (n, t), lambda ds, cs, n=n, t=t: momentum(ds, cs, n, t)))
     return grid
+
+
+def build_grid():
+    """3상태 실험이 쓰는 규칙 35개. **일부만 골라 싣지 않는다** — 전수를 보고한다."""
+    return _grid((10, 20, 30, 40, 52), (0.0, 2.0, 4.0),
+                 ((5, 20), (10, 30), (10, 40), (20, 50)), (0.0, 2.0),
+                 (4, 13, 26, 52), (0.0, 3.0, 6.0))
+
+
+def build_grid_wide():
+    """2상태(TQQQ/현금) 실험용 확장 그리드 60개.
+
+    숏 다리를 뺐으므로 탐색 폭을 넓혔다. 대신 「60개 중 최고」의 선택편향도 같이 커지므로,
+    보고는 반드시 중앙값·표본외와 함께 한다 (experiment_2state.py 가 강제한다).
+    """
+    return _grid((8, 10, 13, 20, 26, 30, 35, 40, 45, 52), (0.0, 2.0, 4.0),
+                 ((3, 10), (5, 20), (10, 30), (10, 40), (13, 40), (20, 50)), (0.0, 2.0),
+                 (4, 8, 13, 26, 39, 52), (0.0, 3.0, 6.0))

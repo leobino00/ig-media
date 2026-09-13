@@ -13,7 +13,30 @@
 > 관측기는 사실만 내고 판단 어휘를 금지한다. 이 실험실은 **가상의 규칙을 과거에 적용한 기록**을 낸다.
 > 둘 다 「앞으로 얼마를 벌 것이다」는 내지 않는다.
 
-## 답 (2026-09-13 기준)
+## 두 실험
+
+| 실험 | 질문 | 실행 | 보고서 |
+|---|---|---|---|
+| **3상태** | TQQQ / SQQQ / 현금 | `experiment.py` → `report.py` | `출력/보고서.md` |
+| **2상태** | TQQQ / 현금 (숏 제거) | `experiment_2state.py` → `report_2state.py` | `출력/보고서-2상태.md` |
+
+3상태에서 SQQQ 다리가 35개 규칙 전부를 악화시켰으므로 숏을 빼고 2상태를 따로 돌렸다.
+
+### 2상태 요약 — 답이 기간에 따라 뒤집힌다
+
+| 구간 | 규칙 60개 CAGR 중앙 | TQQQ 그냥 보유 |
+|---|---|---|
+| 2010~2026 (실제 TQQQ) | +22.80% | **+41.67%** — 60개 중 0개만 이겼다 |
+| 2000~2026 (시뮬 TQQQ) | **+12.30%** | −1.38% (MDD −99.97%) — 소멸한다 |
+
+같은 구간 QQQ 보유는 +8.77%(MDD −82.69%)다. **이 전략이 사는 곳은 상승장이 아니라 붕괴장이다.**
+TQQQ의 2010년 상장 자체가 생존편향이다 — 닷컴을 통과한 3배 나스닥 상품은 존재하지 않는다.
+
+레버리지 합성은 일간리셋 모형으로 하고 실제 TQQQ에 검증했다:
+주간 수익률 상관 **0.9994**, 보수 0% 가정으로도 CAGR 오차 **−0.94%p**
+(단순 주간 ×3 합성은 +9.66%p 과대평가). 보수 가정을 −0.67%~+2%로 흔들어도 중앙값은 +10.47%~+12.30%.
+
+## 3상태 실험 요약 (2026-09-13 기준)
 
 | | 값 |
 |---|---|
@@ -40,19 +63,24 @@
 | 파일 | 역할 |
 |---|---|
 | `prices.py` | 가격·금리 로더, 주간 정렬. 날짜 중복은 거부한다 |
-| `signals.py` | 레짐 판별 규칙 3계열 35개 + 그리드 정의 |
+| `signals.py` | 레짐 판별 규칙 3계열. 기본 35개(`build_grid`) · 확장 60개(`build_grid_wide`) |
 | `backtest.py` | 주간 리밸런싱 엔진. **타이밍 규약이 여기 있다** |
-| `experiment.py` | 전수 실행 → `출력/experiment.json` |
+| `leverage.py` | 일간리셋 레버리지 합성 + 보수 적합. **주간 ×3 합성은 쓰지 않는다** |
+| `experiment.py` | 3상태 전수 실행 → `출력/experiment.json` |
 | `report.py` | json → `출력/보고서.md` |
+| `experiment_2state.py` | 2상태 전수 + 2000년 확장 → `출력/experiment_2state.json` |
+| `report_2state.py` | json → `출력/보고서-2상태.md` |
 | `self_test.py` | 단위 시험 33건. 네트워크 불필요 |
 | `data/` | 가격·금리 원자료 (아래) |
 
 ## 실행
 
 ```bash
-python3 scripts/qqq_regime/self_test.py     # 시험 33건 — 먼저 돌린다
-python3 scripts/qqq_regime/experiment.py    # 전수 백테스트
-python3 scripts/qqq_regime/report.py        # 보고서 생성
+python3 scripts/qqq_regime/self_test.py            # 시험 33건 — 먼저 돌린다
+python3 scripts/qqq_regime/experiment.py           # 3상태 전수 백테스트
+python3 scripts/qqq_regime/report.py               # 3상태 보고서
+python3 scripts/qqq_regime/experiment_2state.py    # 2상태 (숏 제거) + 시뮬 구간
+python3 scripts/qqq_regime/report_2state.py        # 2상태 보고서
 ```
 
 ## 타이밍 규약 — 이 실험에서 가장 중요한 한 줄

@@ -17,6 +17,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import backtest as BT
+import leverage as LV
 import prices
 import signals as S
 
@@ -174,6 +175,45 @@ def test_loader(tmp):
             check(name, True)
 
 
+def test_leverage():
+    ds = wk(4)
+    cs = [100.0, 110.0, 99.0, 108.9]
+    r0 = FlatRate(0.0)
+
+    s1 = LV.simulate_daily(ds, cs, 1.0, r0, 0.0)
+    check("1배·보수0·금리0 = 원자산", near(s1[-1][1], cs[-1] / cs[0], 1e-12))
+
+    s3 = LV.simulate_daily(ds, cs, 3.0, r0, 0.0)
+    exp = 1.0
+    for i in range(1, len(cs)):
+        exp *= (1 + 3 * (cs[i] / cs[i - 1] - 1))
+    check("3배는 일간 등락률에 3을 곱해 복리한다", near(s3[-1][1], exp, 1e-12))
+
+    # 변동성 끌림: +10% 뒤 -10% 면 원자산은 -1%, 3배는 -9%
+    s3b = LV.simulate_daily(wk(3), [100.0, 110.0, 99.0], 3.0, r0, 0.0)
+    check("변동성 끌림이 계산에서 나온다", near(s3b[-1][1], 1.3 * 0.7, 1e-12),
+          "3배 왕복은 -9%%여야 한다: %r" % s3b[-1][1])
+
+    # 차입비용: L=3 이면 금리가 2배만큼 빠진다
+    sr = LV.simulate_daily(wk(2), [100.0, 100.0], 3.0, FlatRate(25.2), 0.0)
+    check("L=3 은 (1-L)=-2 배의 금리를 낸다",
+          near(sr[-1][1], 1 + (1 - 3) * (0.252 / LV.TRADING_DAYS), 1e-12))
+    si = LV.simulate_daily(wk(2), [100.0, 100.0], -3.0, FlatRate(25.2), 0.0)
+    check("L=-3 은 (1-L)=+4 배의 금리를 받는다",
+          near(si[-1][1], 1 + 4 * (0.252 / LV.TRADING_DAYS), 1e-12))
+
+    sf = LV.simulate_daily(wk(2), [100.0, 100.0], 3.0, r0, 25.2)
+    check("보수는 매일 차감된다", near(sf[-1][1], 1 - 0.252 / LV.TRADING_DAYS, 1e-12))
+
+    # 주간 집계는 기준일 이하의 마지막 일간 값을 쓴다 (미래를 보지 않는다)
+    daily = [(dt.date(2020, 1, 1), 1.0), (dt.date(2020, 1, 3), 2.0), (dt.date(2020, 1, 8), 9.0)]
+    w = LV.to_weekly(daily, [dt.date(2020, 1, 3), dt.date(2020, 1, 10)])
+    check("주간 집계는 미래 일간값을 당겨쓰지 않는다", near(w[0][1], 2.0) and near(w[1][1], 9.0))
+
+    fee = LV.fit_fee(ds, cs, 3.0, r0, LV.cagr_pct(LV.simulate_daily(ds, cs, 3.0, r0, 3.5)))
+    check("보수 적합이 원래 값을 되찾는다", near(fee, 3.5, 1e-3), "%r" % fee)
+
+
 def test_real_data():
     """저장소 실 데이터로 대조군이 벤치마크와 정확히 일치하는지 본다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -208,6 +248,7 @@ def main():
             test_metrics()
             test_rate_curve(tmp)
             test_loader(tmp)
+            test_leverage()
             test_real_data()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
