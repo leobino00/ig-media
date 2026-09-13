@@ -16,6 +16,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import analysis_gate as AG
 import backtest as BT
 import leverage as LV
 import prices
@@ -346,6 +347,42 @@ def test_asymmetric():
           == "이탈빠름(진입느림)")
 
 
+def test_analysis_helpers():
+    vals = list(range(100))
+    e = AG.quintile_edges(vals, 5)
+    check("5분위 경계 4개", len(e) == 4)
+    check("경계가 오름차순", all(e[i] < e[i + 1] for i in range(3)))
+    b = [AG.bucket(v, e) for v in vals]
+    check("버킷은 0~4", min(b) == 0 and max(b) == 4)
+    counts = [b.count(i) for i in range(5)]
+    check("버킷 크기가 고르다", max(counts) - min(counts) <= 1, str(counts))
+    check("경계값은 위쪽 버킷", AG.bucket(e[0], e) == 1)
+
+    check("자기상관 완전상관", near(AG.autocorr([1.0, 2.0, 3.0, 4.0, 5.0], 1), 1.0, 1e-9))
+    check("표본 부족 자기상관 결측", AG.autocorr([1.0, 2.0], 1) is None)
+
+    ds = wk(5)
+    g = {ds[0]: True, ds[1]: True, ds[2]: False, ds[3]: False, ds[4]: True}
+    s1 = AG.circular_shift(g, ds, 1)
+    check("순환이동은 노출을 보존한다",
+          sum(1 for v in s1.values() if v) == sum(1 for v in g.values() if v))
+    check("순환이동 0은 원본", AG.circular_shift(g, ds, 0) == g)
+    check("한 바퀴 돌면 원본", AG.circular_shift(g, ds, 5) == g)
+    check("실제로 자리가 바뀐다", s1 != g)
+    # 연속 구간 길이 분포도 보존된다 (원형이므로)
+    def runs(d):
+        v = [d[x] for x in ds]
+        out, cur = [], 1
+        for i in range(1, len(v)):
+            if v[i] == v[i - 1]:
+                cur += 1
+            else:
+                out.append(cur); cur = 1
+        out.append(cur)
+        return sorted(out)
+    check("연속구간 길이 분포 보존(원형 기준)", sum(runs(s1)) == sum(runs(g)))
+
+
 def test_real_data():
     """저장소 실 데이터로 대조군이 벤치마크와 정확히 일치하는지 본다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -384,6 +421,7 @@ def main():
             test_daily_tr_and_periods()
             test_vol_and_weights()
             test_asymmetric()
+            test_analysis_helpers()
             test_real_data()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

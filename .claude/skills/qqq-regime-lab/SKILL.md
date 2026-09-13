@@ -22,7 +22,7 @@ description: 추세 레짐에 따라 TQQQ(상승)·SQQQ(하락)·현금(횡보)�
 ## 절차
 
 ```bash
-python3 scripts/qqq_regime/self_test.py            # 1. 시험 78건 — 깨지면 멈춘다
+python3 scripts/qqq_regime/self_test.py            # 1. 시험 90건 — 깨지면 멈춘다
 
 python3 scripts/qqq_regime/experiment.py           # 2a. 3상태 (TQQQ/SQQQ/현금)
 python3 scripts/qqq_regime/report.py               #     → 출력/보고서.md
@@ -38,6 +38,9 @@ python3 scripts/qqq_regime/report_vol.py           #     → 출력/보고서-�
 
 python3 scripts/qqq_regime/experiment_asym.py      # 2e. 비대칭 진입/이탈 (거울짝 비교)
 python3 scripts/qqq_regime/report_asym.py          #     → 출력/보고서-비대칭진입이탈.md
+
+python3 scripts/qqq_regime/analysis_gate.py        # 2f. 게이트 원인 분해 (순환이동 귀무검정)
+python3 scripts/qqq_regime/report_gate_why.py      #     → 출력/보고서-게이트원인분석.md
 ```
 
 산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
@@ -53,6 +56,17 @@ python3 scripts/qqq_regime/report_asym.py          #     → 출력/보고서-�
 | 일간 전환 | **기각.** 톱질로 두 구간 모두 악화 |
 | 변동성 게이트 | **부분 채택.** 낙폭을 58/60 규칙에서 줄인다. 수익률은 국면에 따라 갈린다 |
 | 비대칭 진입/이탈 | **기각.** 프런티어를 옮길 뿐 넓히지 못한다 (0/288) |
+
+### 「그래서 뭐가 되는 거냐」를 물으면
+
+**3배 상품에서 도움이 되는 거의 모든 것이 노출 관리이고, 예측인 것은 거의 없다.**
+네 가설 중 셋이 기각됐고(숏 다리는 노출을 늘렸고, 일간 전환은 회전만 늘렸고,
+비대칭은 노출 다이얼이었다), 살아남은 변동성 게이트조차 **노출을 맞춘 순환이동 검정에서
+유의성이 사라진다**(CAGR p=0.65/0.78 · 낙폭 p=0.23/0.19).
+원인은 중복이다 — 게이트가 막은 주의 **51.3%를 추세가 이미 막고 있었다.**
+게이트 단독으로는 구간 A 낙폭이 p=0.027로 유의하다.
+**게이트가 아는 것은 진짜지만 그 대부분을 추세가 이미 알고 있었다.**
+자세한 것은 `출력/보고서-게이트원인분석.md`.
 
 ### 손절·비대칭을 물으면
 
