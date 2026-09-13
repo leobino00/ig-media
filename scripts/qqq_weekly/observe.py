@@ -131,7 +131,7 @@ def observe(dates, closes, report):
         "series": {
             "kind": "weekly_close",
             "cadence": "주간 (금요일 종가, 휴장주는 직전 거래일)",
-            "dividend_adjusted": None,
+            "dividend_adjusted": False,
             "currency": "USD",
             "source": "사용자 제공 파일 (data/qqq_weekly.출처.md)",
         },
@@ -162,9 +162,10 @@ def observe(dates, closes, report):
 
 def caveats(report):
     out = [
-        "**배당이 반영되지 않았을 가능성이 있다.** 입력 파일에 수정종가 여부가 적혀 있지 않고, "
-        "2007-01-05 값(43.85)이 당시 미수정 종가와 같다. 그렇다면 이 파일의 누적 등락률·CAGR은 "
-        "배당 재투자분만큼 실제 총수익보다 낮다. 확인 전까지 `dividend_adjusted` 는 결측이다.",
+        "**배당이 반영되지 않았다 (2026-09-13 확인).** 벤더(Alpha Vantage) 미수정 종가와 "
+        "1028주 전부가 소수점까지 일치했고, 같은 날짜의 수정종가와는 평균 7.94% 차이가 났다. "
+        "따라서 이 파일의 누적 등락률·CAGR은 배당 재투자분만큼 실제 총수익보다 낮다. "
+        "낙폭과 변동성은 거의 영향받지 않는다.",
         "**주간 종가만 본다.** 주중 고가·저가를 모르므로 낙폭은 주간 종가 기준이고, "
         "일중·일간 기준 실제 낙폭보다 얕게 측정된다.",
         "**단일 출처이고 대조하지 않았다.** 거래소·운용사 원자료와 대조한 기록이 없다.",
@@ -286,7 +287,7 @@ def render_md(o):
     A("| 행 수 | %d |" % o["input"]["row_count"])
     A("| 요일 분포 | %s |" % ", ".join("%s %d" % (k, v) for k, v in o["input"]["weekday_counts"].items()))
     A("| 결측 주 의심 | %d건 |" % len(o["input"]["gaps"]))
-    A("| 배당 반영 여부 | 결측 (미확인) |")
+    A("| 배당 반영 여부 | 미반영 (2026-09-13 대조 확인) |")
     A("")
     A("## 결측")
     A("")

@@ -238,7 +238,8 @@ def test_end_to_end(tmp):
            "latest", "trend", "returns", "volatility", "drawdown", "distribution",
            "history", "missing", "missing_detail", "caveats", "version"}
     check("json 최상위 키 고정", top.issubset(set(o)), "빠진 키: %s" % (top - set(o)))
-    check("배당 반영 여부는 결측", o["series"]["dividend_adjusted"] is None)
+    check("배당 반영 여부는 미반영으로 확정(2026-09-13 벤더 대조)",
+          o["series"]["dividend_adjusted"] is False)
     check("계산정의 버전 기록", o["version"] == calc.CALC_VERSION)
     check("결측 없음(120주면 52주 지표가 전부 산출된다)", o["missing"] == [], str(o["missing"]))
 
