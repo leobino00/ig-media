@@ -22,7 +22,7 @@ class Result(object):
 
 
 def run(dates, state_by_date, ret_by_symbol, state_to_symbol, rate_curve,
-        switch_cost_bps=10.0, cash_state=S.NEUTRAL):
+        switch_cost_bps=10.0, cash_state=S.NEUTRAL, periods_per_year=52):
     """dates 는 백테스트 구간의 주간 날짜(오름차순).
 
     state_by_date 는 그보다 앞선 날짜까지 포함해도 된다 (워밍업).
@@ -47,7 +47,7 @@ def run(dates, state_by_date, ret_by_symbol, state_to_symbol, rate_curve,
 
         sym = state_to_symbol.get(st)
         if sym is None:
-            r = rate_curve.weekly_return(d_sig)
+            r = rate_curve.period_return(d_sig, periods_per_year)
             if r is None:
                 raise ValueError("금리 결측: %s" % d_sig)
         else:
@@ -77,7 +77,7 @@ def run(dates, state_by_date, ret_by_symbol, state_to_symbol, rate_curve,
     res.mdd_pct = max_drawdown_pct(curve)
     res.annual = annual_returns(curve)
     rs = [r for _, r, _, _ in weekly]
-    res.vol_pct = (stdev(rs) * math.sqrt(52) * 100.0) if len(rs) > 1 else None
+    res.vol_pct = (stdev(rs) * math.sqrt(periods_per_year) * 100.0) if len(rs) > 1 else None
     res.switches_per_year = switches / res.years if res.years > 0 else None
     return res
 
@@ -127,7 +127,7 @@ def annual_returns(curve):
     return out
 
 
-def buy_and_hold(dates, ret_by_symbol, symbol):
+def buy_and_hold(dates, ret_by_symbol, symbol, periods_per_year=52):
     eq = 1.0
     curve = [(dates[0], 1.0)]
     for i in range(1, len(dates)):
@@ -145,5 +145,5 @@ def buy_and_hold(dates, ret_by_symbol, symbol):
     res.weeks_in = None
     res.missing_signal = 0
     rs = [ret_by_symbol[symbol][dates[i]] for i in range(1, len(dates))]
-    res.vol_pct = stdev(rs) * math.sqrt(52) * 100.0
+    res.vol_pct = stdev(rs) * math.sqrt(periods_per_year) * 100.0
     return res

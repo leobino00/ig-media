@@ -22,19 +22,30 @@ description: 추세 레짐에 따라 TQQQ(상승)·SQQQ(하락)·현금(횡보)�
 ## 절차
 
 ```bash
-python3 scripts/qqq_regime/self_test.py            # 1. 시험 41건 — 깨지면 멈춘다
+python3 scripts/qqq_regime/self_test.py            # 1. 시험 51건 — 깨지면 멈춘다
 
 python3 scripts/qqq_regime/experiment.py           # 2a. 3상태 (TQQQ/SQQQ/현금)
 python3 scripts/qqq_regime/report.py               #     → 출력/보고서.md
 
 python3 scripts/qqq_regime/experiment_2state.py    # 2b. 2상태 (TQQQ/현금) + 2000년 확장
 python3 scripts/qqq_regime/report_2state.py        #     → 출력/보고서-2상태.md
+
+python3 scripts/qqq_regime/experiment_daily.py     # 2c. 일간전환 vs 주간전환 짝 비교
+python3 scripts/qqq_regime/report_daily.py         #     → 출력/보고서-일간전환.md
 ```
 
 산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
 
 **질문에 맞는 보고서를 고른다.** 숏을 쓰는 이야기면 3상태, 아니면 2상태다.
 2상태 쪽이 규칙 60개로 더 넓고 2000년 구간(닷컴·금융위기)까지 있으므로 기본은 2상태다.
+
+### 일간 전환을 물으면
+
+**이미 시험했고 더 나쁘다.** 규칙 60개를 길이가 같은 짝으로 묶어 전환 주기만 바꾼 결과:
+2010~2026 주간 +22.80%/−59.46% vs 일간 +21.38%/−63.09%, 2000~2026 주간 +12.30%/−74.45% vs
+일간 **+8.43%/−89.40%**. 전환 횟수는 2배가 된다.
+원인은 구간마다 다르다 — 2010년 이후는 **비용**(0bp면 일간이 앞선다), 붕괴 포함 구간은
+**톱질**(0bp에서도 −3.02%p 뒤진다). 자세한 것은 `출력/보고서-일간전환.md`.
 
 ### 2상태 결과를 인용할 때
 

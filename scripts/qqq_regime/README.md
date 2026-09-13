@@ -19,8 +19,26 @@
 |---|---|---|---|
 | **3상태** | TQQQ / SQQQ / 현금 | `experiment.py` → `report.py` | `출력/보고서.md` |
 | **2상태** | TQQQ / 현금 (숏 제거) | `experiment_2state.py` → `report_2state.py` | `출력/보고서-2상태.md` |
+| **일간전환** | 2상태를 매일 갈아타면? | `experiment_daily.py` → `report_daily.py` | `출력/보고서-일간전환.md` |
 
-3상태에서 SQQQ 다리가 35개 규칙 전부를 악화시켰으므로 숏을 빼고 2상태를 따로 돌렸다.
+3상태에서 SQQQ 다리가 35개 규칙 전부를 악화시켜 숏을 뺐고, 2상태의 닷컴 손실(−54%)이
+주간 전환 탓인지 보려고 일간 전환을 붙였다. **순서대로 읽으면 하나씩 기각되는 기록이다.**
+
+### 일간전환 요약 — 더 나빠진다
+
+규칙 60개를 **길이가 같은 짝**으로 묶어(1주 = 5거래일) 전환 주기만 바꿨다.
+
+| 구간 | 주간 CAGR / MDD | 일간 CAGR / MDD | 전환 |
+|---|---|---|---|
+| 2010~2026 (실제) | **+22.80% / −59.46%** | +21.38% / −63.09% | 4.3 → 8.2회/년 |
+| 2000~2026 (시뮬) | **+12.30% / −74.45%** | +8.43% / −89.40% | 4.5 → 8.7회/년 |
+
+원인이 구간마다 다르다. **2010~2026은 비용** — 비용 0에서는 일간이 +0.39%p 앞서고 10bp에서 뒤집힌다.
+**2000~2026은 비용이 아니다** — 비용 0에서도 −3.02%p 뒤진다. 붕괴장에서 일간 신호가 톱질에 걸린다.
+
+고전 200일선 짝(`sma40_b0` ↔ `sma200_b0`)의 닷컴 구간: 주간 **−37.19%**(전환 8회) vs
+일간 **−90.21%**(전환 21회). 반대로 2020 코로나 V자 급락에서는 일간이 이긴다(−31.37% vs −37.94%).
+**일간 전환은 빠른 급락에 강하고 길게 끄는 하락장에 약한데, 3배를 죽이는 것은 후자다.**
 
 ### 2상태 요약 — 답이 기간에 따라 뒤집힌다
 
@@ -62,14 +80,16 @@ TQQQ의 2010년 상장 자체가 생존편향이다 — 닷컴을 통과한 3배
 
 | 파일 | 역할 |
 |---|---|
-| `prices.py` | 가격·금리 로더, 주간 정렬. 날짜 중복은 거부한다 |
-| `signals.py` | 레짐 판별 규칙 3계열. 기본 35개(`build_grid`) · 확장 60개(`build_grid_wide`) |
+| `prices.py` | 가격·금리 로더, 주간 정렬, 일봉 총수익 복원. 날짜 중복은 거부한다 |
+| `signals.py` | 레짐 판별 규칙 3계열. 기본 35(`build_grid`) · 확장 60(`build_grid_wide`) · 일간 60(`build_grid_daily`) · 짝(`pair_weekly_daily`) |
 | `backtest.py` | 주간 리밸런싱 엔진. **타이밍 규약이 여기 있다** |
 | `leverage.py` | 일간리셋 레버리지 합성 + 보수 적합. **주간 ×3 합성은 쓰지 않는다** |
 | `experiment.py` | 3상태 전수 실행 → `출력/experiment.json` |
 | `report.py` | json → `출력/보고서.md` |
 | `experiment_2state.py` | 2상태 전수 + 2000년 확장 → `출력/experiment_2state.json` |
 | `report_2state.py` | json → `출력/보고서-2상태.md` |
+| `experiment_daily.py` | 일간 전환 + 주간과 짝 비교 → `출력/experiment_daily.json` |
+| `report_daily.py` | json → `출력/보고서-일간전환.md` |
 | `self_test.py` | 단위 시험 33건. 네트워크 불필요 |
 | `data/` | 가격·금리 원자료 (아래) |
 
@@ -81,6 +101,8 @@ python3 scripts/qqq_regime/experiment.py           # 3상태 전수 백테스트
 python3 scripts/qqq_regime/report.py               # 3상태 보고서
 python3 scripts/qqq_regime/experiment_2state.py    # 2상태 (숏 제거) + 시뮬 구간
 python3 scripts/qqq_regime/report_2state.py        # 2상태 보고서
+python3 scripts/qqq_regime/experiment_daily.py     # 일간전환 vs 주간전환 짝 비교
+python3 scripts/qqq_regime/report_daily.py         # 일간전환 보고서
 ```
 
 ## 타이밍 규약 — 이 실험에서 가장 중요한 한 줄
@@ -105,6 +127,7 @@ t주 종가로 신호 계산  →  t주 종가에 포지션 전환  →  t+1주 
 | `data/qqq_daily.csv` | QQQ 일봉 종가 1999-03-10~ | Twelve Data |
 | `data/tqqq_daily.csv` · `sqqq_daily.csv` | 일봉 종가 2010-02-11~ | Twelve Data |
 | `data/ffr_weekly.csv` | 연준금리(주간) 1998~ | Alpha Vantage `FEDERAL_FUNDS_RATE` |
+| `data/*_weekly_factor.csv` | 배당 factor = 수정종가 ÷ 분할반영종가 | 위 둘에서 파생 |
 
 **수정종가를 쓰는 이유:** 전략이 TQQQ·SQQQ를 실제로 보유하므로 분배금이 수익의 일부다.
 특히 SQQQ는 담보 이자를 분배하므로 고금리 구간에서 미수정 종가는 수익을 과소계상한다.
@@ -140,7 +163,8 @@ TQQQ 상장 전(2010 이전)까지 늘리려면 QQQ에서 3배를 합성해야 �
 
 | 검증 | 결과 |
 |---|---|
-| 단위 시험 33건 | 통과 |
+| 단위 시험 51건 | 통과 |
+| 일봉 총수익 복원 | 금요일 865·1401개 전부 수정종가와 일치 (오차 1e-8%) |
 | 음성 대조 (엔진 타이밍을 고의로 깨뜨림) | 시험이 빨개지는 것 확인 |
 | 대조군 「항상 UP」 = TQQQ 바이앤홀드 | +41.67% 정확히 일치 |
 | 대조군 「항상 DOWN」 = SQQQ 바이앤홀드 | −52.46% 정확히 일치 |

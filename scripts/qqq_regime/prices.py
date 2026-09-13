@@ -60,8 +60,12 @@ class RateCurve:
 
     def weekly_return(self, on):
         """주간 현금 수익률(소수). 연율 단순 1/52. 결측이면 0.0 을 쓰지 않고 None."""
+        return self.period_return(on, 52)
+
+    def period_return(self, on, periods_per_year):
+        """한 기간(주간 52 · 일간 252)의 현금 수익률(소수). 결측이면 None — 0 으로 대체하지 않는다."""
         a = self.annual_pct(on)
-        return None if a is None else (a / 100.0) / 52.0
+        return None if a is None else (a / 100.0) / float(periods_per_year)
 
 
 def to_returns(series):
@@ -74,3 +78,38 @@ def align(named_series):
     maps = {k: dict(v) for k, v in named_series.items()}
     common = set.intersection(*(set(m) for m in maps.values()))
     return sorted(common), maps
+
+
+def load_weekly_factor(path):
+    """주간 배당 factor. (date, factor) 오름차순.
+
+    factor(t) = 수정종가(t) / 분할반영종가(t) 이고, 배당 지급일에만 계단처럼 변한다.
+    마지막 시점에서 1.0 이다.
+    """
+    out = [(dt.date.fromisoformat(d), float(f)) for d, f in _rows(path, ("date", "factor"))]
+    out.sort()
+    return out
+
+
+def build_daily_total_return(daily_price, weekly_factor):
+    """일봉 분할반영종가 + 주간 배당 factor → 일봉 **총수익** 시계열.
+
+        총수익지수(d) = 가격(d) x factor(d)
+        factor(d) = 기준일 **이하**의 가장 최근 주간 factor (없으면 첫 factor)
+
+    factor 는 배당락일에만 변하는데 주간 격자로만 알 수 있으므로, 배당 한 건의 반영 시점이
+    그 주 금요일로 최대 4거래일 밀린다. 분기 배당이므로 연 4회, 건당 0.1~0.2% 수준의
+    **시점 오차**이고 누적 수준 오차는 아니다 — 금요일마다 수정종가와 정확히 일치한다.
+
+    배당을 아예 빼면 TQQQ 연 0.44%p·QQQ 연 0.69%p를 잃는다 (실측). 그쪽이 더 큰 오차다.
+    """
+    fd = [d for d, _ in weekly_factor]
+    fv = [v for _, v in weekly_factor]
+    out = []
+    j = -1
+    for d, p in daily_price:
+        while j + 1 < len(fd) and fd[j + 1] <= d:
+            j += 1
+        f = fv[j] if j >= 0 else fv[0]
+        out.append((d, p * f))
+    return out

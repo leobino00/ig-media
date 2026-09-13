@@ -45,7 +45,10 @@ class FlatRate(object):
         return self.a
 
     def weekly_return(self, on):
-        return (self.a / 100.0) / 52.0
+        return self.period_return(on, 52)
+
+    def period_return(self, on, periods_per_year):
+        return (self.a / 100.0) / float(periods_per_year)
 
 
 # ------------------------------------------------------------------ 신호
@@ -214,6 +217,38 @@ def test_leverage():
     check("보수 적합이 원래 값을 되찾는다", near(fee, 3.5, 1e-3), "%r" % fee)
 
 
+def test_daily_tr_and_periods():
+    # 일봉 총수익 복원: 격자점에서 정확히 일치해야 한다
+    dp = [(dt.date(2020, 1, 6) + dt.timedelta(days=i), 100.0) for i in range(10)]
+    wf = [(dt.date(2020, 1, 8), 0.98), (dt.date(2020, 1, 13), 1.0)]
+    tr = dict(prices.build_daily_total_return(dp, wf))
+    check("격자 이전 날짜는 첫 factor를 쓴다", near(tr[dt.date(2020, 1, 6)], 98.0, 1e-9))
+    check("격자일에 factor가 바뀐다", near(tr[dt.date(2020, 1, 8)], 98.0, 1e-9)
+          and near(tr[dt.date(2020, 1, 13)], 100.0, 1e-9))
+    check("격자 사이에는 계단 유지", near(tr[dt.date(2020, 1, 12)], 98.0, 1e-9))
+    check("길이 보존", len(tr) == len(dp))
+
+    # 연율화 주기
+    ds = wk(5)
+    rets = {"A": {ds[i]: 0.0 for i in range(1, 5)}}
+    mp = {S.UP: "A", S.DOWN: None, S.NEUTRAL: None}
+    rc = FlatRate(25.2)
+    rw = BT.run(ds, {d: S.NEUTRAL for d in ds}, rets, mp, rc, switch_cost_bps=0.0, periods_per_year=52)
+    rd = BT.run(ds, {d: S.NEUTRAL for d in ds}, rets, mp, rc, switch_cost_bps=0.0, periods_per_year=252)
+    check("현금 수익률이 연율화 주기를 따른다",
+          near(rw.curve[-1][1], (1 + 0.252 / 52) ** 4, 1e-12)
+          and near(rd.curve[-1][1], (1 + 0.252 / 252) ** 4, 1e-12))
+    check("변동성 연율화가 주기를 따른다", rw.vol_pct is not None and rd.vol_pct is not None)
+
+    # 주간·일간 규칙 짝
+    pr = S.pair_weekly_daily()
+    gw, gdd = dict(S.build_grid_wide()), dict(S.build_grid_daily())
+    check("짝 60쌍", len(pr) == 60)
+    check("짝의 양쪽이 모두 그리드에 있다", all(a in gw and b in gdd for a, b in pr))
+    check("짝은 1:1 이다", len({a for a, _ in pr}) == 60 and len({b for _, b in pr}) == 60)
+    check("짝의 길이비가 5배다", ("sma40_b0", "sma200_b0") in pr)
+
+
 def test_real_data():
     """저장소 실 데이터로 대조군이 벤치마크와 정확히 일치하는지 본다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -249,6 +284,7 @@ def main():
             test_rate_curve(tmp)
             test_loader(tmp)
             test_leverage()
+            test_daily_tr_and_periods()
             test_real_data()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
