@@ -23,6 +23,10 @@
 | **변동성게이트** | 조용할 때만 들어가면? | `experiment_vol.py` → `report_vol.py` | `출력/보고서-변동성게이트.md` |
 | **비대칭** | 나가는 속도≠들어오는 속도? | `experiment_asym.py` → `report_asym.py` | `출력/보고서-비대칭진입이탈.md` |
 | **원인분해** | 게이트는 왜 살아남았나? | `analysis_gate.py` → `report_gate_why.py` | `출력/보고서-게이트원인분석.md` |
+| **결론** | 전부 합치면 무엇이 남나? | `report_summary.py` | **`출력/결론.md`** |
+
+> **먼저 읽을 것은 `출력/결론.md`다.** 여섯 보고서를 하나로 묶었고, 손으로 쓰지 않고
+> 각 실험의 json 에서 생성한다 — 실험을 다시 돌리면 결론의 숫자도 같이 바뀐다.
 
 3상태에서 SQQQ 다리가 35개 규칙 전부를 악화시켜 숏을 뺐고, 2상태의 닷컴 손실(−54%)이
 주간 전환 탓인지 보려고 일간 전환을 붙였다. **순서대로 읽으면 하나씩 기각되는 기록이다.**
@@ -174,6 +178,7 @@ TQQQ의 2010년 상장 자체가 생존편향이다 — 닷컴을 통과한 3배
 | `report_asym.py` | json → `출력/보고서-비대칭진입이탈.md` |
 | `analysis_gate.py` | 게이트 원인 분해 + 순환이동 귀무검정 → `출력/analysis_gate.json` |
 | `report_gate_why.py` | json → `출력/보고서-게이트원인분석.md` |
+| `report_summary.py` | 여섯 json → **`출력/결론.md`** |
 | `self_test.py` | 단위 시험 33건. 네트워크 불필요 |
 | `data/` | 가격·금리 원자료 (아래) |
 
@@ -193,6 +198,7 @@ python3 scripts/qqq_regime/experiment_asym.py      # 비대칭 진입/이탈 (�
 python3 scripts/qqq_regime/report_asym.py          # 비대칭 보고서
 python3 scripts/qqq_regime/analysis_gate.py        # 게이트 원인 분해 (순환이동 검정)
 python3 scripts/qqq_regime/report_gate_why.py      # 원인분석 보고서
+python3 scripts/qqq_regime/report_summary.py       # 결론 (여섯 보고서 통합)
 ```
 
 ## 타이밍 규약 — 이 실험에서 가장 중요한 한 줄

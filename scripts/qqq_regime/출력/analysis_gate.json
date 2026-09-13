@@ -301,7 +301,7 @@
     }
   },
   "gate": "vol13w_p80",
-  "generated_at": "2026-09-13T13:56:08+00:00",
+  "generated_at": "2026-09-13T14:01:38+00:00",
   "redundancy": {
     "blocked_and_trend_down_pct": 51.31086142322097,
     "gate_adds_pct": 10.116731517509727,

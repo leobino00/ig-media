@@ -41,7 +41,11 @@ python3 scripts/qqq_regime/report_asym.py          #     → 출력/보고서-�
 
 python3 scripts/qqq_regime/analysis_gate.py        # 2f. 게이트 원인 분해 (순환이동 귀무검정)
 python3 scripts/qqq_regime/report_gate_why.py      #     → 출력/보고서-게이트원인분석.md
+
+python3 scripts/qqq_regime/report_summary.py       # 3. 결론 (여섯 보고서 통합)
 ```
+
+**질문이 넓으면 `출력/결론.md` 부터 읽는다.** 개별 보고서는 그 안에서 가리키는 대로 찾아간다.
 
 산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
 
@@ -56,6 +60,12 @@ python3 scripts/qqq_regime/report_gate_why.py      #     → 출력/보고서-�
 | 일간 전환 | **기각.** 톱질로 두 구간 모두 악화 |
 | 변동성 게이트 | **부분 채택.** 낙폭을 58/60 규칙에서 줄인다. 수익률은 국면에 따라 갈린다 |
 | 비대칭 진입/이탈 | **기각.** 프런티어를 옮길 뿐 넓히지 못한다 (0/288) |
+
+### 프로젝트 전체를 물으면
+
+`출력/결론.md` 가 여섯 보고서를 묶은 문서다. 그것을 읽고 답한다.
+**그 문서는 각 실험의 json 에서 생성되므로 숫자를 손으로 옮겨 적지 않는다** —
+실험을 다시 돌렸으면 `report_summary.py` 도 다시 돌린다.
 
 ### 「그래서 뭐가 되는 거냐」를 물으면
 
