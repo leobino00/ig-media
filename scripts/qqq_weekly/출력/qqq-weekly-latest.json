@@ -1,0 +1,477 @@
+{
+  "as_of": "2026-09-11",
+  "boundary": "관측 전용. 판정하지 않는다. 어드바이저 프로토콜과 무관하다",
+  "caveats": [
+    "**배당이 반영되지 않았을 가능성이 있다.** 입력 파일에 수정종가 여부가 적혀 있지 않고, 2007-01-05 값(43.85)이 당시 미수정 종가와 같다. 그렇다면 이 파일의 누적 등락률·CAGR은 배당 재투자분만큼 실제 총수익보다 낮다. 확인 전까지 `dividend_adjusted` 는 결측이다.",
+    "**주간 종가만 본다.** 주중 고가·저가를 모르므로 낙폭은 주간 종가 기준이고, 일중·일간 기준 실제 낙폭보다 얕게 측정된다.",
+    "**단일 출처이고 대조하지 않았다.** 거래소·운용사 원자료와 대조한 기록이 없다.",
+    "**환율을 반영하지 않는다.** 전부 달러 기준이다.",
+    "**구간이 2007-01-05에서 시작한다.** 그 이전의 낙폭(2000~2002년 등)은 이 관측에 없다. 「전 구간 최대 낙폭」은 QQQ 상장 이래 최대가 아니라 이 파일 구간 안에서의 최대다."
+  ],
+  "distribution": {
+    "best_week_pct": 11.45374449339207,
+    "mean_weekly_pct": 0.3120196251839296,
+    "p05_weekly_pct": -4.312070378569247,
+    "p50_weekly_pct": 0.4278583313525042,
+    "p95_weekly_pct": 4.466063571971641,
+    "stdev_weekly_pct": 2.818592740117761,
+    "up_week_ratio_pct": 57.643622200584225,
+    "weeks": 1027,
+    "worst_week_pct": -13.432835820895516
+  },
+  "drawdown": {
+    "all_time_high": 740.62,
+    "all_time_high_date": "2026-06-18",
+    "from_all_time_high_pct": -3.47546650103967,
+    "high_52w": 740.62,
+    "low_52w": 562.58,
+    "max_drawdown_pct": -51.67217934582874,
+    "max_drawdown_peak_date": "2007-11-02",
+    "max_drawdown_trough_date": "2009-03-06",
+    "pct_from_high_52w": -3.47546650103967,
+    "pct_from_low_52w": 27.071705357460264,
+    "weeks_since_all_time_high": 12
+  },
+  "generated_at": "2026-09-13T12:30:03+00:00",
+  "history": {
+    "annual": [
+      {
+        "last_close": 51.86,
+        "last_date": "2007-12-28",
+        "partial": true,
+        "partial_reason": "직전 연말 종가 없음",
+        "return_pct": null,
+        "year": 2007
+      },
+      {
+        "last_close": 29.13,
+        "last_date": "2008-12-26",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": -43.82954107211724,
+        "year": 2008
+      },
+      {
+        "last_close": 45.75,
+        "last_date": "2009-12-31",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 57.05458290422245,
+        "year": 2009
+      },
+      {
+        "last_close": 54.46,
+        "last_date": "2010-12-31",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 19.038251366120228,
+        "year": 2010
+      },
+      {
+        "last_close": 55.83,
+        "last_date": "2011-12-30",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 2.5156077855306602,
+        "year": 2011
+      },
+      {
+        "last_close": 63.78,
+        "last_date": "2012-12-28",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 14.239656098871588,
+        "year": 2012
+      },
+      {
+        "last_close": 87.52,
+        "last_date": "2013-12-27",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 37.22169959234869,
+        "year": 2013
+      },
+      {
+        "last_close": 105.04,
+        "last_date": "2014-12-26",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 20.018281535648995,
+        "year": 2014
+      },
+      {
+        "last_close": 111.86,
+        "last_date": "2015-12-31",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 6.492764661081485,
+        "year": 2015
+      },
+      {
+        "last_close": 118.48,
+        "last_date": "2016-12-30",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 5.9181119256213055,
+        "year": 2016
+      },
+      {
+        "last_close": 155.76,
+        "last_date": "2017-12-29",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 31.465226198514507,
+        "year": 2017
+      },
+      {
+        "last_close": 152.97,
+        "last_date": "2018-12-28",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": -1.7912172573189444,
+        "year": 2018
+      },
+      {
+        "last_close": 213.61,
+        "last_date": "2019-12-27",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 39.64175982218736,
+        "year": 2019
+      },
+      {
+        "last_close": 313.74,
+        "last_date": "2020-12-31",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 46.87514629464913,
+        "year": 2020
+      },
+      {
+        "last_close": 397.85,
+        "last_date": "2021-12-31",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 26.808822591955117,
+        "year": 2021
+      },
+      {
+        "last_close": 266.28,
+        "last_date": "2022-12-30",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": -33.07025260776676,
+        "year": 2022
+      },
+      {
+        "last_close": 409.52,
+        "last_date": "2023-12-29",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 53.792999849782184,
+        "year": 2023
+      },
+      {
+        "last_close": 522.56,
+        "last_date": "2024-12-27",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 27.603047470209006,
+        "year": 2024
+      },
+      {
+        "last_close": 623.89,
+        "last_date": "2025-12-26",
+        "partial": false,
+        "partial_reason": null,
+        "return_pct": 19.39107470912431,
+        "year": 2025
+      },
+      {
+        "last_close": 714.88,
+        "last_date": "2026-09-11",
+        "partial": true,
+        "partial_reason": "연중, 2026-09-11까지",
+        "return_pct": 14.584301719854453,
+        "year": 2026
+      }
+    ],
+    "drawdown_episodes": {
+      "-10": [
+        {
+          "drawdown_pct": -51.67217934582874,
+          "peak_close": 54.42,
+          "peak_date": "2007-11-02",
+          "recovered": true,
+          "recovery_date": "2010-12-10",
+          "trough_close": 26.3,
+          "trough_date": "2009-03-06",
+          "weeks_peak_to_trough": 70,
+          "weeks_total": 162,
+          "weeks_trough_to_recovery": 92
+        },
+        {
+          "drawdown_pct": -16.057046979865774,
+          "peak_close": 59.6,
+          "peak_date": "2011-07-22",
+          "recovered": true,
+          "recovery_date": "2012-01-20",
+          "trough_close": 50.03,
+          "trough_date": "2011-08-19",
+          "weeks_peak_to_trough": 4,
+          "weeks_total": 26,
+          "weeks_trough_to_recovery": 22
+        },
+        {
+          "drawdown_pct": -10.795924394565859,
+          "peak_close": 67.72,
+          "peak_date": "2012-04-05",
+          "recovered": true,
+          "recovery_date": "2012-08-17",
+          "trough_close": 60.409,
+          "trough_date": "2012-06-01",
+          "weeks_peak_to_trough": 8,
+          "weeks_total": 19,
+          "weeks_trough_to_recovery": 11
+        },
+        {
+          "drawdown_pct": -11.228270162439458,
+          "peak_close": 70.18,
+          "peak_date": "2012-09-14",
+          "recovered": true,
+          "recovery_date": "2013-05-03",
+          "trough_close": 62.3,
+          "trough_date": "2012-11-16",
+          "weeks_peak_to_trough": 9,
+          "weeks_total": 33,
+          "weeks_trough_to_recovery": 24
+        },
+        {
+          "drawdown_pct": -10.062505502244923,
+          "peak_close": 113.59,
+          "peak_date": "2015-07-17",
+          "recovered": true,
+          "recovery_date": "2015-11-06",
+          "trough_close": 102.16,
+          "trough_date": "2015-09-04",
+          "weeks_peak_to_trough": 7,
+          "weeks_total": 16,
+          "weeks_trough_to_recovery": 9
+        },
+        {
+          "drawdown_pct": -14.868855306583296,
+          "peak_close": 115.14,
+          "peak_date": "2015-12-04",
+          "recovered": true,
+          "recovery_date": "2016-07-29",
+          "trough_close": 98.02,
+          "trough_date": "2016-02-12",
+          "weeks_peak_to_trough": 10,
+          "weeks_total": 34,
+          "weeks_trough_to_recovery": 24
+        },
+        {
+          "drawdown_pct": -20.937583712831508,
+          "peak_close": 186.65,
+          "peak_date": "2018-08-31",
+          "recovered": true,
+          "recovery_date": "2019-04-18",
+          "trough_close": 147.57,
+          "trough_date": "2018-12-21",
+          "weeks_peak_to_trough": 16,
+          "weeks_total": 33,
+          "weeks_trough_to_recovery": 17
+        },
+        {
+          "drawdown_pct": -27.250255710876235,
+          "peak_close": 234.64,
+          "peak_date": "2020-02-14",
+          "recovered": true,
+          "recovery_date": "2020-06-05",
+          "trough_close": 170.7,
+          "trough_date": "2020-03-20",
+          "weeks_peak_to_trough": 5,
+          "weeks_total": 16,
+          "weeks_trough_to_recovery": 11
+        },
+        {
+          "drawdown_pct": -35.45879848511102,
+          "peak_close": 403.99,
+          "peak_date": "2021-11-19",
+          "recovered": true,
+          "recovery_date": "2023-12-15",
+          "trough_close": 260.74,
+          "trough_date": "2022-10-14",
+          "weeks_peak_to_trough": 47,
+          "weeks_total": 108,
+          "weeks_trough_to_recovery": 61
+        },
+        {
+          "drawdown_pct": -21.458701105639687,
+          "peak_close": 538.15,
+          "peak_date": "2025-02-14",
+          "recovered": true,
+          "recovery_date": "2025-06-27",
+          "trough_close": 422.67,
+          "trough_date": "2025-04-04",
+          "weeks_peak_to_trough": 7,
+          "weeks_total": 19,
+          "weeks_trough_to_recovery": 12
+        },
+        {
+          "drawdown_pct": -10.569570953947894,
+          "peak_close": 629.07,
+          "peak_date": "2025-10-31",
+          "recovered": true,
+          "recovery_date": "2026-04-17",
+          "trough_close": 562.58,
+          "trough_date": "2026-03-27",
+          "weeks_peak_to_trough": 21,
+          "weeks_total": 24,
+          "weeks_trough_to_recovery": 3
+        }
+      ],
+      "-20": [
+        {
+          "drawdown_pct": -51.67217934582874,
+          "peak_close": 54.42,
+          "peak_date": "2007-11-02",
+          "recovered": true,
+          "recovery_date": "2010-12-10",
+          "trough_close": 26.3,
+          "trough_date": "2009-03-06",
+          "weeks_peak_to_trough": 70,
+          "weeks_total": 162,
+          "weeks_trough_to_recovery": 92
+        },
+        {
+          "drawdown_pct": -20.937583712831508,
+          "peak_close": 186.65,
+          "peak_date": "2018-08-31",
+          "recovered": true,
+          "recovery_date": "2019-04-18",
+          "trough_close": 147.57,
+          "trough_date": "2018-12-21",
+          "weeks_peak_to_trough": 16,
+          "weeks_total": 33,
+          "weeks_trough_to_recovery": 17
+        },
+        {
+          "drawdown_pct": -27.250255710876235,
+          "peak_close": 234.64,
+          "peak_date": "2020-02-14",
+          "recovered": true,
+          "recovery_date": "2020-06-05",
+          "trough_close": 170.7,
+          "trough_date": "2020-03-20",
+          "weeks_peak_to_trough": 5,
+          "weeks_total": 16,
+          "weeks_trough_to_recovery": 11
+        },
+        {
+          "drawdown_pct": -35.45879848511102,
+          "peak_close": 403.99,
+          "peak_date": "2021-11-19",
+          "recovered": true,
+          "recovery_date": "2023-12-15",
+          "trough_close": 260.74,
+          "trough_date": "2022-10-14",
+          "weeks_peak_to_trough": 47,
+          "weeks_total": 108,
+          "weeks_trough_to_recovery": 61
+        },
+        {
+          "drawdown_pct": -21.458701105639687,
+          "peak_close": 538.15,
+          "peak_date": "2025-02-14",
+          "recovered": true,
+          "recovery_date": "2025-06-27",
+          "trough_close": 422.67,
+          "trough_date": "2025-04-04",
+          "weeks_peak_to_trough": 7,
+          "weeks_total": 19,
+          "weeks_trough_to_recovery": 12
+        }
+      ],
+      "-30": [
+        {
+          "drawdown_pct": -51.67217934582874,
+          "peak_close": 54.42,
+          "peak_date": "2007-11-02",
+          "recovered": true,
+          "recovery_date": "2010-12-10",
+          "trough_close": 26.3,
+          "trough_date": "2009-03-06",
+          "weeks_peak_to_trough": 70,
+          "weeks_total": 162,
+          "weeks_trough_to_recovery": 92
+        },
+        {
+          "drawdown_pct": -35.45879848511102,
+          "peak_close": 403.99,
+          "peak_date": "2021-11-19",
+          "recovered": true,
+          "recovery_date": "2023-12-15",
+          "trough_close": 260.74,
+          "trough_date": "2022-10-14",
+          "weeks_peak_to_trough": 47,
+          "weeks_total": 108,
+          "weeks_trough_to_recovery": 61
+        }
+      ]
+    }
+  },
+  "input": {
+    "anomalies": [],
+    "first_date": "2007-01-05",
+    "gaps": [],
+    "last_date": "2026-09-11",
+    "row_count": 1028,
+    "weekday_counts": {
+      "Fri": 992,
+      "Thu": 36
+    }
+  },
+  "latest": {
+    "close": 714.88,
+    "date": "2026-09-11",
+    "prev_date": "2026-09-04",
+    "week_return_pct": -0.5674863691999654
+  },
+  "missing": [],
+  "missing_detail": {},
+  "returns": {
+    "ret_13w_pct": -0.8955554939418353,
+    "ret_26w_pct": 20.406925823620558,
+    "ret_4w_pct": -2.214562217024374,
+    "ret_52w_pct": 21.855930181024785
+  },
+  "series": {
+    "cadence": "주간 (금요일 종가, 휴장주는 직전 거래일)",
+    "currency": "USD",
+    "dividend_adjusted": null,
+    "kind": "weekly_close",
+    "source": "사용자 제공 파일 (data/qqq_weekly.출처.md)"
+  },
+  "span": {
+    "cagr_price_only_pct": 15.236807281473364,
+    "first_date": "2007-01-05",
+    "last_date": "2026-09-11",
+    "weeks": 1028,
+    "years": 19.682409308692677
+  },
+  "symbol": "QQQ",
+  "trend": {
+    "above_sma_10w": true,
+    "above_sma_30w": true,
+    "above_sma_40w": true,
+    "sma_10w": 711.0870000000001,
+    "sma_30w": 677.0053333333333,
+    "sma_40w": 662.0477499999998
+  },
+  "version": "0.1",
+  "volatility": {
+    "vol_13w_annualized_pct": 19.317760365646922,
+    "vol_52w_annualized_pct": 18.44423572923807
+  }
+}
