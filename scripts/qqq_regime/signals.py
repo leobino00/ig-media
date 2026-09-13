@@ -194,3 +194,82 @@ def build_vol_configs():
         for pct in (50.0, 70.0, 80.0):
             cfg.append(("vol%dw_p%.0f" % (n, pct), n, ("pct", pct, 104)))
     return cfg
+
+
+# ---------------------------------------------------------- 비대칭 진입/이탈
+
+def asymmetric(dates, closes, n, enter_band, exit_band, enter_confirm, exit_confirm):
+    """이력(hysteresis) + 확인지연 상태기계. 진입과 이탈의 속도를 따로 정한다.
+
+        진입 원조건: close > sma_n x (1 + enter_band)
+        이탈 원조건: close < sma_n x (1 - exit_band)
+        둘 다 아니면 **직전 상태를 유지한다** (이것이 이력이다)
+
+    원조건이 `enter_confirm`주 연속이어야 실제로 진입하고,
+    `exit_confirm`주 연속이어야 실제로 이탈한다.
+
+    - enter_confirm > exit_confirm  → 「나갈 땐 빠르게, 들어올 땐 천천히」
+    - exit_confirm > enter_confirm  → 「버티다 나가고, 빨리 돌아온다」
+
+    시작 상태는 **현금(NEUTRAL)** 이다. 모르는 채로 3배에 들어가 있지 않는다.
+    상태는 기준주까지의 종가만으로 정해진다 — 미래를 보지 않는다.
+    """
+    eb, xb = enter_band / 100.0, exit_band / 100.0
+    out = {}
+    state = NEUTRAL
+    want_in = 0
+    want_out = 0
+    for i, d in enumerate(dates):
+        m = _sma(closes, i, n)
+        if m is None:
+            continue
+        c = closes[i]
+        if c > m * (1 + eb):
+            want_in += 1
+            want_out = 0
+        elif c < m * (1 - xb):
+            want_out += 1
+            want_in = 0
+        else:
+            want_in = want_out = 0
+        if state != UP and want_in >= enter_confirm:
+            state = UP
+        elif state == UP and want_out >= exit_confirm:
+            state = NEUTRAL
+        out[d] = state
+    return out
+
+
+def build_asym_grid(sma_lengths=(20, 40)):
+    """비대칭 전수.
+
+    **격자는 두 방향에 대칭이어야 한다.** 진입 확인지연만 넓게 잡으면
+    「이탈빠름」 쪽에 후보가 많아지고, 최고값을 비교하는 순간 그 불균형이 결론이 된다.
+    그래서 enter_confirm 과 exit_confirm 의 범위를 같게 두고, 대칭 경우도 같은 격자에 넣는다.
+    """
+    grid = []
+    for n in sma_lengths:
+        for eb in (0.0, 2.0, 4.0):
+            for xb in (0.0, 2.0, 4.0):
+                for ec in (1, 2, 3, 4):
+                    for xc in (1, 2, 3, 4):
+                        grid.append((
+                            "a%d_e%.0f-%d_x%.0f-%d" % (n, eb, ec, xb, xc),
+                            lambda ds, cs, n=n, eb=eb, xb=xb, ec=ec, xc=xc:
+                                asymmetric(ds, cs, n, eb, xb, ec, xc),
+                            {"sma": n, "enter_band": eb, "exit_band": xb,
+                             "enter_confirm": ec, "exit_confirm": xc}))
+    return grid
+
+
+def asym_kind(p):
+    """설정을 세 부류로 나눈다 — 대칭 / 이탈이 빠름 / 진입이 빠름.
+
+    속도는 (확인지연, 밴드) 둘 다로 결정된다. 확인지연이 크거나 밴드가 넓으면 느리다.
+    """
+    e = (p["enter_confirm"], p["enter_band"])
+    x = (p["exit_confirm"], p["exit_band"])
+    if e == x:
+        return "대칭"
+    slower_in = (e[0] > x[0]) or (e[0] == x[0] and e[1] > x[1])
+    return "이탈빠름(진입느림)" if slower_in else "진입빠름(이탈느림)"

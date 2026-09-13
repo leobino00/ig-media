@@ -22,7 +22,7 @@ description: 추세 레짐에 따라 TQQQ(상승)·SQQQ(하락)·현금(횡보)�
 ## 절차
 
 ```bash
-python3 scripts/qqq_regime/self_test.py            # 1. 시험 67건 — 깨지면 멈춘다
+python3 scripts/qqq_regime/self_test.py            # 1. 시험 78건 — 깨지면 멈춘다
 
 python3 scripts/qqq_regime/experiment.py           # 2a. 3상태 (TQQQ/SQQQ/현금)
 python3 scripts/qqq_regime/report.py               #     → 출력/보고서.md
@@ -35,6 +35,9 @@ python3 scripts/qqq_regime/report_daily.py         #     → 출력/보고서-�
 
 python3 scripts/qqq_regime/experiment_vol.py       # 2d. 변동성 게이트 · 타게팅
 python3 scripts/qqq_regime/report_vol.py           #     → 출력/보고서-변동성게이트.md
+
+python3 scripts/qqq_regime/experiment_asym.py      # 2e. 비대칭 진입/이탈 (거울짝 비교)
+python3 scripts/qqq_regime/report_asym.py          #     → 출력/보고서-비대칭진입이탈.md
 ```
 
 산출물이 최신이면 다시 돌리지 않고 해당 보고서를 읽어 답한다.
@@ -49,6 +52,17 @@ python3 scripts/qqq_regime/report_vol.py           #     → 출력/보고서-�
 | SQQQ 숏 다리 | **기각.** 35개 규칙 전부 악화 |
 | 일간 전환 | **기각.** 톱질로 두 구간 모두 악화 |
 | 변동성 게이트 | **부분 채택.** 낙폭을 58/60 규칙에서 줄인다. 수익률은 국면에 따라 갈린다 |
+| 비대칭 진입/이탈 | **기각.** 프런티어를 옮길 뿐 넓히지 못한다 (0/288) |
+
+### 손절·비대칭을 물으면
+
+**이미 시험했고 공짜 개선이 아니다.** 진입/이탈 속도를 따로 정한 288개 설정 중
+대칭 최선을 닷컴과 2020 회복 **둘 다에서** 이긴 것이 0개다.
+거울짝 비교(방향만 반대, 거르는 양은 동일) 132쌍에서 **낙폭 우세가 66/132로 반반** —
+「빨리 나가면 낙폭이 준다」가 이 표본에서 성립하지 않았다.
+진입 속도는 사실상 **노출 다이얼**이고(거울짝에서도 노출 +6.0%p 잔존), 상승장 표본에서
+빠른 진입이 이기는 것은 전략 우위가 아니라 더 오래 시장에 있었다는 뜻이다.
+**대칭을 기본값으로 권한다.** 자세한 것은 `출력/보고서-비대칭진입이탈.md`.
 
 ### 변동성 게이트를 물으면
 

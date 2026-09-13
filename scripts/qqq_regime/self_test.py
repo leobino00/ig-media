@@ -295,6 +295,57 @@ def test_vol_and_weights():
         BT.run_weights(d4, {}, rets, "A", FlatRate(0.0), switch_cost_bps=0.0).curve[-1][1], 1.0, 1e-12))
 
 
+def test_asymmetric():
+    ds = wk(12)
+    cs = [100.0] * 5 + [120.0, 120.0, 120.0, 90.0, 90.0, 120.0, 120.0]
+
+    def seq(ec, xc, eb=0.0, xb=0.0):
+        st_ = S.asymmetric(ds, cs, 5, eb, xb, ec, xc)
+        return "".join("U" if st_[d] == S.UP else "." for d in ds if d in st_)
+
+    check("시작 상태는 현금", seq(1, 1)[0] == ".")
+    check("진입확인 1 = 즉시 진입", seq(1, 1) == ".UUU..UU", seq(1, 1))
+    check("진입확인 3 = 3주 연속 필요", seq(3, 1) == "...U....", seq(3, 1))
+    check("이탈확인 3 = 눌림을 버틴다", seq(1, 3) == ".UUUUUUU", seq(1, 3))
+    check("이탈확인 2 = 2주째에 나간다", seq(1, 2).count("U") > seq(1, 1).count("U"))
+
+    # 이력(hysteresis): 밴드 안이면 직전 상태를 유지한다
+    ds2 = wk(8)
+    # 120 으로 상단 밴드를 넘어 진입한 뒤, 이후 값들이 ±4% 밴드 **안**에 머문다
+    cs2 = [100.0, 100.0, 100.0, 120.0, 108.0, 109.0, 110.0, 110.0]
+    st2 = S.asymmetric(ds2, cs2, 3, 4.0, 4.0, 1, 1)
+    inside = [d for d in ds2[3:] if d in st2]
+    check("밴드 안에서는 직전 상태 유지(이력)", all(st2[d] == S.UP for d in inside),
+          "".join("U" if st2[d] == S.UP else "." for d in ds2 if d in st2))
+    # 밴드 하단을 뚫으면 나간다
+    cs3 = [100.0, 100.0, 100.0, 120.0, 108.0, 109.0, 110.0, 95.0]
+    st3 = S.asymmetric(ds2, cs3, 3, 4.0, 4.0, 1, 1)
+    check("밴드 하단을 뚫으면 이탈", st3[ds2[-1]] == S.NEUTRAL)
+
+    # 거울짝이 격자 안에 반드시 있다
+    g = S.build_asym_grid()
+    names = {n for n, _, _ in g}
+    miss = []
+    for n, _, p_ in g:
+        mir = "a%d_e%.0f-%d_x%.0f-%d" % (p_["sma"], p_["exit_band"], p_["exit_confirm"],
+                                         p_["enter_band"], p_["enter_confirm"])
+        if mir not in names:
+            miss.append((n, mir))
+    check("모든 설정의 거울짝이 격자에 있다", not miss, str(miss[:3]))
+
+    kinds = {}
+    for _, _, p_ in g:
+        k = S.asym_kind(p_)
+        kinds[k] = kinds.get(k, 0) + 1
+    check("격자가 두 방향에 균형", kinds["이탈빠름(진입느림)"] == kinds["진입빠름(이탈느림)"],
+          str(kinds))
+    check("대칭 판정", S.asym_kind({"enter_confirm": 2, "enter_band": 2.0,
+                                     "exit_confirm": 2, "exit_band": 2.0}) == "대칭")
+    check("확인지연이 밴드보다 우선", S.asym_kind({"enter_confirm": 3, "enter_band": 0.0,
+                                                   "exit_confirm": 1, "exit_band": 4.0})
+          == "이탈빠름(진입느림)")
+
+
 def test_real_data():
     """저장소 실 데이터로 대조군이 벤치마크와 정확히 일치하는지 본다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -332,6 +383,7 @@ def main():
             test_leverage()
             test_daily_tr_and_periods()
             test_vol_and_weights()
+            test_asymmetric()
             test_real_data()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
