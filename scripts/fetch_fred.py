@@ -20,6 +20,7 @@ SERIES = {
     "RRPONTSYD":    ("RRPONTSYD",    "역레포 ON RRP (십억$)",                "B5 구성"),
     "DFII10":       ("DFII10",       "10년 TIPS 실질금리 (%)",              "B34 실질금리"),
     "DGS10":        ("DGS10",        "10년물 명목 (%)",                      "B34 참고"),
+    "DGS30":        ("DGS30",        "30년물 명목 (%)",                      "IRP-002 ⑧ (<4.00% 전환 보류)"),
     "DFF":          ("DFF",          "실효 연방기금금리 (%)",                "B34·D2 참고"),
     "NASDAQ100":    ("NASDAQ100",    "나스닥100 지수 (NDX)",                "C1 · T1 · T5 · 원화 낙폭"),
     "DTWEXBGS":     ("DTWEXBGS",     "달러 광의 지수 (DXY 대체)",           "D3 대체"),
@@ -106,6 +107,10 @@ def derive(series: dict, today: dt.date) -> dict:
     for code, key in (("DFII10", "B34_real"), ("DGS10", "B34_nominal"), ("DFF", "fed_funds")):
         l = latest(code); m3 = ago(code, 91)
         d[key] = {"latest": l, "3m_ago": m3, "chg_3m_pp": round(l[1] - m3[1], 2) if l and m3 else None}
+    # 30년물 — IRP-002 무효화 조건 ⑧ (4.00% 미만이면 미국채30년 전환 보류). 판정은 어드바이저가 한다.
+    l = latest("DGS30"); m3 = ago("DGS30", 91)
+    d["UST30_IRP002"] = {"latest": l, "3m_ago": m3, "chg_3m_pp": round(l[1] - m3[1], 2) if l and m3 else None,
+                         "below_4.00": (l[1] < 4.00) if l else None}
     # 참고 시계열
     for code in ("NASDAQCOM", "DEXKOUS"):
         l = latest(code); m3 = ago(code, 91)
@@ -124,6 +129,7 @@ def to_markdown(out: dict) -> str:
     r = g["B34_real"]; s.append(f"| B34 실질 | DFII10 % | {r['latest']} | 3개월 전 {r['3m_ago']} | {r['chg_3m_pp']}p |")
     r = g["B34_nominal"]; s.append(f"| B34 명목 | DGS10 % | {r['latest']} | 3개월 전 {r['3m_ago']} | {r['chg_3m_pp']}p |")
     r = g["fed_funds"]; s.append(f"| 연방기금 | DFF % | {r['latest']} | 3개월 전 {r['3m_ago']} | {r['chg_3m_pp']}p |")
+    r = g["UST30_IRP002"]; s.append(f"| IRP-002 ⑧ | DGS30 % | {r['latest']} | 3개월 전 {r['3m_ago']} | {r['chg_3m_pp']}p · **4.00% 미만 {r['below_4.00']}** |")
     s.append(f"| 참고 | 나스닥 종합 | {g['NASDAQCOM']['latest']} | 3개월 전 {g['NASDAQCOM']['3m_ago']} | |")
     s.append(f"| 참고 | 원달러 | {g['DEXKOUS']['latest']} | 3개월 전 {g['DEXKOUS']['3m_ago']} | |")
     m = out.get("market", {})
