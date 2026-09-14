@@ -40,6 +40,7 @@ QQQ 대비 14개 섹터의 상대강도·4분면·연속 주수 플래그와 나
 1. `main`에 이 워크플로가 있어야 예약 실행이 된다 — **예약(schedule)은 기본 브랜치에서만 돈다.** 이 브랜치를 main에 병합하거나, 병합 전엔 GitHub → Actions → `macro-fetch` → **Run workflow**로 수동 실행.
 2. `FRED_API_KEY`는 선택. 없으면 `fredgraph.csv`로 받는다. 있으면 Settings → Secrets → Actions에 등록.
 3. 첫 실행 후 `fred-latest.md`가 생기면 파이프라인 확인 끝.
+4. `DART_API_KEY`(금감원 전자공시 OpenDART, 2026-09-14 사용자 제공)는 **아직 소비자가 없다.** 값은 저장소에 두지 않고 Settings → Secrets → Actions에 `DART_API_KEY`로 등록해 둔다. 이 세션 환경(claude.ai/code 컨테이너)은 `opendart.fss.or.kr`가 정책 차단(403)이라 검증·호출이 불가능하고, **GitHub Actions 러너나 사용자 PC에서만 쓸 수 있다.** 쓸 자리가 생기면(국내 ETF 투자설명서의 TER 원문 = A등급, 국내 개별종목 재무제표) `macro-fetch.yml`에 단계를 추가한다. 섹터 프로그램(가격 기반)에는 필요 없다.
 
 ## 읽는 법 (어드바이저)
 
