@@ -198,6 +198,8 @@ def degraded(reason):
     return {
         "program": PROGRAM, "program_version": PROGRAM_VERSION, "version": calc.CALC_VERSION,
         "as_of": None, "generated_at": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
+        "freshness": {"as_of_weekday": None, "as_of_is_friday": None, "as_of_age_days": None,
+                      "rule": "분모 결측 — 신선도를 판정할 수 없다"},
         "benchmark": BENCH, "calc": {}, "sources": [{"name": "yahoo_chart", "grade": "B",
                                                     "url": yahoo.CHART, "price_field": None}],
         "missing": [BENCH] + [t for _, t, _, _ in UNIVERSE] + ["breadth"],
@@ -272,13 +274,23 @@ def build(args):
         notes.append("구성종목 가격 실패: " + ", ".join(breadth["price_fetch_failed"])
                      + f" (총 {breadth['price_fetch_errors']}종목 — 폭 지표 모집단에서 빠졌다).")
     if asof_date and asof_date.weekday() != 4:
-        notes.append(f"기준일 {as_of}은 금요일이 아니다 (요일={asof_date.weekday()}). "
-                     "마지막 거래일 종가 기준이며 주가 덜 끝났을 수 있다.")
+        notes.append(f"기준일 {as_of}은 금요일이 아니라 그 주의 **마지막 거래일**이다. "
+                     "휴장이거나 출처에 금요일 값이 아직 없으면 이렇게 된다 — 결측이 아니다. "
+                     "신선도는 freshness.as_of_age_days로 본다(8일 이상이면 그 주 수집이 빠진 것).")
 
+    gen = dt.datetime.now(KST).replace(microsecond=0)
     doc = {
         "program": PROGRAM, "program_version": PROGRAM_VERSION, "version": calc.CALC_VERSION,
         "as_of": as_of,
-        "generated_at": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
+        # 신선도 — 읽는 쪽이 요일로 판정하지 않게 한다. 금요일이 휴장이거나 데이터가 늦으면
+        # 그 주의 마지막 거래일이 기준일이 된다. 「금요일인가」가 아니라 「며칠 지났는가」를 본다.
+        "freshness": {
+            "as_of_weekday": ["월", "화", "수", "목", "금", "토", "일"][asof_date.weekday()] if asof_date else None,
+            "as_of_is_friday": (asof_date.weekday() == 4) if asof_date else None,
+            "as_of_age_days": (gen.date() - asof_date).days if asof_date else None,
+            "rule": "as_of_age_days가 8 이상이면 그 주 수집이 빠진 것이다 — 결측으로 다룬다",
+        },
+        "generated_at": gen.isoformat(),
         "benchmark": BENCH,
         "calc": {"rs_window_weeks": calc.RS_WINDOW, "momentum_lag_weeks": calc.MOM_LAG,
                  "dd_fire_pct": calc.DD_FIRE, "up_fire_pct": calc.UP_FIRE,
@@ -315,7 +327,9 @@ def to_markdown(doc):
     miss = ", ".join(doc["missing"]) if doc["missing"] else "없음"
     L = [f"# 미국 섹터 상대강도 (QQQ 대비) — 주간 관측", "",
          "| | |", "|---|---|",
-         f"| 기준일 | {doc['as_of'] or '결측 — 분모를 받지 못했다'} |",
+         f"| 기준일 | {doc['as_of'] or '결측 — 분모를 받지 못했다'}"
+         + (f" ({doc['freshness']['as_of_weekday']}) · 생성 시점 {doc['freshness']['as_of_age_days']}일 전"
+            if doc.get("freshness", {}).get("as_of_age_days") is not None else "") + " |",
          f"| 생성 | {doc['generated_at']} · {doc['program']} v{doc['program_version']} (계산정의 v{doc['version']}) |",
          f"| 분모 | QQQ {doc['sources'][0]['price_field'] or '(결측)'} |",
          f"| 출처 | {src} |",
