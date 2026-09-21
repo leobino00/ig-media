@@ -67,7 +67,13 @@ def derive(series: dict, today: dt.date) -> dict:
     d = {}
     def latest(code): return series[code][-1] if series.get(code) else None
     def ago(code, days):
-        return at_or_before(series.get(code, []), (today - dt.timedelta(days=days)).isoformat())
+        # 비교 기준은 실행일이 아니라 **그 시리즈의 최신 관측일**이다. 실행일 앵커링은 지연 시리즈(주간·T−1)의
+        # 창을 짧게 만든다 — 「4주 전」이 실제로는 3주 전이 되는 식이다 (감사 F063·F062).
+        rows = series.get(code, [])
+        if not rows:
+            return None
+        base = dt.date.fromisoformat(rows[-1][0])
+        return at_or_before(rows, (base - dt.timedelta(days=days)).isoformat())
 
     # B2 — 청구 4주 평균: 최신 vs 4주 전 vs 3개월 전
     l = latest("IC4WSA"); m1 = ago("IC4WSA", 28); m3 = ago("IC4WSA", 91)
@@ -99,7 +105,8 @@ def derive(series: dict, today: dt.date) -> dict:
         if not (a and t and r): return None
         return {"date": a[0], "net_liquidity_musd": round(a[1] - t[1] - r[1] * 1000, 0),
                 "WALCL": a[1], "WTREGEN": t[1], "RRPONTSYD_bn": r[1]}
-    now_nl = nl_at(today.isoformat()); m3_nl = nl_at((today - dt.timedelta(days=91)).isoformat())
+    now_nl = nl_at(today.isoformat())
+    m3_nl = nl_at((dt.date.fromisoformat(now_nl["date"]) - dt.timedelta(days=91)).isoformat()) if now_nl else None
     d["B5"] = {"latest": now_nl, "3m_ago": m3_nl,
                "chg_3m_pct": round((now_nl["net_liquidity_musd"] / m3_nl["net_liquidity_musd"] - 1) * 100, 2)
                if now_nl and m3_nl else None}
@@ -121,6 +128,21 @@ def to_markdown(out: dict) -> str:
     g = out["derived"]; s = []
     s.append(f"# FRED 자동 수집 — {out['fetched_at']} (UTC)\n")
     s.append("> 추정 없음. `null` = 결측. 스킬 채점은 어드바이저가 한다 — 이 파일은 값과 방향만 준다.\n")
+    if out.get("basis"):
+        s.append(f"> **기준일 {out['basis']} 이하로 잘라 계산** (월간 판정용). 비교 기준(4주·3개월 전)은 각 시리즈의 최신 관측일에서 센다.\n")
+    else:
+        s.append("> 비교 기준(4주·1개월·3개월 전)은 실행일이 아니라 **각 시리즈의 최신 관측일**에서 센다.\n")
+    sup = out.get("supplement") or {}
+    parts = []
+    for code, v in sup.items():
+        if v.get("yahoo_added"):
+            parts.append(f"{code}: FRED ≤{v['fred_through']} + Yahoo {v['yahoo_symbol']} {', '.join(d for d, _ in v['yahoo_added'])}")
+        elif v.get("error"):
+            parts.append(f"{code}: FRED ≤{v.get('fred_through')} (Yahoo 보강 실패)")
+        else:
+            parts.append(f"{code}: FRED ≤{v.get('fred_through')} (보강 불필요)")
+    if parts:
+        s.append("> 최신 종가 보강: " + " · ".join(parts) + "\n")
     s.append("| 스킬 코드 | 항목 | 최신 | 비교 | 변화 |\n|---|---|---|---|---|")
     b = g["B2"]; s.append(f"| B2 | 청구 4주 평균 | {b['latest']} | 4주 전 {b['4w_ago']} · 3개월 전 {b['3m_ago']} | 4주 {b['chg_4w_pct']}% · 3개월 {b['chg_3m_pct']}% |")
     c = g["C3_T3"]; s.append(f"| C3 · T3 | HY OAS %p | {c['latest']} | 1개월 전 {c['1m_ago']} · 3개월 전 {c['3m_ago']} | 1개월 {c['chg_1m_pp']} · 3개월 {c['chg_3m_pp']} · **T3 발동 {c['T3_fire_(>=+0.60pp_3m)']}** |")
@@ -134,7 +156,7 @@ def to_markdown(out: dict) -> str:
     s.append(f"| 참고 | 원달러 | {g['DEXKOUS']['latest']} | 3개월 전 {g['DEXKOUS']['3m_ago']} | |")
     m = out.get("market", {})
     if m.get("NDX"):
-        q = m["NDX"]; s.append(f"| C1 · T1 · T5 | NDX ({m.get('index_source')}) | {q['last']} · 200일선 {q['sma200']} ({q['pct_vs_sma200']:+}%) | 사상최고 {q['ath_close']} · 3개월 {q['chg_3m_pct']}% | 달러 낙폭 {q['drawdown_usd_pct']}% · **T1a {q['T1a_(<=-10%)']} · T1b {q['T1b_(<=-20%)']} · T5 {q['T5_(3m>=+25%)']}** |")
+        q = m["NDX"]; s.append(f"| C1 · T1 · T5 | NDX ({m.get('index_source')}) | {q['last']} · 200일선 {q['sma200']} ({q['pct_vs_sma200']:+}%) | 사상최고 {q['ath_close']} (탐색 창 {q.get('ath_window_start')}~) · 3개월 {q['chg_3m_pct']}% | 달러 낙폭 {q['drawdown_usd_pct']}% · **T1a {q['T1a_(<=-10%)']} · T1b {q['T1b_(<=-20%)']} · T5 {q['T5_(3m>=+25%)']}** |")
     if m.get("C2_breadth_QQQE_over_QQQ"):
         c = m["C2_breadth_QQQE_over_QQQ"]; s.append(f"| C2 (대체) | QQQE/QQQ | {c['now']} | 3개월 전 {c['3m_ago']} | {c['chg_3m_pct']}% |")
     if m.get("D3_dollar"):
@@ -142,7 +164,9 @@ def to_markdown(out: dict) -> str:
     if m.get("D1_USDKRW"):
         d1 = m["D1_USDKRW"]; s.append(f"| D1 | 원달러 5년 밴드 | {d1['last']} | {d1['5y_low']} ~ {d1['5y_high']} | 위치 {d1['band_pos_pct']}% |")
     if m.get("KRW_drawdown_(부칙4)"):
-        k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
+        k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} (창 {k.get('ath_window_start')}~ · 환율 {k.get('fx_used_for_last')}) | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
+    if m.get("QQQ_price"):
+        qp = m["QQQ_price"]; s.append(f"| 부칙 5 대체 | QQQ {qp['field']} ({qp['source']}) | {qp['last']} | r_idx 대체 가능 {qp['usable_for_r_idx']} | Twelve Data 불가 시만 |")
     if out.get("factset_surprise_pct") is not None:
         s.append(f"| A3 | FactSet EPS 서프라이즈 비율 | {out['factset_surprise_pct']}% | (최선노력 파싱) | |")
     if out.get("errors"):
@@ -161,15 +185,23 @@ def try_factset() -> tuple[float | None, str | None]:
     except Exception as e:
         return None, f"factset: {e}"
 
-def fetch_yahoo(sym: str) -> list[tuple[str, float]]:
-    """Yahoo Finance chart API (키 불필요). 1년 일봉 종가."""
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=1y&interval=1d"
+YAHOO_FIELDS: dict = {}   # 심볼별로 어느 가격 필드를 썼는지 (adjclose / close) — 감사 F074
+
+def fetch_yahoo(sym: str, range_: str = "1y") -> list[tuple[str, float]]:
+    """Yahoo Finance chart API (키 불필요). 일봉. **수정종가(adjclose)** 를 우선 쓴다 —
+    채점규칙 §2의 r_idx 정의(QQQ 수정종가)와 맞추기 위해서다. 지수(^NDX·^VIX)는 adjclose=close."""
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range={range_}&interval=1d"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=30) as r:
         data = json.load(r)
     res = data["chart"]["result"][0]
-    ts = res["timestamp"]; closes = res["indicators"]["quote"][0]["close"]
-    rows = [(dt.datetime.utcfromtimestamp(t).date().isoformat(), float(c)) for t, c in zip(ts, closes) if c is not None]
+    ts = res["timestamp"]
+    adj = ((res["indicators"].get("adjclose") or [{}])[0] or {}).get("adjclose")
+    closes = res["indicators"]["quote"][0]["close"]
+    field = "adjclose" if adj and any(v is not None for v in adj) else "close"
+    vals = adj if field == "adjclose" else closes
+    YAHOO_FIELDS[sym] = field
+    rows = [(dt.datetime.utcfromtimestamp(t).date().isoformat(), float(c)) for t, c in zip(ts, vals) if c is not None]
     if not rows:
         raise RuntimeError(f"yahoo {sym}: 0 rows")
     return rows
@@ -190,37 +222,49 @@ def fetch_stooq(sym: str) -> list[tuple[str, float]]:
         raise RuntimeError(f"stooq {sym}: 0 rows; head={text[:120]!r}")
     return rows
 
-def market(px: dict, krw: list, today: dt.date, ndx: list | None = None, dxy: list | None = None) -> dict:
+def market(px: dict, krw: list, today: dt.date, ndx: list | None = None, dxy: list | None = None,
+           px_src: dict | None = None) -> dict:
     """벤더 도구가 없는 세션을 위한 시장 지표: C1·C2·D1·D3·T1·T5·원화 낙폭.
-    지수는 FRED NASDAQ100(NDX) — 트리거 스킬 규정과 일치. stooq QQQ는 폴백."""
+    지수는 FRED NASDAQ100(NDX) — 트리거 스킬 규정과 일치. Yahoo/stooq QQQ는 폴백.
+    「사상최고」는 시리즈 전체(1985~)에서 찾는다 — 400일 창은 장기 하락장에서 T1·−25% 경보를 꺼 버린다 (감사 F059).
+    창 시작일을 함께 기록해 어드바이저가 창을 확인할 수 있게 한다."""
+    px_src = px_src or {}
     out = {}
     q = ndx if ndx else px.get("QQQ", [])
-    out["index_source"] = "FRED NASDAQ100" if ndx else ("stooq QQQ" if q else None)
+    out["index_source"] = "FRED NASDAQ100" if ndx else (f"{px_src.get('QQQ', '?')} QQQ" if q else None)
     if q:
         closes = [v for _, v in q]
         last_d, last = q[-1]
+        base = dt.date.fromisoformat(last_d)
         sma200 = round(sum(closes[-200:]) / min(len(closes), 200), 2)
         sma200_prev = round(sum(closes[-220:-20]) / min(len(closes[-220:-20]), 200), 2) if len(closes) > 220 else None
         ath = max(q, key=lambda x: x[1])
-        m3 = at_or_before(q, (today - dt.timedelta(days=91)).isoformat())
+        m3 = at_or_before(q, (base - dt.timedelta(days=91)).isoformat())
         out["NDX"] = {"last": (last_d, last), "sma200": sma200, "sma200_20d_ago": sma200_prev,
                       "pct_vs_sma200": round((last / sma200 - 1) * 100, 2),
-                      "ath_close": ath, "drawdown_usd_pct": round((last / ath[1] - 1) * 100, 2),
+                      "ath_close": ath, "ath_window_start": q[0][0],
+                      "drawdown_usd_pct": round((last / ath[1] - 1) * 100, 2),
                       "T1a_(<=-10%)": (last / ath[1] - 1) <= -0.10, "T1b_(<=-20%)": (last / ath[1] - 1) <= -0.20,
                       "chg_3m_pct": round((last / m3[1] - 1) * 100, 2) if m3 else None,
                       "T5_(3m>=+25%)": ((last / m3[1] - 1) >= 0.25) if m3 else None}
     e = px.get("QQQE", []); qq = px.get("QQQ", [])
+    if qq:
+        # 채점규칙 §2 r_idx 대체 출처 (Twelve Data가 없는 회차용). 미수정 종가면 채점에 쓰지 않는다 (감사 F074).
+        out["QQQ_price"] = {"last": qq[-1], "field": YAHOO_FIELDS.get("QQQ") if px_src.get("QQQ") == "Yahoo" else "close",
+                            "source": f"{px_src.get('QQQ', '?')} (B)",
+                            "usable_for_r_idx": YAHOO_FIELDS.get("QQQ") == "adjclose" and px_src.get("QQQ") == "Yahoo"}
     if qq and e:
         ed = {d: v for d, v in e}
         pairs = [(d, ed[d] / v) for d, v in qq if d in ed]
         if pairs:
-            r_now = pairs[-1]; r_3m = at_or_before(pairs, (today - dt.timedelta(days=91)).isoformat())
+            r_now = pairs[-1]
+            r_3m = at_or_before(pairs, (dt.date.fromisoformat(r_now[0]) - dt.timedelta(days=91)).isoformat())
             out["C2_breadth_QQQE_over_QQQ"] = {"now": (r_now[0], round(r_now[1], 4)),
                                                "3m_ago": (r_3m[0], round(r_3m[1], 4)) if r_3m else None,
                                                "chg_3m_pct": round((r_now[1] / r_3m[1] - 1) * 100, 2) if r_3m else None}
     u = dxy if dxy else px.get("UUP", [])
     if u:
-        m3 = at_or_before(u, (today - dt.timedelta(days=91)).isoformat())
+        m3 = at_or_before(u, (dt.date.fromisoformat(u[-1][0]) - dt.timedelta(days=91)).isoformat())
         out["D3_dollar"] = {"source": "FRED DTWEXBGS" if dxy else "stooq UUP", "last": u[-1], "3m_ago": m3,
                             "chg_3m_pct": round((u[-1][1] / m3[1] - 1) * 100, 2) if m3 else None}
     if krw:
@@ -231,42 +275,76 @@ def market(px: dict, krw: list, today: dt.date, ndx: list | None = None, dxy: li
         if q:
             kd = {d: v for d, v in krw}
             kq = []
-            lastk = None
+            lastk = None; lastk_d = None
             for d, v in q:
-                if d in kd: lastk = kd[d]
+                if d in kd: lastk = kd[d]; lastk_d = d
                 if lastk: kq.append((d, v * lastk))
             if kq:
                 athk = max(kq, key=lambda x: x[1]); lk = kq[-1]
                 out["KRW_drawdown_(부칙4)"] = {"last": (lk[0], round(lk[1])), "ath": (athk[0], round(athk[1])),
+                                              "ath_window_start": kq[0][0],
+                                              "fx_used_for_last": (lastk_d, lastk),   # 지수 날짜와 환율 날짜가 다르면 여기서 드러난다
                                               "drawdown_krw_pct": round((lk[1] / athk[1] - 1) * 100, 2),
                                               "alert_(<=-25%)": (lk[1] / athk[1] - 1) <= -0.25}
     return out
 
-def main(out_dir: str):
+LONG_START = "1985-01-01"          # 사상최고 탐색·원화 환산용 장기 창 (감사 F059)
+LONG_SERIES = ("NASDAQ100", "NASDAQCOM", "DEXKOUS")
+SUPPLEMENT = (("NASDAQ100", "^NDX"), ("VIXCLS", "^VIX"))   # FRED T−1 지연을 Yahoo 최신 종가로 보강 (감사 F060)
+
+def truncate(rows, basis: str | None):
+    return [r for r in rows if r[0] <= basis] if basis else rows
+
+def main(out_dir: str, basis: str | None = None):
+    """basis(YYYY-MM-DD)를 주면 모든 시리즈를 그 날짜 이하로 잘라 계산한다 — 월간 판정 기준일용 (감사 F062).
+    주지 않으면 최신치 그대로 (주간 트리거 점검용)."""
     today = dt.date.today()
+    ref = dt.date.fromisoformat(basis) if basis else today
     start = (today - dt.timedelta(days=400)).isoformat()
     series, errors = {}, []
     for code, (fid, _, _) in SERIES.items():
         try:
-            series[code] = fetch_csv(fid, (today - dt.timedelta(days=365 * 5 + 30)).isoformat() if code == "DEXKOUS" else start)
+            series[code] = truncate(fetch_csv(fid, LONG_START if code in LONG_SERIES else start), basis)
         except Exception as e:
             errors.append(f"{code}: {e}")
-    px = {}
-    for sym, code in (("QQQ", "QQQ"), ("QQQE", "QQQE")):
+    # FRED는 전 영업일까지만 준다. 지수·VIX의 마지막 하루(금요일 종가, 기준일 종가)를 Yahoo로 보강하고 날짜별 출처를 남긴다.
+    supplement = {}
+    for code, ysym in SUPPLEMENT:
+        base_rows = series.get(code, [])
         try:
-            px[code] = fetch_yahoo(sym)
+            yrows = truncate(fetch_yahoo(ysym, "3mo"), basis)
+            fred_through = base_rows[-1][0] if base_rows else None
+            added = [(d, round(v, 2)) for d, v in yrows if (fred_through is None or d > fred_through)]
+            if added:
+                series[code] = base_rows + added
+            supplement[code] = {"fred_through": fred_through, "yahoo_symbol": ysym,
+                                "yahoo_added": added, "note": "추가된 날짜는 Yahoo 종가(B). 그 이전은 FRED."}
+        except Exception as e:
+            supplement[code] = {"fred_through": base_rows[-1][0] if base_rows else None, "yahoo_symbol": ysym,
+                                "yahoo_added": [], "error": str(e)}
+            errors.append(f"supplement {ysym}: {e}")
+    px, px_src = {}, {}
+    for sym, code, rng in (("QQQ", "QQQ", "max"), ("QQQE", "QQQE", "1y")):
+        try:
+            px[code] = truncate(fetch_yahoo(sym, rng), basis); px_src[code] = "Yahoo"
         except Exception as e:
             try:
-                px[code] = fetch_stooq(sym.lower() + ".us")
+                px[code] = truncate(fetch_stooq(sym.lower() + ".us"), basis); px_src[code] = "stooq"
             except Exception as e2:
                 errors.append(f"{code}: yahoo {e} / stooq {e2}")
-    mkt = market(px, series.get("DEXKOUS", []), today, ndx=series.get("NASDAQ100"), dxy=series.get("DTWEXBGS"))
+    mkt = market(px, series.get("DEXKOUS", []), ref, ndx=series.get("NASDAQ100"), dxy=series.get("DTWEXBGS"), px_src=px_src)
+    if supplement.get("NASDAQ100", {}).get("yahoo_added") and mkt.get("index_source"):
+        mkt["index_source"] += f" + Yahoo ^NDX({supplement['NASDAQ100']['yahoo_added'][-1][0]})"
     fs, fs_err = try_factset()
     if fs_err: errors.append(fs_err)
     out = {"fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
+           "basis": basis,
            "series_meta": {k: {"fred_id": v[0], "desc": v[1], "skill_code": v[2]} for k, v in SERIES.items()},
+           "windows": {"ath_search_start": LONG_START, "long_series": list(LONG_SERIES), "other_series_days": 400},
+           "supplement": supplement,
+           "yahoo_price_fields": dict(YAHOO_FIELDS),
            "last_values": {k: (v[-1] if v else None) for k, v in series.items()},
-           "derived": derive(series, today),
+           "derived": derive(series, ref),
            "market": mkt,
            "factset_surprise_pct": fs,
            "errors": errors,
@@ -276,12 +354,17 @@ def main(out_dir: str):
         json.dump(out, f, ensure_ascii=False, indent=1)
     with open(os.path.join(out_dir, "fred-latest.md"), "w", encoding="utf-8") as f:
         f.write(to_markdown(out))
-    # 월별 스냅샷 (기준일 첫 영업일용 보존)
-    snap = os.path.join(out_dir, f"fred-{today.strftime('%Y-%m-%d')}.json")
+    # 월별 스냅샷 (기준일 첫 영업일용 보존). basis 실행은 파일명에 기준일을 붙여 주간 스냅샷을 덮어쓰지 않는다.
+    snap = os.path.join(out_dir, f"fred-{today.strftime('%Y-%m-%d')}{'-basis-' + basis if basis else ''}.json")
     with open(snap, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
     print(to_markdown(out))
     return 0 if not errors else 0  # 부분 실패도 커밋한다 (결측 표시가 목적)
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "claude/advisor/월간판정/입력"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("out_dir", nargs="?", default="claude/advisor/월간판정/입력")
+    ap.add_argument("--basis", default=None, help="기준일 YYYY-MM-DD — 이 날짜 이하로 잘라 계산 (월간 판정용)")
+    a = ap.parse_args()
+    sys.exit(main(a.out_dir, a.basis))

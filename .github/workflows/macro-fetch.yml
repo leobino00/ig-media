@@ -2,11 +2,20 @@ name: macro-fetch (FRED · 미국 섹터 → 월간판정 입력)
 
 on:
   schedule:
-    # 매주 금요일 미국 장 마감 후 (22:30 UTC = 토 07:30 KST) — 트리거 주간 점검용
+    # 매주 금요일 22:30 UTC (토 07:30 KST) — 트리거 주간 점검용.
+    # FRED는 목요일 값까지만 준다. 금요일 종가는 지수(^NDX)·VIX(^VIX)만 스크립트가 Yahoo로 보강하고
+    # 날짜별 출처를 남긴다. HY OAS·금리 등 나머지는 목요일 값이다 (감사 F060).
     - cron: "30 22 * * 5"
-    # 매월 2일 00:30 UTC (09:30 KST) — 첫 영업일(1일) 미국 마감값까지 포함해 월간 판정 기준일용
+    # 매월 2일 00:30 UTC (09:30 KST) — 월간 판정용. 매월 1일을 기준일(--basis)로 잘라 계산한다.
+    # FRED는 1일 값을 아직 주지 않으므로 지수·VIX만 Yahoo로 보강되고, 나머지는 직전 영업일 값이다
+    # (스킬 1단계 「아직 발표되지 않은 항목은 직전 최신값」). 1일이 휴장이면 직전 거래일 값이 잡힌다.
     - cron: "30 0 2 * *"
   workflow_dispatch:
+    inputs:
+      basis:
+        description: "기준일 YYYY-MM-DD — 이 날짜 이하로 잘라 계산 (비우면 최신치)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -22,7 +31,11 @@ jobs:
       - name: Fetch FRED series
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}   # 없어도 동작 (fredgraph.csv 사용)
-        run: python scripts/fetch_fred.py "claude/advisor/월간판정/입력"
+        run: |
+          BASIS=""
+          if [ "${{ github.event.schedule }}" = "30 0 2 * *" ]; then BASIS="--basis $(date -u +%Y-%m-01)"; fi
+          if [ -n "${{ github.event.inputs.basis }}" ]; then BASIS="--basis ${{ github.event.inputs.basis }}"; fi
+          python scripts/fetch_fred.py "claude/advisor/월간판정/입력" $BASIS
       - name: Fetch primary-source web indicators (ISM · BOK · FactSet)
         run: python scripts/fetch_web.py "claude/advisor/월간판정/입력" || true
       - name: Self-test sector calc definitions (네트워크 불필요)
