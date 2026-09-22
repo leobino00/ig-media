@@ -165,6 +165,8 @@ def to_markdown(out: dict) -> str:
         d1 = m["D1_USDKRW"]; s.append(f"| D1 | 원달러 5년 밴드 | {d1['last']} | {d1['5y_low']} ~ {d1['5y_high']} | 위치 {d1['band_pos_pct']}% |")
     if m.get("KRW_drawdown_(부칙4)"):
         k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} (창 {k.get('ath_window_start')}~ · 환율 {k.get('fx_used_for_last')}) | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
+    if m.get("HYT_GLB008"):
+        hh = m["HYT_GLB008"]; s.append(f"| GLB-008 · GLB-004 | HYT 종가 ({hh['source']}) | {hh['last']} | 52주 {hh['52w_low']}~{hh['52w_high']} · $9.00까지 {hh['to_9.00_pct']:+}% | **정지 ≤7.50 {hh['stop_(close<=7.50)']} (2일 연속 {hh['stop_2days_(prev_and_last<=7.50)']}) · 목표 ≥9.00 {hh['target_(close>=9.00)']}** · 분배 공시 <$0.0779 여부는 수동 |")
     if m.get("QQQ_price"):
         qp = m["QQQ_price"]; s.append(f"| 부칙 5 대체 | QQQ {qp['field']} ({qp['source']}) | {qp['last']} | r_idx 대체 가능 {qp['usable_for_r_idx']} | Twelve Data 불가 시만 |")
     if out.get("factset_surprise_pct") is not None:
@@ -187,9 +189,10 @@ def try_factset() -> tuple[float | None, str | None]:
 
 YAHOO_FIELDS: dict = {}   # 심볼별로 어느 가격 필드를 썼는지 (adjclose / close) — 감사 F074
 
-def fetch_yahoo(sym: str, range_: str = "1y") -> list[tuple[str, float]]:
+def fetch_yahoo(sym: str, range_: str = "1y", prefer_adj: bool = True) -> list[tuple[str, float]]:
     """Yahoo Finance chart API (키 불필요). 일봉. **수정종가(adjclose)** 를 우선 쓴다 —
-    채점규칙 §2의 r_idx 정의(QQQ 수정종가)와 맞추기 위해서다. 지수(^NDX·^VIX)는 adjclose=close."""
+    채점규칙 §2의 r_idx 정의(QQQ 수정종가)와 맞추기 위해서다. 지수(^NDX·^VIX)는 adjclose=close.
+    prefer_adj=False면 미수정 종가 — 가격 조건(HYT $7.50/$9.00, `GLB-008`)은 분배금을 빼지 않은 시장가로 잰다."""
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range={range_}&interval=1d"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -198,7 +201,7 @@ def fetch_yahoo(sym: str, range_: str = "1y") -> list[tuple[str, float]]:
     ts = res["timestamp"]
     adj = ((res["indicators"].get("adjclose") or [{}])[0] or {}).get("adjclose")
     closes = res["indicators"]["quote"][0]["close"]
-    field = "adjclose" if adj and any(v is not None for v in adj) else "close"
+    field = "adjclose" if prefer_adj and adj and any(v is not None for v in adj) else "close"
     vals = adj if field == "adjclose" else closes
     YAHOO_FIELDS[sym] = field
     rows = [(dt.datetime.utcfromtimestamp(t).date().isoformat(), float(c)) for t, c in zip(ts, vals) if c is not None]
@@ -247,6 +250,18 @@ def market(px: dict, krw: list, today: dt.date, ndx: list | None = None, dxy: li
                       "T1a_(<=-10%)": (last / ath[1] - 1) <= -0.10, "T1b_(<=-20%)": (last / ath[1] - 1) <= -0.20,
                       "chg_3m_pct": round((last / m3[1] - 1) * 100, 2) if m3 else None,
                       "T5_(3m>=+25%)": ((last / m3[1] - 1) >= 0.25) if m3 else None}
+    # HYT 가격 조건 (`GLB-008` P3, 감사 F110) — 미수정 종가. 판정은 어드바이저가 한다.
+    h = px.get("HYT", [])
+    if h:
+        hd, hl = h[-1]
+        yr = [v for d, v in h if d >= (dt.date.fromisoformat(hd) - dt.timedelta(days=365)).isoformat()]
+        prev = h[-2][1] if len(h) > 1 else None
+        out["HYT_GLB008"] = {"last": (hd, round(hl, 2)), "source": f"{px_src.get('HYT', '?')} close (B)",
+                             "52w_low": round(min(yr), 2), "52w_high": round(max(yr), 2),
+                             "to_9.00_pct": round((9.00 / hl - 1) * 100, 2),
+                             "stop_(close<=7.50)": hl <= 7.50,
+                             "stop_2days_(prev_and_last<=7.50)": (hl <= 7.50 and prev is not None and prev <= 7.50),
+                             "target_(close>=9.00)": hl >= 9.00}
     e = px.get("QQQE", []); qq = px.get("QQQ", [])
     if qq:
         # 채점규칙 §2 r_idx 대체 출처 (Twelve Data가 없는 회차용). 미수정 종가면 채점에 쓰지 않는다 (감사 F074).
@@ -324,9 +339,9 @@ def main(out_dir: str, basis: str | None = None):
                                 "yahoo_added": [], "error": str(e)}
             errors.append(f"supplement {ysym}: {e}")
     px, px_src = {}, {}
-    for sym, code, rng in (("QQQ", "QQQ", "max"), ("QQQE", "QQQE", "1y")):
+    for sym, code, rng in (("QQQ", "QQQ", "max"), ("QQQE", "QQQE", "1y"), ("HYT", "HYT", "2y")):
         try:
-            px[code] = truncate(fetch_yahoo(sym, rng), basis); px_src[code] = "Yahoo"
+            px[code] = truncate(fetch_yahoo(sym, rng, prefer_adj=(code != "HYT")), basis); px_src[code] = "Yahoo"
         except Exception as e:
             try:
                 px[code] = truncate(fetch_stooq(sym.lower() + ".us"), basis); px_src[code] = "stooq"

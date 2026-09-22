@@ -1,0 +1,39 @@
+=== 250만 공제 매년 활용 ===
+r=6% A=45,932,826 A_harv(0.2%)=51,828,111 A_harv(0)=54,391,136 | B=52,338,643 B10=51,187,190 B30=48,800,222 Bx=49,730,063 Bx30=46,407,639
+   B-A=6,405,816  B-Ah=510,532~-2,052,493  B30-Ah=-3,027,889~-5,590,914  Bx-Ah=-2,098,047~-4,661,073  Bx30-Ah=-5,420,471~-7,983,496
+r=8% A=72,658,113 A_harv(0.2%)=81,026,218 A_harv(0)=83,853,071 | B=84,212,987 B10=82,374,641 B30=78,561,298 Bx=79,658,693 Bx30=74,352,001
+   B-A=11,554,874  B-Ah=3,186,769~359,916  B30-Ah=-2,464,921~-5,291,774  Bx-Ah=-1,367,525~-4,194,378  Bx30-Ah=-6,674,217~-9,501,070
+r=10% A=115,145,756 A_harv(0.2%)=124,472,731 A_harv(0)=127,588,456 | B=134,855,439 B10=131,945,553 B30=125,905,753 Bx=127,209,763 Bx30=118,806,395
+   B-A=19,709,683  B-Ah=10,382,708~7,266,983  B30-Ah=1,433,022~-1,682,703  Bx-Ah=2,737,033~-378,692  Bx30-Ah=-5,666,335~-8,782,060
+months 281 first 15.02 last 7.98
+sigma all=0.142 10y=0.129 5y=0.121; price drift all=-2.710% 10y=-3.045%
+T years 2.42
+empirical P(max close in 29m >= +12.78%) = 77/252 = 30.56%
+  starting at 12m low: 16/46 = 34.78%
+
+=== $9 도달 확률 ===
+drift0/sig10y: analytic p=0.515 MC p=0.444 E[t|hit]=1.03y  breakeven p*=0.502  EV(wait)=-1.036%
+drift0/sig_all: analytic p=0.551 MC p=0.480 E[t|hit]=0.96y  breakeven p*=0.495  EV(wait)=-0.263%
+drift-3%/sig10y: analytic p=0.397 MC p=0.328 E[t|hit]=1.02y  breakeven p*=0.500  EV(wait)=-3.099%
+drift-2.7%/sig_all: analytic p=0.457 MC p=0.383 E[t|hit]=0.95y  breakeven p*=0.493  EV(wait)=-2.010%
+drift0/sig5y: analytic p=0.491 MC p=0.420 E[t|hit]=1.08y  breakeven p*=0.506  EV(wait)=-1.535%
+F103 basis (g=9.22%,T=2.48): p*=0.667 with E[t|hit]=T/2
+
+F103: gain=1,168,590 cost/yr=471,323 breakeven=2.479y -> 2029-02-22
+today: val=12,217,853 gain=1,561,681 cost/yr=454,504 breakeven=3.436y -> 2030-02-28; cost to 2029-02-22=1,100,018
+HYT: close -35.5% low -48.4%
+QQQ: close -28.2% low -35.2%
+SPY: close -22.4% low -29.6%
+EFA: close -29.4% low -40.1%
+VYM: close -15.8% low -23.2%
+WORLD(0.6246 SPY+EFA): close -25.0% low -33.5%
+TDF proxy(0.735 world): close -18.4% low -24.6%
+
+=== 시나리오 낙폭 (원화) ===
+지금: 2008 close -31.1% low -42.1% | 2022 close -22.0% low -24.5% | HYT w=69.6%
+PEN-005 실행 후(3.2M/2.8M): 2008 close -30.0% low -40.1% | 2022 close -22.0% low -24.7% | HYT w=51.9%
+확정 종착(HYT→QQQM, PEN 3.2/2.8): 2008 close -26.2% low -33.3% | 2022 close -24.2% low -27.1% | HYT w=0.0%
+QQQ 100%: 2008 close -28.2% low -35.2% | 2022 close -29.1% low -32.3% | HYT w=0.0%
+
+분배금: 1114*0.0779 = 86.78059999999999 USD = 119270 KRW/월 ; 연 1431234
+VXUS 1주 87.15 USD = 119777 KRW
