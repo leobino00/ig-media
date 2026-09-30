@@ -167,7 +167,7 @@ def to_markdown(out: dict) -> str:
         k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} (창 {k.get('ath_window_start')}~ · 환율 {k.get('fx_used_for_last')}) | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
     v = out.get("vt25", {})
     if v and not v.get("error"):
-        s.append(f"| ALL-008 | VT25 슬리브 (QQQ σ40 {v['sigma40_pct']}%) | L **{v['L']}** (지난주 {v['prev_week']['L']}) | QLD {v['qld_weight_pct']}% · SGOV {v['sgov_weight_pct']}% | 매매 {'**필요**' if v['trade_needed'] else '없음'} |")
+        s.append(f"| ALL-008 | VT25 슬리브 (QQQ σ40 {v['sigma40_pct']}%) | L **{v['L']}** (지난주 {v['prev_week']['L']}) | TQQQ {v['tqqq_weight_pct']}% · SGOV {v['sgov_weight_pct']}% | 매매 {'**필요**' if v['trade_needed'] else '없음'} |")
     elif v:
         s.append(f"| ALL-008 | VT25 슬리브 | 결측 | {v.get('error')} | |")
     if m.get("QQQ_price"):
@@ -334,7 +334,7 @@ VT25_STATE = "claude/advisor/연동/VT25-슬리브.json"   # 슬리브 보유 �
 def vt25_block(qqq_rows, basis, state_path=VT25_STATE):
     """PROTOCOL 부칙 8 · `ALL-008` — VT25 슬리브 신호. 판정하지 않는다. 값만 준다.
     규칙(투자처분서 §1): 금요일 종가 기준 QQQ 최근 40거래일 일간수익률 표준편차 × √252 = σ.
-    L = min(2, 0.25/σ)를 0.5 단위 반올림. QLD 목표비중 = L/2, 나머지 SGOV. L이 지난주와 같으면 매매 없음.
+    L = min(3, 0.25/σ)를 0.5 단위 반올림. TQQQ 목표비중 = L/3, 나머지 SGOV. L이 지난주와 같으면 매매 없음.
     슬리브 vs QQQM 누적차(무효화 ③ −10%p)는 상태 파일의 보유 내역이 있을 때만 계산한다."""
     import math, statistics
     out = {}
@@ -346,15 +346,15 @@ def vt25_block(qqq_rows, basis, state_path=VT25_STATE):
     def L_at(end):   # end: rets 인덱스(포함) 기준 최근 40개
         w = rets[end - 39:end + 1]
         sigma = statistics.stdev(w) * math.sqrt(252)
-        L = min(2.0, 0.25 / sigma)
+        L = min(3.0, 0.25 / sigma)
         return sigma, round(L * 2) / 2
     sigma, L = L_at(len(rets) - 1)
     sigma_w, L_w = L_at(len(rets) - 6)          # 5거래일 전 (지난주 같은 요일 근사)
     out.update({"as_of": rows[-1][0], "qqq_close": round(closes[-1], 2),
-                "sigma40_pct": round(sigma * 100, 2), "L": L, "qld_weight_pct": round(L / 2 * 100, 1), "sgov_weight_pct": round((1 - L / 2) * 100, 1),
+                "sigma40_pct": round(sigma * 100, 2), "L": L, "tqqq_weight_pct": round(L / 3 * 100, 1), "sgov_weight_pct": round((1 - L / 3) * 100, 1),
                 "prev_week": {"as_of": rows[-6][0], "sigma40_pct": round(sigma_w * 100, 2), "L": L_w},
                 "trade_needed": L != L_w,
-                "rule": "L=min(2, 0.25/σ40) 0.5단위 · QLD=L/2 · L 변경 시만 매매 (ALL-008 투자처분서 §1)",
+                "rule": "L=min(3, 0.25/σ40) 0.5단위 · TQQQ=L/3 · L 변경 시만 매매 (ALL-009)",
                 "source": "Yahoo QQQ 수정종가 (B)"})
     try:
         if os.path.exists(state_path):
