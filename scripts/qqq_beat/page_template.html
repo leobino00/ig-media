@@ -1,0 +1,451 @@
+<title>QQQ 초과 전략 VT25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 한 줄 폭 리서치 노트. 요약(신호·핵심 수치) → 증거(차트) → 약점 → 실행. 차트는 본문 폭 전체 */
+:root {
+  --bg: #f5f6f7;
+  --surface: #fcfcfb;
+  --fg: #14171b;
+  --fg2: #4d535b;
+  --muted: #7b828b;
+  --rule: #dde0e4;
+  --grid: #e8eaed;
+  --accent: #c24e1c;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --neg: #9aa1a9;
+  --seq0: #e8f0fb; --seq1: #1d4f8f;
+  --good: #1f7a3d; --warn: #9a6400;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --surface: #1a1c1f; --fg: #f2f3f4; --fg2: #c1c5ca; --muted: #8f959c;
+  --rule: #2e3237; --grid: #262a2e; --accent: #f07a45;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --neg: #5c636b;
+  --seq0: #1d2632; --seq1: #6aa6f0; --good: #5cc27f; --warn: #e0a642; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1a1c1f; --fg: #f2f3f4; --fg2: #c1c5ca; --muted: #8f959c;
+  --rule: #2e3237; --grid: #262a2e; --accent: #f07a45;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --neg: #5c636b;
+  --seq0: #1d2632; --seq1: #6aa6f0; --good: #5cc27f; --warn: #e0a642; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 44px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(26px, 5vw, 36px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 21px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 14px; min-width: 0; }
+header { display: grid; gap: 12px; }
+.lede { color: var(--fg2); font-size: 16px; }
+
+/* 현재 신호 */
+.signal { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 20px 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px 28px; }
+.signal .k { font-size: 12.5px; color: var(--muted); }
+.signal .v { font-family: var(--f-mono); font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.signal .v.hot { color: var(--accent); }
+.signal .sub { font-size: 13px; color: var(--fg2); }
+
+/* 핵심 수치 */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat { padding: 14px 16px 14px 0; display: grid; gap: 2px; }
+.stat .k { font-size: 12.5px; color: var(--muted); }
+.stat .v { font-family: var(--f-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+.stat .v small { font-size: 13px; color: var(--muted); }
+
+/* 차트 */
+.chart { position: relative; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 10px 8px; min-width: 0; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart svg text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.chart svg text.lbl { font-family: var(--f-body); font-size: 12px; font-weight: 500; fill: var(--fg); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--fg2); padding: 0 6px 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 7px 10px; border-radius: 6px; white-space: nowrap; z-index: 2; }
+.tip b { font-family: var(--f-mono); font-weight: 500; }
+.tip .row { display: flex; align-items: center; gap: 6px; }
+.tip .row i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.note { font-size: 13px; color: var(--muted); max-width: 72ch; }
+
+/* 표 */
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 12px; color: var(--muted); font-weight: 500; }
+td { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+td:first-child { font-family: var(--f-body); }
+tr.pick td { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+tr.pick td:first-child { font-weight: 700; }
+tr.sub td { color: var(--muted); font-size: 12.5px; }
+tr.txt td { font-family: var(--f-body); }
+.sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+
+/* 규칙 */
+.rules { display: grid; gap: 0; counter-reset: r; border-top: 1px solid var(--rule); }
+.rules li { list-style: none; display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.rules li::before { counter-increment: r; content: counter(r); font-family: var(--f-mono); color: var(--accent); font-weight: 500; }
+.rules { padding: 0; margin: 0; }
+code { font-family: var(--f-mono); font-size: 0.92em; background: var(--grid); padding: 1px 5px; border-radius: 4px; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px 32px; }
+.two > * { min-width: 0; }
+.cons { display: grid; gap: 12px; padding: 0; margin: 0; }
+.cons li { list-style: none; padding-left: 16px; border-left: 2px solid var(--rule); }
+.cons li b { display: block; }
+.pill { display: inline-block; font-size: 11.5px; padding: 1px 8px; border-radius: 99px; border: 1px solid currentColor; font-weight: 500; }
+.pill.ok { color: var(--good); } .pill.no { color: var(--muted); } .pill.chk { color: var(--warn); }
+.acct { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.acct div { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.acct div > * { min-width: 0; }
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 18px; }
+
+/* 히트맵 */
+.heat { display: grid; grid-template-columns: 64px repeat(5, minmax(0, 1fr)); gap: 3px; font-size: 12px; }
+.heat .h { color: var(--muted); font-family: var(--f-mono); display: flex; align-items: center; justify-content: center; padding: 4px 0; }
+.heat .c { border-radius: 4px; padding: 8px 4px; text-align: center; font-family: var(--f-mono); font-variant-numeric: tabular-nums; line-height: 1.35; position: relative; }
+.heat .c .big { font-size: 14px; font-weight: 500; display: block; }
+.heat .c .sm { font-size: 10.5px; opacity: 0.85; }
+.heat .c.pickc { outline: 2px solid var(--accent); outline-offset: 1px; }
+.heat .c.below::after { content: "BH 미만"; position: absolute; top: 2px; right: 4px; font-size: 9px; opacity: 0.8; }
+@media (max-width: 520px) { .heat .c .sm { display: none; } .heat { grid-template-columns: 44px repeat(5, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">백테스트 1999-03-10 ~ 2026-09-29 · 6,932거래일</div>
+    <h1>QQQ 바이앤홀드를 이기는 변동성 타깃 레버리지, VT25</h1>
+    <p class="lede">QQQ 노출을 최근 40일 변동성의 역수로 0~2배 사이에서 매주 조절한다. 27.5년 동안 연 17.4%로 바이앤홀드(10.9%)를 앞섰고, 최대낙폭은 −83%에서 −45%로 얕아졌다. 20여 개 전략 중 수익, 위험, 강건성을 모두 이긴 것은 이 계열뿐이었다. 기존 QQQM·TQQQ 전략(U1)과 적립식으로 비교하면 <a href="#vs-u1" style="color:var(--accent)">둘을 반반 섞는 쪽</a>이 가장 균형이 좋았다.</p>
+  </header>
+
+  <section aria-label="현재 신호">
+    <div class="signal">
+      <div><div class="k">이번 주 목표 레버리지</div><div class="v hot" id="now-lev">1.5배</div><div class="sub" id="now-date"></div></div>
+      <div><div class="k">QQQ 40일 변동성 (연율)</div><div class="v" id="now-vol">16.6%</div><div class="sub">25% ÷ 변동성, 0.5 단위 반올림</div></div>
+      <div><div class="k">2배 ETF로 실행</div><div class="v" id="now-qld">QLD 75%</div><div class="sub">나머지 단기국채(SGOV·BIL)</div></div>
+      <div><div class="k">3배 ETF로 실행</div><div class="v" id="now-tqqq">TQQQ 50%</div><div class="sub">나머지 단기국채</div></div>
+    </div>
+  </section>
+
+  <section aria-label="핵심 수치">
+    <div class="stats">
+      <div class="stat"><span class="k">연평균 수익률</span><span class="v">17.4% <small>vs 10.9%</small></span></div>
+      <div class="stat"><span class="k">최대낙폭</span><span class="v">−45% <small>vs −83%</small></span></div>
+      <div class="stat"><span class="k">샤프지수</span><span class="v">0.67 <small>vs 0.44</small></span></div>
+      <div class="stat"><span class="k">세후 22% 매년 납부</span><span class="v">14.1% <small>vs 9.9%</small></span></div>
+      <div class="stat"><span class="k">10년 보유 구간 승률</span><span class="v">≈100% <small>211구간</small></span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>1달러가 어떻게 자랐나</h2>
+    <p class="note">로그 눈금. 1999년 3월 1달러 기준, 주간 샘플. 바이앤홀드 ×17, VT25 ×82. 1999년 닷컴 고점 근처에서 시작한 불리한 출발점이다.</p>
+    <div class="chart" id="c-eq"></div>
+  </section>
+
+  <section>
+    <h2>전략 비교</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>전략</th><th>연수익률</th><th>변동성</th><th>최대낙폭</th><th>샤프</th><th>최장 수중</th><th>27.5년 배수</th><th>매매/년</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sw" style="background:var(--s1)"></span>QQQ 바이앤홀드</td><td>10.9%</td><td>26.9%</td><td>−82.7%</td><td>0.44</td><td>14.9년</td><td>×17</td><td>0</td></tr>
+        <tr class="sub"><td>　세후 22%</td><td>9.9%</td><td></td><td></td><td>0.41</td><td></td><td>×13.5</td><td></td></tr>
+        <tr class="pick"><td><span class="sw" style="background:var(--s2)"></span>VT25 · 2배 상한 (권장)</td><td>17.4%</td><td>25.9%</td><td>−45.3%</td><td>0.67</td><td>3.8년</td><td>×82</td><td>6</td></tr>
+        <tr class="sub"><td>　세후 22%</td><td>14.1%</td><td></td><td>−47.5%</td><td>0.56</td><td></td><td>×38</td><td></td></tr>
+        <tr><td>VT25 · 3배 상한</td><td>18.3%</td><td>26.3%</td><td>−45.3%</td><td>0.69</td><td>3.8년</td><td>×102</td><td>8</td></tr>
+        <tr><td><span class="sw" style="background:var(--s3)"></span>QQQ 50% + VT25 50%</td><td>15.1%</td><td>23.8%</td><td>−54.2%</td><td>0.63</td><td>7.3년</td><td>×48</td><td>6</td></tr>
+        <tr class="sub"><td>　세후 22%</td><td>12.5%</td><td></td><td></td><td>0.53</td><td></td><td>×26</td><td></td></tr>
+        <tr><td>200일선 추세추종 3배↔1배</td><td>14.9%</td><td>55.0%</td><td>−97.0%</td><td>0.49</td><td>17.8년</td><td>×46</td><td>1.7</td></tr>
+        <tr class="sub"><td>　세후 22%</td><td>9.0%</td><td></td><td></td><td>0.40</td><td></td><td></td><td></td></tr>
+        <tr><td><span class="sw" style="background:var(--s4)"></span>U1 (TQQQ −50% 전환, 기존)</td><td>8.4%</td><td>31.0%</td><td>−91.3%</td><td>0.35</td><td>19.6년</td><td>×9</td><td>—</td></tr>
+        <tr><td>QLD 바이앤홀드 (합성 2배)</td><td>10.4%</td><td>54.0%</td><td>−98.8%</td><td>0.42</td><td>20.7년</td><td>×15</td><td>0</td></tr>
+        <tr><td>TQQQ 바이앤홀드 (합성 3배)</td><td>3.2%</td><td>93.3%</td><td>−100%</td><td>0.47</td><td>26.5년</td><td>×2.4</td><td>0</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">매매비용 편도 0.1%, 레버리지 ETF 보수 0.95%와 차입비(T-bill+0.5%) 반영. QQQ 배당은 연 0.6%로 가산. 1999~2010년 QLD·TQQQ는 합성이며, 합성 TQQQ는 2022년 −81.6%(실제 약 −82%), 2020년 3월 −69.6%(실제 약 −70%)로 실제와 맞았다.</p>
+  </section>
+
+  <section id="vs-u1">
+    <div class="eyebrow">기존 전략과 비교 · 매월 같은 금액 적립</div>
+    <h2>완성본(VT25)과 기존 QQQM·TQQQ 전략(U1)</h2>
+    <p>U1은 평소 QQQM을 적립하다가 TQQQ가 전고점 대비 −50%가 되면 QQQM 절반을 TQQQ로 옮기는 전략이다. 원래 적립식이라 비교도 매월 같은 금액을 넣는 방식으로 했다. 수익률은 납입 시점을 반영한 연 IRR이다.</p>
+    <div class="signal" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+      <div><div class="k">꾸준함: 10년 적립 71구간 중앙값</div><div class="v">VT25 <span class="hot" style="color:var(--accent)">20.5%</span></div><div class="sub">U1 17.1% · 반반 20.1% · QQQM 15.8%</div></div>
+      <div><div class="k">큰 한 방: 최근 10년 (2016-09~)</div><div class="v">U1 <span style="color:var(--accent)">36.0%</span></div><div class="sub">반반 30.3% · VT25 22.0% · QQQM 20.9%</div></div>
+      <div><div class="k">QQQM 적립을 이긴 10년 구간</div><div class="v">VT25 92%</div><div class="sub">반반 87% · U1 73%</div></div>
+      <div><div class="k">계좌 최악 손실 (납입원금 대비, 중앙값)</div><div class="v">VT25 −21%</div><div class="sub">QQQM −31% · 반반 −33% · U1 −44%</div></div>
+    </div>
+    <div class="chart" id="c-dca"></div>
+    <p class="note">가로축은 적립을 시작한 분기, 세로축은 그때부터 10년 적립한 연 IRR. U1(노랑)은 2008~2016년 시작 구간에서 크게 튀어 오른다. 2018·2020·2022·2025년 −50% 신호가 모두 V자로 회복한 시기를 품기 때문이다. 그 밖의 구간에서는 QQQM과 거의 겹친다.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>적립식 (매월 1)</th><th>QQQM 적립</th><th>VT25</th><th>U1 (기존)</th><th>반반 (VT25 50 + U1 50)</th></tr></thead>
+      <tbody>
+        <tr><td>전체 1999-03 ~ 2026-09 IRR</td><td>15.0%</td><td>17.8%</td><td>14.9%</td><td>16.5%</td></tr>
+        <tr class="sub"><td>　납입원금 대비 배수</td><td>×12.1</td><td>×20.1</td><td>×11.9</td><td>×16.0</td></tr>
+        <tr><td>10년 적립 IRR 중앙값 (71구간)</td><td>15.8%</td><td>20.5%</td><td>17.1%</td><td>20.1%</td></tr>
+        <tr><td>10년 적립 IRR 평균</td><td>14.5%</td><td>17.9%</td><td>19.2%</td><td>18.9%</td></tr>
+        <tr><td>10년 적립 IRR 최저</td><td>−7.3%</td><td>−3.9%</td><td>−8.1%</td><td>−5.9%</td></tr>
+        <tr><td>QQQM 적립 대비 승률 · 중앙 격차</td><td>—</td><td>92% · +3.4%p</td><td>73% · +0.9%p</td><td>87% · +3.8%p</td></tr>
+        <tr><td>최근 10년 2016-09 ~ 2026-09</td><td>20.9%</td><td>22.0%</td><td>36.0%</td><td>30.3%</td></tr>
+        <tr><td>금융위기 포함 2007-10 ~ 2017-10</td><td>16.8%</td><td>23.7%</td><td>16.9%</td><td>20.6%</td></tr>
+        <tr><td>닷컴 포함 2000-03 ~ 2010-03</td><td>3.7%</td><td>4.2%</td><td>3.7%</td><td>4.0%</td></tr>
+        <tr><td>계좌 최대낙폭 (전체 기간)</td><td>−52%</td><td>−42%</td><td>−62%</td><td>−44%</td></tr>
+        <tr class="txt"><td>매매 빈도</td><td>없음</td><td>주 1회 확인, 연 6회 안팎</td><td>몇 년에 한 번</td><td>둘 다</td></tr>
+      </tbody>
+    </table></div>
+    <div class="two">
+      <div style="display:grid;gap:10px">
+        <h3>U1이 실제로 움직인 날 (2010년부터 적립 시작 가정)</h3>
+        <div class="tbl"><table style="min-width:0">
+          <thead><tr><th>날짜</th><th>행동</th><th>QQQ</th></tr></thead>
+          <tbody>
+            <tr><td>2018-12-20</td><td>TQQQ 진입</td><td>$152</td></tr>
+            <tr><td>2020-02-10</td><td>3/3 매도 완료</td><td>$232</td></tr>
+            <tr><td>2020-03-12</td><td>TQQQ 진입</td><td>$177</td></tr>
+            <tr><td>2020-12-17</td><td>3/3 매도 완료</td><td>$311</td></tr>
+            <tr><td>2022-03-07</td><td>TQQQ 진입</td><td>$325</td></tr>
+            <tr><td>2025-02-27</td><td>1/3 매도 후 보호매도</td><td>$500</td></tr>
+            <tr><td>2025-04-04</td><td>TQQQ 진입</td><td>$423</td></tr>
+            <tr><td>2026-04-24</td><td>3/3 매도 완료</td><td>$664</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div style="display:grid;gap:12px">
+        <h3>읽는 법</h3>
+        <ul class="cons">
+          <li><b>U1은 복권형이다</b>신호 뒤 V자 회복이 오면 크게 이긴다. 2010년 이후 네 번 모두 그랬다. 신호가 없거나 L자면 QQQM과 같거나 더 나쁘다.</li>
+          <li><b>L자 폭락에서 U1은 멈춘다</b>1999년에 시작했다면 2000년 4월에 TQQQ로 옮긴 절반이 목표가(당시 전고점)에 끝내 닿지 못했다. 그래서 2008·2020·2022년 신호도 받지 못했다.</li>
+          <li><b>VT25는 꾸준형이다</b>큰 한 방은 없지만 거의 모든 구간에서 QQQM을 조금씩 이기고, 계좌 손실이 가장 얕다.</li>
+          <li><b>둘은 서로를 메운다</b>U1 신호가 뜨는 폭락장은 변동성이 커서 VT25가 레버리지를 낮춰 둔 때다. 반반이면 VT25의 꾸준함(중앙 20.1%)과 U1의 한 방(최근 10년 30.3%)을 대부분 가져간다.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="signal" style="border-color:var(--accent)">
+      <div style="grid-column:1/-1;display:grid;gap:6px">
+        <div class="k">결론</div>
+        <p style="font-size:16px"><b>U1을 버리지 말고 반반으로 운영한다.</b> 해외 계좌 적립금의 절반은 VT25로 굴리고, 나머지 절반은 지금처럼 QQQM을 적립하며 U1 규칙을 적용한다. 10년 적립 중앙값은 VT25 단독과 비슷하고(20.1% vs 20.5%), 최근 10년 같은 V자 시대에는 U1의 이득을 대부분 챙긴다(30.3%). U1 단독보다 최저 구간과 계좌 낙폭도 얕다. 레버리지가 부담스러우면 VT25 단독이 가장 꾸준한 선택이다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>규칙</h2>
+    <ol class="rules">
+      <li><span>매주 마지막 거래일 종가로 QQQ 최근 40거래일 일간수익률의 표준편차를 구하고 <code>×√252</code>로 연율화한다.</span></li>
+      <li><span>목표 레버리지 <code>L = 25% ÷ 변동성</code>. 0~2배로 자르고 0.5 단위로 반올림한다 (0, 0.5, 1, 1.5, 2).</span></li>
+      <li><span>L이 지난주와 같으면 아무것도 하지 않는다. 다르면 다음 거래일에 QLD 비중을 <code>L ÷ 2</code>로 맞추고 나머지는 단기국채에 둔다.</span></li>
+      <li><span>매월 적립금도 그 주의 비중대로 나눠 산다.</span></li>
+      <li><span>뉴스, 전망, 감으로 L을 바꾸지 않는다. 규칙을 깨면 이 백테스트는 근거가 되지 못한다.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>레버리지는 이렇게 움직였다</h2>
+    <p class="note">평균 1.35배. 닷컴 약세장(2000~2002)과 2008년, 2022년에는 0.5~1배로 내려갔고, 조용한 강세장(2005~2007, 2013~2017)에서 2배에 머물렀다.</p>
+    <div class="chart" id="c-lev"></div>
+  </section>
+
+  <section>
+    <h2>고점 대비 낙폭</h2>
+    <p class="note">천천히 오래 가는 약세장에서 방어가 강하다. 갑자기 무너진 2020년·2022년·2025년에는 바이앤홀드보다 2~3%p 더 빠졌다.</p>
+    <div class="chart" id="c-dd"></div>
+    <div class="tbl"><table>
+      <thead><tr><th>구간 (고점 → 저점)</th><th>바이앤홀드</th><th>VT25</th><th>50/50 혼합</th><th>U1</th></tr></thead>
+      <tbody>
+        <tr><td>닷컴 2000-03 ~ 2002-10</td><td>−82.7%</td><td>−39.7%</td><td>−54.1%</td><td>−91.3%</td></tr>
+        <tr><td>금융위기 2007-10 ~ 2009-03</td><td>−52.9%</td><td>−45.3%</td><td>−48.3%</td><td>−53.5%</td></tr>
+        <tr><td>코로나 2020-02 ~ 03</td><td>−28.5%</td><td>−31.7%</td><td>−31.1%</td><td>−30.3%</td></tr>
+        <tr><td>2022 긴축</td><td>−35.2%</td><td>−37.2%</td><td>−37.6%</td><td>−38.6%</td></tr>
+        <tr><td>2025 관세</td><td>−22.8%</td><td>−24.7%</td><td>−22.9%</td><td>−24.8%</td></tr>
+        <tr><td>회복 2002-10 ~ 2007-10</td><td>+183%</td><td>+144%</td><td>+144%</td><td>+186%</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>연도별 초과수익 (VT25 − 바이앤홀드)</h2>
+    <p class="note">완결 연도 26년 중 8년은 졌다. 가장 크게 진 해는 2020년(−14.5%p)으로, V자 반등 초반을 낮은 레버리지로 보냈다. 1999년은 3월부터, 2026년은 9월까지다.</p>
+    <div class="chart" id="c-yr"></div>
+  </section>
+
+  <section>
+    <h2>어느 달에 시작해도 10년을 버티면 이겼다</h2>
+    <p class="note">가로축은 시작한 달. 그 달부터 10년 보유했을 때 연수익률 차이. 0선 위면 바이앤홀드를 이긴 것이다. VT25는 211개 구간 중 최악이 −0.1%p였다. 3년 보유 구간에서는 24%를 졌다.</p>
+    <div class="chart" id="c-roll"></div>
+  </section>
+
+  <section>
+    <h2>설정값을 바꿔도 결과가 유지되나</h2>
+    <p class="note">2배 상한, 주간 판단. 칸마다 연수익률 / 샤프 / 최대낙폭. 25칸 중 23칸이 바이앤홀드(10.9%)를 넘었고 샤프는 25칸 모두 0.44를 넘었다. 선택한 값(25%·40일)은 넓은 고원 가운데에 있다. 3배 상한과 1.5배 상한까지 합친 75칸에서도 71칸이 이겼다.</p>
+    <div class="chart" style="padding:14px"><div class="heat" id="c-grid"></div></div>
+    <p class="note">비용 스트레스: 매매비용 0.3%, 차입 스프레드 1.5%로 올려도 연 14.6%, 샤프 0.57.</p>
+  </section>
+
+  <section class="two">
+    <div style="display:grid;gap:14px">
+      <h2>이기는 이유</h2>
+      <ul class="cons">
+        <li><b>변동성은 몰려서 온다</b>변동성이 높은 주 다음 주도 높고, 그 구간은 위험 대비 수익이 낮다. 조용할 때 늘리고 시끄러울 때 줄이면 같은 위험으로 더 번다 (Moreira & Muir, 2017).</li>
+        <li><b>레버리지 감쇠를 피한다</b>3배 ETF를 계속 들면 변동성 구간에서 복리가 깎인다(TQQQ 합성 연 3.2%, 최대낙폭 −100%). VT25는 조용할 때만 레버리지를 쓴다.</li>
+        <li><b>샤프가 올랐다</b>평균 1.35배라 수익 일부는 레버리지 몫이다. 그러나 샤프 0.44 → 0.67은 레버리지로 설명되지 않는다.</li>
+      </ul>
+    </div>
+    <div style="display:grid;gap:14px">
+      <h2>지는 때</h2>
+      <ul class="cons">
+        <li><b>갑작스러운 급락</b>조용하던 장이 한 번에 무너지면 이미 1.5~2배를 들고 있다.</li>
+        <li><b>V자 반등 초반</b>변동성이 식기 전까지 레버리지가 낮다. 2020년 −14.5%p, 2009년 −5.6%p.</li>
+        <li><b>짧은 보유</b>3년 구간의 24%, 연도의 약 3분의 1을 진다. 10년 이상 규칙을 지킬 때만 맞는다.</li>
+        <li><b>모형 위험</b>초기 레버리지 ETF는 합성이다. 2026년 T-bill 3.8%는 가정이다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>계좌 배치</h2>
+    <div class="acct">
+      <div><b>연금저축 · IRP</b><span><span class="pill no">레버리지 불가</span> 지금처럼 나스닥100 1배를 계속 보유한다. 1배 상한 변형은 수익률이 바이앤홀드보다 낮아 이 목표에 맞지 않는다.</span></div>
+      <div><b>해외 과세계좌</b><span><span class="pill ok">실행 위치</span> 22% 세금을 매년 내도 연 +4.2%p 앞선다. 첫 매수 조건(기본예탁금 1,000만원, 사전교육)은 완료 기록이 있다.</span></div>
+      <div><b>ISA</b><span><span class="pill chk">확인 필요</span> 국내상장 나스닥100 레버리지 ETF를 담을 수 있다면 비과세·9.9% 분리과세라 가장 좋은 자리다.</span></div>
+    </div>
+    <p class="note">기존 판정 체계와 부딪히는 곳이 있다. 위성 편입 게이트(K2)와 최대낙폭 −30% 규칙(K3)이다. VT25의 −45%는 바이앤홀드보다 얕지만 −30%를 넘는다. 실행하려면 coordinator 판정을 거친다.</p>
+  </section>
+
+  <footer>
+    <span>데이터: Twelve Data 일봉 종가(분할 반영, 배당 미반영 → 연 0.6% 가산). T-bill은 연평균 금리표, 2025·2026년은 추정.</span>
+    <span>신호는 종가로 판단하고 다음 거래일에 체결한다(미래 정보 없음). 세후 계산은 평균단가로 실현이익을 추적해 연말에 22%를 내고, 마지막 날 전량 청산해 과세한다. 연 250만원 공제는 넣지 않았다.</span>
+    <span>재현: <code>scripts/qqq_beat/</code> · 문서: <code>claude/advisor/연동/전략제안-QQQ초과-변동성타깃.md</code>. 과거 성과는 미래 수익을 보장하지 않는다.</span>
+  </footer>
+</div>
+
+<script>
+const D = __DATA__;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = "http://www.w3.org/2000/svg";
+const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const pct = (v, d = 1) => (v >= 0 ? "+" : "−") + Math.abs(v * 100).toFixed(d) + "%";
+const pctU = (v, d = 1) => (v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(d) + "%";
+const yearOf = s => +s.slice(0, 4);
+
+function legend(el, series) {
+  const lg = document.createElement("div"); lg.className = "legend";
+  series.forEach(s => { const sp = document.createElement("span"); sp.innerHTML = `<i style="background:var(${s.color})"></i>${s.name}`; lg.appendChild(sp); });
+  el.appendChild(lg);
+}
+
+// 시계열 선 차트: x는 날짜 문자열 배열(균등 간격 인덱스), 호버 크로스헤어 + 툴팁
+function lineChart(el, o) {
+  el.innerHTML = ""; if (o.series.length > 1) legend(el, o.series);
+  const W = el.clientWidth - 20, H = o.height || 300, m = { l: 48, r: o.endLabels ? 70 : 14, t: 10, b: 26 };
+  const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": o.aria }, el);
+  const n = o.x.length, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const all = o.series.flatMap(s => s.values);
+  let lo = o.min ?? Math.min(...all), hi = o.max ?? Math.max(...all);
+  const f = o.log ? Math.log10 : (v => v);
+  const y = v => m.t + ih - (f(v) - f(lo)) / (f(hi) - f(lo)) * ih;
+  const x = i => m.l + i / (n - 1) * iw;
+  // 격자
+  (o.ticks || []).forEach(t => {
+    mk("line", { x1: m.l, x2: m.l + iw, y1: y(t), y2: y(t), style: `stroke:var(${t === o.zero ? "--muted" : "--grid"});stroke-width:1` }, svg);
+    mk("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end" }, svg).textContent = o.yfmt(t);
+  });
+  // x 눈금: 연도
+  const step = W < 520 ? 5 : (o.xstep || 3); let lastY = null;
+  o.x.forEach((d, i) => { const yy = yearOf(d); if (yy !== lastY) { if (yy % step === 0) { mk("text", { x: x(i), y: H - 6, "text-anchor": "middle" }, svg).textContent = yy; mk("line", { x1: x(i), x2: x(i), y1: m.t + ih, y2: m.t + ih + 4, style: "stroke:var(--muted)" }, svg); } lastY = yy; } });
+  // 선
+  o.series.forEach(s => {
+    let dstr = "";
+    s.values.forEach((v, i) => { const px = x(i), py = y(Math.max(v, lo)); if (o.step && i > 0) dstr += `H${px.toFixed(1)}V${py.toFixed(1)}`; else dstr += (i ? "L" : "M") + px.toFixed(1) + "," + py.toFixed(1); });
+    if (o.area && s === o.series[0]) mk("path", { d: dstr + `L${x(n - 1)},${y(o.zero ?? lo)}L${x(0)},${y(o.zero ?? lo)}Z`, style: `fill:var(${s.color});fill-opacity:0.12;stroke:none` }, svg);
+    mk("path", { d: dstr, style: `fill:none;stroke:var(${s.color});stroke-width:2;stroke-linejoin:round` }, svg);
+  });
+  // 끝 라벨 (겹침 방지)
+  if (o.endLabels) {
+    const ends = o.series.map(s => ({ s, py: y(s.values[n - 1]) })).sort((a, b) => a.py - b.py);
+    for (let i = 1; i < ends.length; i++) if (ends[i].py - ends[i - 1].py < 15) ends[i].py = ends[i - 1].py + 15;
+    ends.forEach(e => { mk("circle", { cx: x(n - 1), cy: y(e.s.values[n - 1]), r: 3.5, style: `fill:var(${e.s.color});stroke:var(--surface);stroke-width:2` }, svg); mk("text", { x: x(n - 1) + 8, y: e.py + 4, class: "lbl" }, svg).textContent = e.s.short + " " + o.endFmt(e.s.values[n - 1]); });
+  }
+  // 호버
+  const cross = mk("line", { y1: m.t, y2: m.t + ih, style: "stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3", visibility: "hidden" }, svg);
+  const dots = o.series.map(s => mk("circle", { r: 4, style: `fill:var(${s.color});stroke:var(--surface);stroke-width:2`, visibility: "hidden" }, svg));
+  const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; el.appendChild(tip);
+  const hit = mk("rect", { x: m.l, y: m.t, width: iw, height: ih, style: "fill:transparent" }, svg);
+  const move = ev => {
+    const r = svg.getBoundingClientRect(); const px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px * W / r.width - m.l) / iw * (n - 1))));
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+    o.series.forEach((s, k) => { dots[k].setAttribute("cx", x(i)); dots[k].setAttribute("cy", y(Math.max(s.values[i], lo))); dots[k].setAttribute("visibility", "visible"); });
+    tip.innerHTML = `<div>${o.x[i]}</div>` + o.series.map(s => `<div class="row"><i style="background:var(${s.color})"></i>${s.name} <b>${o.tipFmt(s.values[i])}</b></div>`).join("");
+    tip.hidden = false;
+    const tx = x(i) * r.width / W + 10, lim = el.clientWidth - tip.offsetWidth - 6;
+    tip.style.left = Math.min(tx, lim) + "px"; tip.style.top = (el.querySelector(".legend") ? 40 : 14) + "px";
+    if (tx > lim) tip.style.left = Math.max(4, x(i) * r.width / W - tip.offsetWidth - 10) + "px";
+  };
+  const leave = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dots.forEach(d => d.setAttribute("visibility", "hidden")); };
+  hit.addEventListener("mousemove", move); hit.addEventListener("touchmove", move, { passive: true }); hit.addEventListener("touchstart", move, { passive: true });
+  hit.addEventListener("mouseleave", leave); hit.addEventListener("touchend", leave);
+}
+
+// 연도별 막대 (양수: VT25 색, 음수: 회색), 막대마다 호버 툴팁
+function barChart(el) {
+  el.innerHTML = "";
+  const W = el.clientWidth - 20, H = 280, m = { l: 48, r: 10, t: 12, b: 26 };
+  const svg = mk("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "연도별 초과수익 막대" }, el);
+  const v = D.yr_a.map((a, i) => a - D.yr_bh[i]); const n = v.length;
+  const lo = -0.2, hi = 0.5, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const y = t => m.t + ih - (t - lo) / (hi - lo) * ih; const bw = iw / n;
+  [-0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5].forEach(t => { mk("line", { x1: m.l, x2: m.l + iw, y1: y(t), y2: y(t), style: `stroke:var(${t === 0 ? "--muted" : "--grid"})` }, svg); mk("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end" }, svg).textContent = (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t * 100) + "%p"; });
+  const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; el.appendChild(tip);
+  v.forEach((d, i) => {
+    const x0 = m.l + i * bw + 1, w = Math.max(2, bw - 2), top = y(Math.max(d, 0)), h = Math.max(1, Math.abs(y(d) - y(0)));
+    const r = Math.min(4, w / 2, h);
+    const path = d >= 0 ? `M${x0},${y(0)}V${top + r}Q${x0},${top} ${x0 + r},${top}H${x0 + w - r}Q${x0 + w},${top} ${x0 + w},${top + r}V${y(0)}Z`
+                        : `M${x0},${y(0)}V${y(d) - r}Q${x0},${y(d)} ${x0 + r},${y(d)}H${x0 + w - r}Q${x0 + w},${y(d)} ${x0 + w},${y(d) - r}V${y(0)}Z`;
+    mk("path", { d: path, style: `fill:var(${d >= 0 ? "--s2" : "--neg"})` }, svg);
+    const yr = D.years[i];
+    if (W > 520 ? yr % 2 === 0 : yr % 5 === 0) mk("text", { x: x0 + w / 2, y: H - 6, "text-anchor": "middle" }, svg).textContent = yr;
+    if (W > 520 && Math.abs(d) > 0.14) mk("text", { x: x0 + w / 2, y: d > 0 ? top - 4 : y(d) + 12, "text-anchor": "middle", class: "lbl", style: "font-size:10.5px" }, svg).textContent = (d > 0 ? "+" : "−") + Math.abs(d * 100).toFixed(0);
+    const hit = mk("rect", { x: m.l + i * bw, y: m.t, width: bw, height: ih, style: "fill:transparent" }, svg);
+    const show = () => { tip.innerHTML = `<div>${yr}${yr === 1999 ? " (3월~)" : yr === 2026 ? " (~9월)" : ""}</div><div class="row">VT25 <b>${pct(D.yr_a[i])}</b></div><div class="row">바이앤홀드 <b>${pct(D.yr_bh[i])}</b></div><div class="row">차이 <b>${pct(d)}p</b></div>`; tip.hidden = false; const r = svg.getBoundingClientRect(); const tx = (m.l + (i + 1) * bw) * r.width / W + 8; tip.style.left = Math.min(tx, el.clientWidth - tip.offsetWidth - 6) + "px"; tip.style.top = "14px"; };
+    hit.addEventListener("mouseenter", show); hit.addEventListener("touchstart", show, { passive: true }); hit.addEventListener("mouseleave", () => tip.hidden = true);
+  });
+}
+
+function heat(el) {
+  const g = D.grid, bh = 0.109; el.innerHTML = '<div class="h">목표＼기간</div>' + g.lb.map(l => `<div class="h">${l}일</div>`).join("");
+  const vals = g.cells.flat().map(c => c[0]); const lo = Math.min(...vals), hi = Math.max(...vals);
+  g.cells.forEach((row, i) => {
+    el.insertAdjacentHTML("beforeend", `<div class="h">${g.tv[i]}%</div>`);
+    row.forEach((c, j) => {
+      const t = (c[0] - lo) / (hi - lo); const pick = g.tv[i] === 25 && g.lb[j] === 40;
+      const dark = t > 0.55;
+      el.insertAdjacentHTML("beforeend", `<div class="c${pick ? " pickc" : ""}${c[0] < bh ? " below" : ""}" style="background:color-mix(in oklab, var(--seq1) ${Math.round(t * 100)}%, var(--seq0));color:${dark ? "var(--surface)" : "var(--fg)"}" title="목표 ${g.tv[i]}% · ${g.lb[j]}일: 연 ${(c[0]*100).toFixed(1)}%, 샤프 ${c[1].toFixed(2)}, 최대낙폭 ${pctU(c[2],0)}"><span class="big">${(c[0] * 100).toFixed(1)}%</span><span class="sm">${c[1].toFixed(2)} / ${pctU(c[2], 0)}</span></div>`);
+    });
+  });
+}
+
+function draw() {
+  const S = [{ key: "bh", name: "QQQ 바이앤홀드", short: "BH", color: "--s1" }, { key: "a", name: "VT25 (2배 상한)", short: "VT25", color: "--s2" }, { key: "b", name: "50/50 혼합", short: "혼합", color: "--s3" }, { key: "u1", name: "U1 (기존)", short: "U1", color: "--s4" }];
+  lineChart(document.getElementById("c-eq"), { aria: "누적 성장 로그 차트", x: D.dates, log: true, min: 0.1, max: 120, ticks: [0.1, 0.3, 1, 3, 10, 30, 100], yfmt: t => "×" + t, endLabels: true, endFmt: v => "×" + v.toFixed(0), tipFmt: v => "×" + v.toFixed(2), height: 340, series: S.map(s => ({ ...s, values: D["eq_" + s.key] })) });
+  lineChart(document.getElementById("c-dd"), { aria: "고점 대비 낙폭", x: D.dates, min: -0.9, max: 0, zero: 0, ticks: [0, -0.2, -0.4, -0.6, -0.8], yfmt: t => pctU(t, 0), tipFmt: v => pctU(v), area: true, series: [S[0], S[1]].map(s => ({ ...s, values: D["dd_" + s.key] })), height: 260 });
+  lineChart(document.getElementById("c-lev"), { aria: "주간 목표 레버리지", x: D.dates, min: 0, max: 2, ticks: [0, 0.5, 1, 1.5, 2], yfmt: t => t + "배", tipFmt: v => v + "배", step: true, series: [{ name: "목표 레버리지", color: "--s2", values: D.lev }], height: 200 });
+  lineChart(document.getElementById("c-roll"), { aria: "10년 보유 구간별 초과수익", x: D.roll10.start, min: -0.04, max: 0.16, zero: 0, ticks: [-0.04, 0, 0.04, 0.08, 0.12, 0.16], yfmt: t => (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t * 100).toFixed(0) + "%p", tipFmt: v => pct(v) + "p", xstep: 2, series: [{ name: "VT25 − 바이앤홀드", short: "VT25", color: "--s2", values: D.roll10.a }, { name: "50/50 혼합 − 바이앤홀드", short: "혼합", color: "--s3", values: D.roll10.b }], height: 260 });
+  barChart(document.getElementById("c-yr"));
+  const DS = [{ k: "BH", name: "QQQM 적립", short: "QQQM", color: "--s1" }, { k: "VT25", name: "VT25", short: "VT25", color: "--s2" }, { k: "반반", name: "반반", short: "반반", color: "--s3" }, { k: "U1", name: "U1 (기존)", short: "U1", color: "--s4" }];
+  lineChart(document.getElementById("c-dca"), { aria: "10년 적립 IRR, 시작 분기별", x: D.dca_roll.start, min: -0.1, max: 0.4, zero: 0, ticks: [-0.1, 0, 0.1, 0.2, 0.3, 0.4], yfmt: t => pctU(t, 0), tipFmt: v => pctU(v), xstep: 2, endLabels: true, endFmt: v => pctU(v, 0), height: 300, series: DS.map(s => ({ ...s, values: D.dca_roll[s.k] })) });
+}
+document.getElementById("now-date").textContent = D.now.date + " 종가 기준";
+document.getElementById("now-lev").textContent = D.now.lev + "배";
+document.getElementById("now-vol").textContent = (D.now.vol * 100).toFixed(1) + "%";
+document.getElementById("now-qld").textContent = "QLD " + Math.round(D.now.lev / 2 * 100) + "%";
+document.getElementById("now-tqqq").textContent = "TQQQ " + Math.round(D.now.lev / 3 * 100) + "%";
+heat(document.getElementById("c-grid"));
+draw();
+let rt; new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(draw, 120); }).observe(document.querySelector(".wrap"));
+</script>
