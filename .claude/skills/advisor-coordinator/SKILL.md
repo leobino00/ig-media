@@ -11,6 +11,7 @@ description: 연금저축-ISA-해외계좌 전체를 합산 점검하고 계좌 
 2. `claude/advisor/계좌-제약.md` — 특히 **자산배치 원칙** 절
 3. `claude/advisor/프로필.md` — 전 계좌
 4. `claude/판정기록부.md` — 전체
+5. `claude/advisor/연동/사용자전략-QQQM-TQQQ.md` — **사용자 QQQM·TQQQ 전략. 매 발언마다 대조하고 「전략 대조」 블록을 붙인다** (PROTOCOL 부칙 7)
 
 계좌코드 `ALL`. 판정ID는 `YYYY-MM-DD-ALL-NNN`.
 

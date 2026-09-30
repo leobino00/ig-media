@@ -10,6 +10,7 @@ description: 해외주식 개별종목을 검토해 매수-보유-매도를 판�
 1. `claude/advisor/PROTOCOL.md` — 5단계 공용 규칙. **이 스킬은 P1과 P3만 규정한다. P2·P4·P5는 프로토콜 그대로 따르고 여기에 다시 쓰지 않는다.**
 2. `claude/advisor/계좌-제약.md` — GLB 절
 3. `claude/advisor/프로필.md` — GLB 절
+4. `claude/advisor/연동/사용자전략-QQQM-TQQQ.md` — **사용자 QQQM·TQQQ 전략. 매 발언마다 대조하고 「전략 대조」 블록을 붙인다** (PROTOCOL 부칙 7)
 
 계좌코드 `GLB`. 판정ID는 `YYYY-MM-DD-GLB-NNN`.
 

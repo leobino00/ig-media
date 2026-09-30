@@ -10,6 +10,7 @@ description: ISA 계좌에 무엇을 담고 만기를 어떻게 처리할지 판
 1. `claude/advisor/PROTOCOL.md` — 5단계 공용 규칙. **이 스킬은 P1과 P3만 규정한다. P2·P4·P5는 프로토콜 그대로 따르고 여기에 다시 쓰지 않는다.**
 2. `claude/advisor/계좌-제약.md` — ISA 절
 3. `claude/advisor/프로필.md` — ISA 절
+4. `claude/advisor/연동/사용자전략-QQQM-TQQQ.md` — **사용자 QQQM·TQQQ 전략. 매 발언마다 대조하고 「전략 대조」 블록을 붙인다** (PROTOCOL 부칙 7)
 
 프로필 ISA 절, 특히 **개설일과 만기일**이 비어 있으면 P3로 가지 않는다. 만기일 없이는 이 계좌의 투자 지평을 알 수 없고, 지평을 모르면 어떤 상품도 적합한지 판정할 수 없다.
 
