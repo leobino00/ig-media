@@ -146,3 +146,20 @@ def vt2(df, target=0.25, lmax=3.0, lookback=20, step=0.5, trend=None, off_cap=0.
     w = pd.DataFrame(0.0, index=df.index, columns=["Q", "Q2", "Q3"])
     w["Q3"] = L / 3.0
     return emit(df, w)
+
+
+def vt3(df, target=0.25, lmax=2.0, lookback=40, step=0.5, sleeve="Q3", rebalance="weekly"):
+    """VT 구현 방식 검증용. sleeve: Q(1배, lmax≤1)·Q2(QLD, 비중 L/2)·Q3(TQQQ, 비중 L/3).
+    rebalance: 'weekly' = 매주 금요일 목표비중으로 되돌림 · 'change' = L이 바뀔 때만 (vt2와 같음, 비중 드리프트 허용)."""
+    rv = df.r.rolling(lookback).std() * np.sqrt(252)
+    L = (target / rv).clip(0, lmax).fillna(0.0)
+    fri = df.index.isin(df.index.to_series().groupby(df.index.to_period("W")).max().values)
+    L = L.where(fri).ffill().fillna(0.0)
+    L = (L / step).round() * step
+    mult = {"Q": 1.0, "Q2": 2.0, "Q3": 3.0}[sleeve]
+    w = pd.DataFrame(0.0, index=df.index, columns=["Q", "Q2", "Q3"])
+    w[sleeve] = L / mult
+    if rebalance == "change":
+        return emit(df, w)
+    t = w.copy(); t[~fri] = np.nan; t.iloc[0] = w.iloc[0]
+    return t
