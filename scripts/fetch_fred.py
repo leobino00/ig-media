@@ -187,7 +187,7 @@ def try_factset() -> tuple[float | None, str | None]:
 
 YAHOO_FIELDS: dict = {}   # 심볼별로 어느 가격 필드를 썼는지 (adjclose / close) — 감사 F074
 
-def fetch_yahoo(sym: str, range_: str = "1y") -> list[tuple[str, float]]:
+def fetch_yahoo(sym: str, range_: str = "1y", prefer_adj: bool = True) -> list[tuple[str, float]]:
     """Yahoo Finance chart API (키 불필요). 일봉. **수정종가(adjclose)** 를 우선 쓴다 —
     채점규칙 §2의 r_idx 정의(QQQ 수정종가)와 맞추기 위해서다. 지수(^NDX·^VIX)는 adjclose=close."""
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range={range_}&interval=1d"
@@ -198,13 +198,45 @@ def fetch_yahoo(sym: str, range_: str = "1y") -> list[tuple[str, float]]:
     ts = res["timestamp"]
     adj = ((res["indicators"].get("adjclose") or [{}])[0] or {}).get("adjclose")
     closes = res["indicators"]["quote"][0]["close"]
-    field = "adjclose" if adj and any(v is not None for v in adj) else "close"
+    field = "adjclose" if prefer_adj and adj and any(v is not None for v in adj) else "close"
     vals = adj if field == "adjclose" else closes
     YAHOO_FIELDS[sym] = field
     rows = [(dt.datetime.utcfromtimestamp(t).date().isoformat(), float(c)) for t, c in zip(ts, vals) if c is not None]
     if not rows:
         raise RuntimeError(f"yahoo {sym}: 0 rows")
     return rows
+
+U1_TQQQ_ATH_SEED = ("2026-06-02", 87.22)   # 사용자 전략 원문(나스닥 적립 실행안 2026-09-22)의 전고점 — 종가 기준
+OPP_WATCH = (("WTI", "CL=F"), ("GOLD", "GC=F"), ("COPPER", "HG=F"))
+
+def u1_block(basis):
+    """PROTOCOL 부칙 7·8 — U1(TQQQ −50%) 신호 거리와 원자재 관측. 판정하지 않는다. 값만 준다."""
+    out, errs = {}, []
+    try:
+        rows = truncate(fetch_yahoo("TQQQ", "2y", prefer_adj=False), basis)   # 분할 조정 종가 (배당 미조정 — 원문과 같은 기준)
+        last_d, last_c = rows[-1]
+        ath_d, ath_c = max(((d, c) for d, c in rows if d >= "2025-01-01"), key=lambda x: x[1])
+        if U1_TQQQ_ATH_SEED[1] > ath_c:
+            ath_d, ath_c = U1_TQQQ_ATH_SEED
+        out["TQQQ"] = {"last": (last_d, round(last_c, 2)), "ath_close": (ath_d, round(ath_c, 2)),
+                       "dd_pct": round((last_c / ath_c - 1) * 100, 2),
+                       "signal_price": round(ath_c * 0.5, 2), "report_price_x0.6": round(ath_c * 0.6, 2),
+                       "to_signal_pct": round((ath_c * 0.5 / last_c - 1) * 100, 2),
+                       "signal": last_c <= ath_c * 0.5, "report": last_c <= ath_c * 0.6,
+                       "source": "Yahoo close (B)",
+                       "note": "전고점은 2025-01 이후 최고 종가와 원문 시드 87.22 중 큰 값. 탐색 창 2년 — 원문 규칙은 역대 최고 종가"}
+    except Exception as e:
+        errs.append(f"u1 TQQQ: {e}")
+    for code, sym in OPP_WATCH:
+        try:
+            rows = truncate(fetch_yahoo(sym, "6mo", prefer_adj=False), basis)
+            now = rows[-1]; m1 = rows[-22] if len(rows) > 22 else rows[0]; m3 = rows[-64] if len(rows) > 64 else rows[0]
+            out[code] = {"last": (now[0], round(now[1], 2)),
+                         "chg_1m_pct": round((now[1] / m1[1] - 1) * 100, 2), "chg_3m_pct": round((now[1] / m3[1] - 1) * 100, 2),
+                         "source": f"Yahoo {sym} (B)"}
+        except Exception as e:
+            errs.append(f"opp {code}: {e}")
+    return out, errs
 
 def fetch_stooq(sym: str) -> list[tuple[str, float]]:
     """stooq 일봉 CSV (키 불필요). sym 예: qqq.us"""
@@ -335,6 +367,8 @@ def main(out_dir: str, basis: str | None = None):
     mkt = market(px, series.get("DEXKOUS", []), ref, ndx=series.get("NASDAQ100"), dxy=series.get("DTWEXBGS"), px_src=px_src)
     if supplement.get("NASDAQ100", {}).get("yahoo_added") and mkt.get("index_source"):
         mkt["index_source"] += f" + Yahoo ^NDX({supplement['NASDAQ100']['yahoo_added'][-1][0]})"
+    u1, u1_err = u1_block(basis)
+    errors.extend(u1_err)
     fs, fs_err = try_factset()
     if fs_err: errors.append(fs_err)
     out = {"fetched_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
@@ -346,6 +380,7 @@ def main(out_dir: str, basis: str | None = None):
            "last_values": {k: (v[-1] if v else None) for k, v in series.items()},
            "derived": derive(series, ref),
            "market": mkt,
+           "u1_opp": u1,
            "factset_surprise_pct": fs,
            "errors": errors,
            "raw_recent": {k: v[-70:] for k, v in series.items()}}
