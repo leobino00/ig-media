@@ -1,0 +1,290 @@
+<title>반반안 운용 흐름도</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 한 줄 폭 기술 노트. 전체 구조 → 주간 루프 → 세 시장 국면 → 이벤트 순서. 도식은 본문 폭 SVG */
+:root {
+  --bg: #f5f6f7; --surface: #fcfcfb; --fg: #14171b; --fg2: #4d535b; --muted: #7b828b; --rule: #dde0e4;
+  --accent: #c24e1c; --vt: #2a78d6; --u1: #eda100; --cash: #7b828b; --pen: #1baf7a;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --surface: #1a1c1f; --fg: #f2f3f4; --fg2: #c1c5ca; --muted: #8f959c; --rule: #2e3237;
+  --accent: #f07a45; --vt: #3987e5; --u1: #c98500; --cash: #8f959c; --pen: #199e70; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1a1c1f; --fg: #f2f3f4; --fg2: #c1c5ca; --muted: #8f959c; --rule: #2e3237;
+  --accent: #f07a45; --vt: #3987e5; --u1: #c98500; --cash: #8f959c; --pen: #199e70; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 900px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 44px; }
+h1, h2 { margin: 0; text-wrap: balance; line-height: 1.3; }
+h1 { font-size: clamp(24px, 5vw, 32px); }
+h2 { font-size: 20px; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 14px; min-width: 0; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 12px 10px; display: grid; gap: 10px; min-width: 0; }
+figure svg { width: 100%; height: auto; max-width: 100%; display: block; font-family: var(--f-body); font-size: 12px; }
+figure svg .mono { font-family: var(--f-mono); }
+figure svg .k { fill: var(--muted); font-size: 11px; }
+figure svg .t { fill: var(--fg); font-weight: 500; }
+figure svg .box { fill: var(--surface); stroke: currentColor; stroke-width: 1.2; }
+figure svg .vt { stroke: var(--vt); } figure svg .u1 { stroke: var(--u1); } figure svg .pen { stroke: var(--pen); } figure svg .cash { stroke: var(--cash); stroke-dasharray: 4 3; }
+figure svg .fvt { fill: var(--vt); } figure svg .fu1 { fill: var(--u1); } figure svg .fpen { fill: var(--pen); }
+figure svg .edge { fill: none; stroke: currentColor; stroke-width: 1.2; }
+figure svg .edge.vt { stroke: var(--vt); } figure svg .edge.u1 { stroke: var(--u1); } figure svg .edge.pen { stroke: var(--pen); } figure svg .edge.acc { stroke: var(--accent); stroke-width: 1.8; }
+figure svg .lbl { fill: var(--fg2); font-size: 11px; }
+figure svg .hl { fill: var(--accent); font-weight: 700; }
+figcaption { font-size: 13px; color: var(--fg2); padding: 0 6px; max-width: 76ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--fg2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; } .legend i { width: 14px; height: 3px; border-radius: 2px; }
+.tbl { overflow-x: auto; } table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 620px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 500; }
+td:first-child { font-weight: 700; white-space: nowrap; }
+code { font-family: var(--f-mono); font-size: .92em; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: 1px 5px; border-radius: 4px; }
+.note { font-size: 13px; color: var(--muted); max-width: 72ch; }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <div class="eyebrow">ALL-008 · 사용자 결정 #10 · 2026-09-30</div>
+    <h1>반반안 운용 흐름도</h1>
+    <p>해외 과세계좌(GLB)를 두 갈래로 나눈다. 한쪽은 매주 변동성으로 레버리지를 조절하는 VT25 슬리브, 다른 쪽은 QQQM을 들고 있다가 TQQQ가 반토막 나면 절반을 옮기는 U1이다. 둘은 서로 다른 신호로 움직이고, 폭락장에서 한쪽이 줄일 때 다른 쪽이 들어간다.</p>
+    <div class="legend"><span><i style="background:var(--vt)"></i>VT25 슬리브</span><span><i style="background:var(--u1)"></i>U1 (QQQM·TQQQ)</span><span><i style="background:var(--pen)"></i>연금·ISA</span><span><i style="background:var(--cash);height:0;border-top:3px dashed var(--cash)"></i>현금·국채</span><span><i style="background:var(--accent)"></i>이번 결정으로 바뀐 것</span></div>
+  </header>
+
+  <section>
+    <h2>1. 돈이 어디로 가는가</h2>
+    <figure>
+      <svg viewBox="0 0 860 420" role="img" aria-label="계좌 구조: HYT 매도대금이 GLB QQQM 28주가 되고, 7주는 VT25 슬리브(QLD와 SGOV), 14주는 12월 연금저축으로, 7주는 U1 연료로 남는다. 세액공제 환급금과 스팩 회수금은 QQQM으로 돌아온다.">
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          <marker id="avt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--vt)"/></marker>
+          <marker id="au1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--u1)"/></marker>
+          <marker id="apen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--pen)"/></marker>
+          <marker id="aacc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+        </defs>
+        <!-- 원천 -->
+        <rect class="box" x="20" y="170" width="130" height="56" rx="6"/>
+        <text class="t" x="85" y="193" text-anchor="middle">HYT 매도대금</text>
+        <text class="k mono" x="85" y="211" text-anchor="middle">$8,741 · 10/01</text>
+        <path class="edge" d="M150,198 H220" marker-end="url(#a)"/>
+        <text class="lbl" x="185" y="190" text-anchor="middle">QQQM 28주</text>
+        <!-- GLB -->
+        <rect x="222" y="40" width="300" height="340" rx="10" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="6 4"/>
+        <text class="k" x="236" y="60">GLB 해외 과세계좌 (신한)</text>
+        <!-- 슬리브 -->
+        <rect class="box vt" x="250" y="80" width="250" height="104" rx="6"/>
+        <text class="t" x="262" y="102">VT25 슬리브 · QQQM 7주분</text>
+        <text class="k mono" x="262" y="120">≈ $2,130 (289만원)</text>
+        <rect class="box vt" x="262" y="132" width="110" height="38" rx="4"/>
+        <text class="t mono" x="317" y="150" text-anchor="middle">QLD  L/2</text>
+        <text class="k mono" x="317" y="164" text-anchor="middle">L=1.5 → 75%</text>
+        <rect class="box cash" x="380" y="132" width="108" height="38" rx="4"/>
+        <text class="t mono" x="434" y="150" text-anchor="middle">SGOV</text>
+        <text class="k mono" x="434" y="164" text-anchor="middle">1−L/2 → 25%</text>
+        <!-- U1 -->
+        <rect class="box u1" x="250" y="212" width="250" height="150" rx="6"/>
+        <text class="t" x="262" y="234">U1 · QQQM 21주 → 12/02 후 7주</text>
+        <rect class="box u1" x="262" y="248" width="110" height="38" rx="4"/>
+        <text class="t mono" x="317" y="266" text-anchor="middle">QQQM</text>
+        <text class="k mono" x="317" y="280" text-anchor="middle">평소 100%</text>
+        <rect class="box u1" x="380" y="248" width="108" height="38" rx="4" stroke-dasharray="4 3"/>
+        <text class="t mono" x="434" y="266" text-anchor="middle">TQQQ</text>
+        <text class="k mono" x="434" y="280" text-anchor="middle">신호 시 절반</text>
+        <path class="edge u1" d="M372,267 H378" marker-end="url(#au1)"/>
+        <text class="k" x="262" y="312">신호: TQQQ ≤ 전고점 × 0.5 ($43.61)</text>
+        <text class="k" x="262" y="330">매도: 전고점 · ×1.25 · ×1.5 에서 1/3씩</text>
+        <text class="k" x="262" y="348">보호: 분할 중 목표 × 0.9 아래면 전량</text>
+        <!-- 이번 결정 화살 -->
+        <path class="edge acc" d="M300,212 V184" marker-end="url(#aacc)"/>
+        <text class="hl" x="310" y="202">10/05 7주 전환</text>
+        <!-- 연금 -->
+        <rect class="box pen" x="600" y="212" width="230" height="64" rx="6"/>
+        <text class="t" x="612" y="234">연금저축 600만원 (PEN-005)</text>
+        <text class="k mono" x="612" y="252">133690 320만 + 251350 280만</text>
+        <text class="k" x="612" y="268">12/02 QQQM 14주 매도·환전</text>
+        <path class="edge pen" d="M500,244 H598" marker-end="url(#apen)"/>
+        <text class="lbl" x="549" y="238" text-anchor="middle">14주</text>
+        <!-- ISA 장기 -->
+        <rect class="box pen" x="600" y="300" width="230" height="56" rx="6" stroke-dasharray="4 3"/>
+        <text class="t" x="612" y="322">ISA 133690 (ALL-005, 2029~)</text>
+        <text class="k" x="612" y="340">U1 연료의 장기 행선 — 2029 전 재판정</text>
+        <path class="edge pen" d="M500,330 H598" stroke-dasharray="4 3" marker-end="url(#apen)"/>
+        <!-- 유입 -->
+        <rect class="box" x="600" y="80" width="230" height="64" rx="6"/>
+        <text class="t" x="612" y="102">신규 유입 (연 1회·소액)</text>
+        <text class="k" x="612" y="120">세액공제 환급 79만 (2027 봄, K10)</text>
+        <text class="k" x="612" y="136">스팩 회수금 (월 30만 적립분)</text>
+        <path class="edge u1" d="M600,112 H560 V267 H500" marker-end="url(#au1)"/>
+        <text class="lbl" x="566" y="176">QQQM 적립</text>
+        <text class="lbl" x="566" y="190">(U1 규칙 1)</text>
+      </svg>
+      <figcaption>10/01 QQQM 28주가 세 갈래로 갈린다. 7주는 10/05 VT25 슬리브로(이번 결정), 14주는 12/02 연금저축으로, 남는 7주가 U1 연료다. 새 돈은 환급금과 스팩 회수금뿐이고 U1 규칙대로 QQQM으로 간다. 슬리브에는 새 돈이 들어가지 않는다.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>2. 매주 금요일 밤에 하는 일</h2>
+    <figure>
+      <svg viewBox="0 0 860 300" role="img" aria-label="주간 루프: 금요일 종가로 QQQ 40일 변동성을 재고 L을 정한다. L이 지난주와 같으면 아무것도 하지 않고, 다르면 월요일에 QLD 비중을 L/2로 맞춘다. 같은 점검에서 TQQQ 전고점 대비 거리로 U1 신호를 본다.">
+        <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <rect class="box" x="20" y="40" width="150" height="60" rx="6"/>
+        <text class="t" x="95" y="64" text-anchor="middle">금요일 종가</text>
+        <text class="k" x="95" y="82" text-anchor="middle">주간 트리거 점검 루틴</text>
+        <!-- VT 가지 -->
+        <path class="edge vt" d="M170,60 H210" marker-end="url(#b)"/>
+        <rect class="box vt" x="212" y="30" width="170" height="60" rx="6"/>
+        <text class="t" x="297" y="52" text-anchor="middle">QQQ 40일 변동성 σ</text>
+        <text class="k mono" x="297" y="72" text-anchor="middle">지금 16.6%</text>
+        <path class="edge vt" d="M382,60 H422" marker-end="url(#b)"/>
+        <rect class="box vt" x="424" y="30" width="170" height="60" rx="6"/>
+        <text class="t mono" x="509" y="52" text-anchor="middle">L = min(2, 0.25/σ)</text>
+        <text class="k mono" x="509" y="72" text-anchor="middle">0.5 단위 → 1.5</text>
+        <path class="edge vt" d="M594,60 H634" marker-end="url(#b)"/>
+        <polygon class="box vt" points="700,30 770,60 700,90 630,60"/>
+        <text class="t" x="700" y="64" text-anchor="middle">L 바뀜?</text>
+        <path class="edge vt" d="M700,90 V120" marker-end="url(#b)"/>
+        <text class="lbl" x="710" y="110">예 (연 6회쯤)</text>
+        <rect class="box vt" x="620" y="122" width="160" height="56" rx="6"/>
+        <text class="t" x="700" y="144" text-anchor="middle">월요일 QLD = L/2</text>
+        <text class="k" x="700" y="162" text-anchor="middle">나머지 SGOV · 지정가</text>
+        <path class="edge vt" d="M770,60 H810 V150 H782" marker-end="url(#b)"/>
+        <text class="lbl" x="814" y="100">아니오</text>
+        <text class="lbl" x="814" y="114">→ 손대지</text>
+        <text class="lbl" x="814" y="128">않음</text>
+        <!-- U1 가지 -->
+        <path class="edge u1" d="M95,100 V200 H210" marker-end="url(#b)"/>
+        <rect class="box u1" x="212" y="170" width="170" height="60" rx="6"/>
+        <text class="t" x="297" y="192" text-anchor="middle">TQQQ 종가 / 전고점</text>
+        <text class="k mono" x="297" y="212" text-anchor="middle">$77.46 / $87.22</text>
+        <path class="edge u1" d="M382,200 H422" marker-end="url(#b)"/>
+        <polygon class="box u1" points="509,170 594,200 509,230 424,200"/>
+        <text class="t" x="509" y="204" text-anchor="middle">≤ ×0.5?</text>
+        <path class="edge u1" d="M594,200 H634" marker-end="url(#b)"/>
+        <rect class="box u1" x="636" y="172" width="150" height="56" rx="6"/>
+        <text class="t" x="711" y="194" text-anchor="middle">다음날 QQQM 절반</text>
+        <text class="t" x="711" y="212" text-anchor="middle">→ TQQQ</text>
+        <text class="lbl" x="509" y="252" text-anchor="middle">×0.6 이하면 「접근」 보고 · K1 예탁금 확인</text>
+        <!-- 감시 -->
+        <text class="k" x="20" y="285">같은 점검에서: 원화 낙폭 −25% (coordinator 소집) · 슬리브 − QQQM 누적차 −10%p (무효화 ③) · 설계 낙폭 −30% (12/01)</text>
+      </svg>
+      <figcaption>두 가지가 한 점검에서 같이 돌아간다. 위는 VT25(변동성 → L → 필요할 때만 매매), 아래는 U1(전고점 대비 거리). 둘 다 예측이 없다. 숫자가 임계치를 넘으면 정해진 행동을 한다.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>3. 시장이 횡보·상승·하락할 때 각 갈래가 하는 일</h2>
+    <figure>
+      <svg viewBox="0 0 860 560" role="img" aria-label="세 국면별 대응. 횡보: 변동성이 낮아 VT25는 1.5~2배를 유지하고 U1은 대기. 상승: 변동성이 낮으면 2배까지, 급등하면 변동성이 올라 레버리지가 내려간다. U1은 보유 중이면 목표가에서 1/3씩 판다. 하락: 변동성이 뛰면 VT25가 0.5~1배로 내려가고, 반토막이 나면 U1이 들어간다. 회복기에 변동성이 식으면 VT25가 다시 올라간다.">
+        <defs><marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <!-- 열 헤더 -->
+        <text class="k" x="30" y="30">국면</text>
+        <text class="k" x="150" y="30">시장이 보이는 신호</text>
+        <text class="fvt" x="380" y="30" font-weight="700">VT25 슬리브가 하는 일</text>
+        <text class="fu1" x="630" y="30" font-weight="700">U1이 하는 일</text>
+        <line x1="20" y1="40" x2="840" y2="40" stroke="currentColor" stroke-width="1"/>
+        <!-- 횡보 -->
+        <rect x="20" y="52" width="820" height="120" rx="8" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <text class="t" x="30" y="76" font-size="14">횡보</text>
+        <polyline points="30,120 50,112 70,124 90,114 110,122 130,116" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text class="lbl" x="150" y="76">변동성 낮음 (σ 12~17%)</text>
+        <text class="lbl" x="150" y="94">TQQQ 전고점 근처 오르내림</text>
+        <text class="lbl" x="150" y="112">신호 없음</text>
+        <rect class="box vt" x="380" y="60" width="230" height="100" rx="6"/>
+        <text class="t" x="392" y="82">L = 1.5 ~ 2 유지</text>
+        <text class="lbl" x="392" y="100">QLD 75~100% · 매매 거의 없음</text>
+        <text class="lbl" x="392" y="118">횡보에서 2배 ETF는 조금씩 깎이나</text>
+        <text class="lbl" x="392" y="136">(변동성 감쇠) σ가 낮아 작다</text>
+        <text class="lbl" x="392" y="154">가장 편한 국면</text>
+        <rect class="box u1" x="630" y="60" width="200" height="100" rx="6"/>
+        <text class="t" x="642" y="82">대기</text>
+        <text class="lbl" x="642" y="100">QQQM 100% 보유</text>
+        <text class="lbl" x="642" y="118">새 돈(환급·스팩)은 QQQM</text>
+        <text class="lbl" x="642" y="136">할 일 없음</text>
+        <!-- 상승 -->
+        <rect x="20" y="184" width="820" height="150" rx="8" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <text class="t" x="30" y="208" font-size="14">상승</text>
+        <polyline points="30,290 50,280 70,274 90,262 110,252 130,236" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text class="lbl" x="150" y="208">완만: σ 낮음 → L 2배</text>
+        <text class="lbl" x="150" y="226">급등: σ 오름 → L 내려감</text>
+        <text class="lbl" x="150" y="244">(2020 V자에서 −14.5%p 뒤진 이유)</text>
+        <text class="lbl" x="150" y="262">과열 트리거 T5: 3개월 +25%</text>
+        <text class="lbl" x="150" y="280">TQQQ 새 전고점 갱신</text>
+        <rect class="box vt" x="380" y="192" width="230" height="130" rx="6"/>
+        <text class="t" x="392" y="214">완만하면 최대 2배로 올린다</text>
+        <text class="lbl" x="392" y="232">가장 많이 버는 국면 (2013·2017)</text>
+        <text class="t" x="392" y="256">급등이면 오히려 줄인다</text>
+        <text class="lbl" x="392" y="274">σ가 뛰면 L 1 이하 — 규칙대로</text>
+        <text class="lbl" x="392" y="292">「더 오를 것 같아서」 L을 올리지</text>
+        <text class="lbl" x="392" y="310">않는다 (규칙 5)</text>
+        <rect class="box u1" x="630" y="192" width="200" height="130" rx="6"/>
+        <text class="t" x="642" y="214">미보유: 전고점만 갱신</text>
+        <text class="lbl" x="642" y="232">신호가 = 새 전고점 × 0.5</text>
+        <text class="t" x="642" y="256">TQQQ 보유 중이면</text>
+        <text class="lbl" x="642" y="274">목표가(진입 시 전고점) 1/3</text>
+        <text class="lbl" x="642" y="292">×1.25 에서 1/3 · ×1.5 전량</text>
+        <text class="lbl" x="642" y="310">매도분은 QQQM으로</text>
+        <!-- 하락 -->
+        <rect x="20" y="346" width="820" height="200" rx="8" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <text class="t" x="30" y="370" font-size="14">하락</text>
+        <polyline points="30,400 50,412 70,440 90,470 110,500 130,480 150,520" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text class="lbl" x="170" y="370">σ 급등 (25~60%)</text>
+        <text class="lbl" x="170" y="388">T1: 달러 −10% / −20%</text>
+        <text class="lbl" x="170" y="406">원화 낙폭 −25% → 소집</text>
+        <text class="lbl" x="170" y="424">TQQQ ×0.6 → 「접근」</text>
+        <text class="lbl" x="170" y="442">TQQQ ×0.5 → 「신호」</text>
+        <text class="lbl" x="170" y="470">회복기: σ 식음 → L 복귀</text>
+        <text class="lbl" x="170" y="488">T6: 200일선·VIX&lt;25·+15%</text>
+        <rect class="box vt" x="380" y="354" width="230" height="182" rx="6"/>
+        <text class="t" x="392" y="376">σ가 뛰는 만큼 L을 내린다</text>
+        <text class="lbl" x="392" y="394">L 0.5~1 → QLD 25~50%, SGOV 늘림</text>
+        <text class="lbl" x="392" y="412">첫 주 급락은 못 피한다 (2020·2022</text>
+        <text class="lbl" x="392" y="430">QQQ보다 2~3%p 더 빠짐)</text>
+        <text class="lbl" x="392" y="448">길게 가는 약세장에서 방어</text>
+        <text class="lbl" x="392" y="466">(닷컴 −40% vs QQQ −83%)</text>
+        <text class="t" x="392" y="492">회복기: σ가 식으면 자동 상향</text>
+        <text class="lbl" x="392" y="510">바닥을 맞히지 않는다. 변동성이</text>
+        <text class="lbl" x="392" y="528">낮아진 뒤 따라 들어간다</text>
+        <rect class="box u1" x="630" y="354" width="200" height="182" rx="6"/>
+        <text class="t" x="642" y="376">×0.6: 예탁금 1,000만 확인</text>
+        <text class="lbl" x="642" y="394">12/02 후 GLB ≈580만 (K1)</text>
+        <text class="t" x="642" y="418">×0.5 신호 다음 날</text>
+        <text class="lbl" x="642" y="436">QQQM 7주의 절반 → TQQQ</text>
+        <text class="lbl" x="642" y="454">기다리지 않는다 (규칙 3)</text>
+        <text class="lbl" x="642" y="472">목표가 = 그때 전고점</text>
+        <text class="t" x="642" y="496">L자면 옮긴 절반 소멸 위험</text>
+        <text class="lbl" x="642" y="514">2000년형: 목표가 미도달로</text>
+        <text class="lbl" x="642" y="532">전략 정지 (반대논리 3)</text>
+        <!-- 상호보완 화살 -->
+        <path class="edge acc" d="M610,445 H628" marker-end="url(#c)"/>
+      </svg>
+      <figcaption>하락에서 둘이 엇갈린다. 변동성이 뛰면 VT25는 레버리지를 낮추고, 반토막이 나면 U1이 레버리지를 산다. 회복기에 변동성이 식으면 VT25가 다시 올라가고 U1은 목표가에서 판다. 상승에서는 반대다. VT25가 2배를 들고 U1은 기다린다.</figcaption>
+    </figure>
+    <p class="note">붉은 화살표 자리가 이 조합의 핵심이다. 같은 폭락에서 한쪽은 줄이고 한쪽은 들어간다. 백테스트에서 반반의 10년 적립 중앙값(20.1%)이 VT25 단독(20.5%)에 가깝고 최근 10년(30.3%)에는 U1 쪽 이득을 가져온 이유다.</p>
+  </section>
+
+  <section>
+    <h2>4. 날짜가 정해진 일</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>날짜</th><th>행동</th><th>확인·조건</th></tr></thead>
+      <tbody>
+        <tr><td>10/01 (수)</td><td>QQQM 28주 매수 (GLB-008)</td><td>체결 캡처 → 기록부</td></tr>
+        <tr><td>10/02 (금)</td><td>첫 VT25 신호 계산</td><td>σ40 → L (지금 1.5)</td></tr>
+        <tr><td>10/05 (월)</td><td><b>QQQM 7주 매도 → QLD 75% + SGOV 25%</b></td><td>GLB ≈1,156만 > 1,000만 → 첫 레버리지 매수 가능. 체결 캡처 → <code>VT25-슬리브.json</code></td></tr>
+        <tr><td>매주 금</td><td>트리거 점검 4-3: L · 매매 필요 · 누적차</td><td>L 바뀌면 메일 제목 「VT25 매매」</td></tr>
+        <tr><td>~11/27</td><td>신한에 예탁금 요건 확인</td><td>「매수마다」면 12/02 이후 L 상향 매수 불가, 하향만</td></tr>
+        <tr><td>12/01</td><td>설계 낙폭 재계산 (슬리브 포함)</td><td>&lt; −30% → 슬리브 해체 (무효화 ②)</td></tr>
+        <tr><td>12/02</td><td>QQQM 14주 매도·환전 → 연금저축 (GLB-009)</td><td>남는 QQQM 7주 = U1 연료</td></tr>
+        <tr><td>2027 봄</td><td>환급금 79만 → QQQM (K10)</td><td>coordinator 확인</td></tr>
+        <tr><td>2027-09-01</td><td>미국 상한·MDD 재판정</td><td>레버리지 명목 정의 확정 · 결정 #10 상시 승격 여부 택일</td></tr>
+        <tr><td>2027-09-30</td><td>1년 채점</td><td>슬리브 vs QQQM vs U1 (부칙 8 요건 4)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>5. 하지 않는 것</h2>
+    <p>뉴스·전망·「이번엔 다르다」로 L을 바꾸지 않는다. U1 신호 전에 미리 들어가지 않고, 신호 뒤에 반등을 확인하지 않는다. 슬리브에 새 돈을 넣지 않는다. 두 갈래 사이에서 돈을 옮기지 않는다 (12/02 연금 조달은 U1 쪽 QQQM에서만). 이 중 하나라도 깨면 백테스트는 근거가 아니게 되고, 기록부에 재량으로 남는다.</p>
+  </section>
+</div>
