@@ -408,7 +408,7 @@ def main(out_dir: str, basis: str | None = None):
                                 "yahoo_added": [], "error": str(e)}
             errors.append(f"supplement {ysym}: {e}")
     px, px_src = {}, {}
-    for sym, code, rng in (("QQQ", "QQQ", "10y"), ("QQQE", "QQQE", "1y")):   # max는 월봉으로 돌아온다 (결함 #23)
+    for sym, code, rng in (("QQQ", "QQQ", "10y"), ("QQQE", "QQQE", "1y")):   # max는 월봉으로 돌아온다 (결함 #26)
         try:
             px[code] = truncate(fetch_yahoo(sym, rng), basis); px_src[code] = "Yahoo"
         except Exception as e:
