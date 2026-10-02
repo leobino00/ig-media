@@ -165,6 +165,11 @@ def to_markdown(out: dict) -> str:
         d1 = m["D1_USDKRW"]; s.append(f"| D1 | 원달러 5년 밴드 | {d1['last']} | {d1['5y_low']} ~ {d1['5y_high']} | 위치 {d1['band_pos_pct']}% |")
     if m.get("KRW_drawdown_(부칙4)"):
         k = m["KRW_drawdown_(부칙4)"]; s.append(f"| 부칙 4 | QQQ 원화 낙폭 | {k['last']} | 원화 사상최고 {k['ath']} (창 {k.get('ath_window_start')}~ · 환율 {k.get('fx_used_for_last')}) | **{k['drawdown_krw_pct']}% · 경보(−25%) {k['alert_(<=-25%)']}** |")
+    v = out.get("vt25", {})
+    if v and not v.get("error"):
+        s.append(f"| ALL-008 | VT25 슬리브 (QQQ σ40 {v['sigma40_pct']}%) | L **{v['L']}** (지난주 {v['prev_week']['L']}) | TQQQ {v['tqqq_weight_pct']}% · SGOV {v['sgov_weight_pct']}% | 매매 {'**필요**' if v['trade_needed'] else '없음'} |")
+    elif v:
+        s.append(f"| ALL-008 | VT25 슬리브 | 결측 | {v.get('error')} | |")
     if m.get("QQQ_price"):
         qp = m["QQQ_price"]; s.append(f"| 부칙 5 대체 | QQQ {qp['field']} ({qp['source']}) | {qp['last']} | r_idx 대체 가능 {qp['usable_for_r_idx']} | Twelve Data 불가 시만 |")
     if out.get("factset_surprise_pct") is not None:
@@ -324,6 +329,53 @@ LONG_START = "1985-01-01"          # 사상최고 탐색·원화 환산용 장�
 LONG_SERIES = ("NASDAQ100", "NASDAQCOM", "DEXKOUS")
 SUPPLEMENT = (("NASDAQ100", "^NDX"), ("VIXCLS", "^VIX"))   # FRED T−1 지연을 Yahoo 최신 종가로 보강 (감사 F060)
 
+VT25_STATE = "claude/advisor/연동/VT25-슬리브.json"   # 슬리브 보유 상태 (ALL-008 실행 후 사용자 캡처로 채움)
+
+def vt25_block(qqq_rows, basis, state_path=VT25_STATE):
+    """PROTOCOL 부칙 8 · `ALL-008` — VT25 슬리브 신호. 판정하지 않는다. 값만 준다.
+    규칙(투자처분서 §1): 금요일 종가 기준 QQQ 최근 40거래일 일간수익률 표준편차 × √252 = σ.
+    L = min(3, 0.25/σ)를 0.5 단위 반올림. TQQQ 목표비중 = L/3, 나머지 SGOV. L이 지난주와 같으면 매매 없음.
+    슬리브 vs QQQM 누적차(무효화 ③ −10%p)는 상태 파일의 보유 내역이 있을 때만 계산한다."""
+    import math, statistics
+    out = {}
+    rows = truncate(qqq_rows, basis)
+    if len(rows) < 42:
+        return {"error": "QQQ 종가 42행 미만 — 결측"}
+    closes = [c for _, c in rows]
+    rets = [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes))]
+    def L_at(end):   # end: rets 인덱스(포함) 기준 최근 40개
+        w = rets[end - 39:end + 1]
+        sigma = statistics.stdev(w) * math.sqrt(252)
+        L = min(3.0, 0.25 / sigma)
+        return sigma, round(L * 2) / 2
+    sigma, L = L_at(len(rets) - 1)
+    sigma_w, L_w = L_at(len(rets) - 6)          # 5거래일 전 (지난주 같은 요일 근사)
+    out.update({"as_of": rows[-1][0], "qqq_close": round(closes[-1], 2),
+                "sigma40_pct": round(sigma * 100, 2), "L": L, "tqqq_weight_pct": round(L / 3 * 100, 1), "sgov_weight_pct": round((1 - L / 3) * 100, 1),
+                "prev_week": {"as_of": rows[-6][0], "sigma40_pct": round(sigma_w * 100, 2), "L": L_w},
+                "trade_needed": L != L_w,
+                "rule": "L=min(3, 0.25/σ40) 0.5단위 · TQQQ=L/3 · L 변경 시만 매매 (ALL-009)",
+                "source": "Yahoo QQQ 수정종가 (B)"})
+    try:
+        if os.path.exists(state_path):
+            with open(state_path, encoding="utf-8") as f:
+                st = json.load(f)
+            out["state"] = {k: st.get(k) for k in ("entered_on", "qqqm_sold", "sleeve_usd_at_entry", "qqqm_px_at_entry", "qld_shares", "sgov_shares", "cash_usd", "last_L", "note")}
+            if st.get("qqqm_px_at_entry") and st.get("sleeve_usd_at_entry"):
+                # 벤치마크: 진입일에 같은 달러를 QQQM(≈QQQ 수익률)으로 두었을 때. QQQ 수정종가 비율로 근사.
+                ent = next((c for d, c in rows if d >= st["entered_on"]), None)
+                if ent:
+                    bench = st["sleeve_usd_at_entry"] * closes[-1] / ent
+                    out["benchmark_qqqm_usd_now"] = round(bench, 2)
+                    out["note_diff"] = "슬리브 평가액은 계좌 화면(A)에서 읽어 누적차 = 슬리브/진입액 − 벤치마크/진입액. 여기서는 벤치마크만 계산"
+        else:
+            out["state"] = None
+            out["state_note"] = f"{state_path} 없음 — 10/05 실행 전이거나 미기록. 신호만 계산"
+    except Exception as e:
+        out["state_error"] = str(e)
+    return out
+
+
 def truncate(rows, basis: str | None):
     return [r for r in rows if r[0] <= basis] if basis else rows
 
@@ -381,6 +433,7 @@ def main(out_dir: str, basis: str | None = None):
            "derived": derive(series, ref),
            "market": mkt,
            "u1_opp": u1,
+           "vt25": vt25_block(px.get("QQQ", []), basis) if px.get("QQQ") else {"error": "QQQ 시세 없음 — 결측"},
            "factset_surprise_pct": fs,
            "errors": errors,
            "raw_recent": {k: v[-70:] for k, v in series.items()}}

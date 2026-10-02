@@ -1,0 +1,14 @@
+{
+  "_설명": "ALL-009 VT25 슬리브 보유 상태. 10/05 체결 후 사용자 캡처(A)로 채워 VT25-슬리브.json으로 저장한다. 주간 점검 4-3이 읽는다. 매매(L 변경) 때마다 갱신.",
+  "entered_on": "2026-10-05",
+  "qqqm_sold": 7,
+  "qqqm_px_at_entry": null,
+  "sleeve_usd_at_entry": null,
+  "tqqq_shares": null,
+  "sgov_shares": null,
+  "cash_usd": null,
+  "last_L": 1.5,
+  "sleeve_usd_latest": null,
+  "sleeve_usd_latest_date": null,
+  "note": "누적차 = sleeve_usd_latest/sleeve_usd_at_entry − benchmark_qqqm_usd_now/sleeve_usd_at_entry. −10%p 이하 → 무효화 ③"
+}
