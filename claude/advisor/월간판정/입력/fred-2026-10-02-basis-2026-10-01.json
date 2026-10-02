@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-02 01:40",
+ "fetched_at": "2026-10-02 05:55",
  "basis": "2026-10-01",
  "series_meta": {
   "IC4WSA": {
@@ -84,14 +84,9 @@
  },
  "supplement": {
   "NASDAQ100": {
-   "fred_through": "2026-09-30",
+   "fred_through": "2026-10-01",
    "yahoo_symbol": "^NDX",
-   "yahoo_added": [
-    [
-     "2026-10-01",
-     30501.56
-    ]
-   ],
+   "yahoo_added": [],
    "note": "추가된 날짜는 Yahoo 종가(B). 그 이전은 FRED."
   },
   "VIXCLS": {
@@ -166,8 +161,8 @@
    120.33
   ],
   "NASDAQCOM": [
-   "2026-09-30",
-   26861.06
+   "2026-10-01",
+   26871.6
   ],
   "DEXKOUS": [
    "2026-09-25",
@@ -303,12 +298,12 @@
   },
   "NASDAQCOM": {
    "latest": [
-    "2026-09-30",
-    26861.06
+    "2026-10-01",
+    26871.6
    ],
    "3m_ago": [
-    "2026-07-01",
-    26040.03
+    "2026-07-02",
+    25832.67
    ]
   },
   "DEXKOUS": {
@@ -323,7 +318,7 @@
   }
  },
  "market": {
-  "index_source": "FRED NASDAQ100 + Yahoo ^NDX(2026-10-01)",
+  "index_source": "FRED NASDAQ100",
   "NDX": {
    "last": [
     "2026-10-01",
@@ -345,8 +340,8 @@
   },
   "QQQ_price": {
    "last": [
-    "2026-09-01",
-    739.77001953125
+    "2026-10-01",
+    742.030029296875
    ],
    "field": "adjclose",
    "source": "Yahoo (B)",
@@ -354,14 +349,14 @@
   },
   "C2_breadth_QQQE_over_QQQ": {
    "now": [
-    "2026-09-01",
-    0.1619
+    "2026-10-01",
+    0.1626
    ],
    "3m_ago": [
-    "2026-06-01",
-    0.164
+    "2026-07-02",
+    0.1685
    ],
-   "chg_3m_pct": -1.3
+   "chg_3m_pct": -3.52
   },
   "D3_dollar": {
    "source": "FRED DTWEXBGS",
@@ -441,13 +436,31 @@
   },
   "COPPER": {
    "last": [
-    "2026-09-30",
-    6.56
+    "2026-10-01",
+    6.48
    ],
-   "chg_1m_pct": -0.52,
-   "chg_3m_pct": 7.11,
+   "chg_1m_pct": -0.38,
+   "chg_3m_pct": 6.01,
    "source": "Yahoo HG=F (B)"
   }
+ },
+ "vt25": {
+  "as_of": "2026-10-01",
+  "qqq_close": 742.03,
+  "sigma40_pct": 14.22,
+  "L": 2.0,
+  "tqqq_weight_pct": 66.7,
+  "sgov_weight_pct": 33.3,
+  "prev_week": {
+   "as_of": "2026-09-24",
+   "sigma40_pct": 18.57,
+   "L": 1.5
+  },
+  "trade_needed": true,
+  "rule": "L=min(3, 0.25/σ40) 0.5단위 · TQQQ=L/3 · L 변경 시만 매매 (ALL-009)",
+  "source": "Yahoo QQQ 수정종가 (B)",
+  "state": null,
+  "state_note": "claude/advisor/연동/VT25-슬리브.json 없음 — 10/05 실행 전이거나 미기록. 신호만 계산"
  },
  "factset_surprise_pct": null,
  "errors": [
@@ -3684,10 +3697,6 @@
   ],
   "NASDAQCOM": [
    [
-    "2026-06-23",
-    25587.04
-   ],
-   [
     "2026-06-24",
     25476.64
    ],
@@ -3962,6 +3971,10 @@
    [
     "2026-09-30",
     26861.06
+   ],
+   [
+    "2026-10-01",
+    26871.6
    ]
   ],
   "DEXKOUS": [
