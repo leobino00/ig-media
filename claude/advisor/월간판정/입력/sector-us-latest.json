@@ -9,7 +9,7 @@
   "as_of_age_days": 2,
   "rule": "as_of_age_days가 8 이상이면 그 주 수집이 빠진 것이다 — 결측으로 다룬다"
  },
- "generated_at": "2026-10-03T10:08:35+09:00",
+ "generated_at": "2026-10-03T10:21:14+09:00",
  "benchmark": "QQQ",
  "calc": {
   "rs_window_weeks": 26,
@@ -32,7 +32,7 @@
    "grade": "A-",
    "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
    "as_of": null,
-   "fetched_at": "2026-10-03T01:07Z"
+   "fetched_at": "2026-10-03T01:20Z"
   }
  ],
  "missing": [],
@@ -958,7 +958,7 @@
   "constituents_source": "nasdaq_api",
   "constituents_grade": "A-",
   "constituents_as_of": null,
-  "constituents_fetched_at": "2026-10-03T01:07Z",
+  "constituents_fetched_at": "2026-10-03T01:20Z",
   "constituents_url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
   "constituents_tickers": [
    "AAPL",
