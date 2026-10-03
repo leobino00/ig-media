@@ -1,5 +1,5 @@
 {
- "run_at": "2026-10-02T10:41:37+09:00",
+ "run_at": "2026-10-03T10:07:09+09:00",
  "calc_version": "0.1",
  "range": "10y",
  "first_week": "2016-10-07",
@@ -95,17 +95,17 @@
   "recompute_max_rel_pct": 0.0001,
   "recompute_diffs_sample": [
    {
+    "ticker": "IGV",
+    "week": "2026-07-17",
+    "first": 0.995198,
+    "second": 0.995199,
+    "rel_pct": 0.0001
+   },
+   {
     "ticker": "XLE",
     "week": "2026-07-31",
     "first": 1.004014,
     "second": 1.004013,
-    "rel_pct": 0.0001
-   },
-   {
-    "ticker": "XLV",
-    "week": "2026-08-14",
-    "first": 0.998559,
-    "second": 0.998558,
     "rel_pct": 0.0001
    }
   ],
