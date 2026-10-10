@@ -1,31 +1,31 @@
 {
- "run_at": "2026-10-03T10:07:09+09:00",
+ "run_at": "2026-10-10T10:06:32+09:00",
  "calc_version": "0.1",
  "range": "10y",
- "first_week": "2016-10-07",
- "last_week": "2026-10-01",
+ "first_week": "2016-10-14",
+ "last_week": "2026-10-08",
  "n_weeks": 522,
  "fetch_errors": {},
  "v1_quadrant": {
-  "n_obs": 6757,
+  "n_obs": 6758,
   "horizon_weeks": 4,
   "mean_excess_by_quadrant_pct": {
-   "improving": -0.573,
-   "lagging": -0.235,
-   "leading": -0.337,
-   "weakening": -0.333
+   "improving": -0.591,
+   "lagging": -0.229,
+   "leading": -0.354,
+   "weakening": -0.325
   },
   "n_by_quadrant": {
-   "improving": 1659,
-   "lagging": 2440,
-   "leading": 1721,
-   "weakening": 937
+   "improving": 1664,
+   "lagging": 2430,
+   "leading": 1724,
+   "weakening": 940
   },
-  "leading_mean_pct": -0.337,
-  "all_mean_pct": -0.358,
-  "leading_minus_all_pp": 0.021,
+  "leading_mean_pct": -0.354,
+  "all_mean_pct": -0.364,
+  "leading_minus_all_pp": 0.01,
   "by_year_diff_pp": {
-   "2017": -0.515,
+   "2017": -0.595,
    "2018": -0.003,
    "2019": -0.501,
    "2020": 0.123,
@@ -34,7 +34,7 @@
    "2023": -0.226,
    "2024": -0.648,
    "2025": 0.165,
-   "2026": 1.111
+   "2026": 1.008
   },
   "years": 10,
   "years_positive": 3
@@ -44,8 +44,8 @@
   "n_event_weeks": 15,
   "n_other_weeks": 478,
   "leading_count_before_event": 4.4,
-  "leading_count_other": 3.462,
-  "leading_diff": 0.938,
+  "leading_count_other": 3.469,
+  "leading_diff": 0.931,
   "dispersion_before_event": 0.063,
   "dispersion_other": 0.056,
   "dispersion_diff": 0.007
@@ -76,50 +76,35 @@
    "2026"
   ],
   "pooled_and_yearly_sign_conflict": true,
-  "qqq_fwd4w_low_pct": 0.459,
-  "qqq_fwd4w_rest_pct": 1.441,
-  "low_minus_rest_pp": -0.982,
+  "qqq_fwd4w_low_pct": 0.367,
+  "qqq_fwd4w_rest_pct": 1.491,
+  "low_minus_rest_pp": -1.124,
   "by_year_diff_pp": {
-   "2022": 5.512,
+   "2022": 4.689,
    "2025": 4.182,
-   "2026": 13.527
+   "2026": 13.4
   },
   "years": 3,
   "years_positive": 3
  },
  "v4_stability": {
-  "recompute_identical": false,
+  "recompute_identical": true,
   "recompute_within_tolerance": true,
   "recompute_tolerance_pct": 0.005,
-  "recompute_n_diff_points": 2,
-  "recompute_max_rel_pct": 0.0001,
-  "recompute_diffs_sample": [
-   {
-    "ticker": "IGV",
-    "week": "2026-07-17",
-    "first": 0.995198,
-    "second": 0.995199,
-    "rel_pct": 0.0001
-   },
-   {
-    "ticker": "XLE",
-    "week": "2026-07-31",
-    "first": 1.004014,
-    "second": 1.004013,
-    "rel_pct": 0.0001
-   }
-  ],
+  "recompute_n_diff_points": 0,
+  "recompute_max_rel_pct": 0.0,
+  "recompute_diffs_sample": [],
   "source_changed_between_runs": null,
   "snapshot_compare": {
-   "file": "sector-us-2026-10-01.json",
+   "file": "sector-us-2026-10-08.json",
    "compared_points": 182,
    "max_abs_rel_change_pct": 0.0
   }
  },
  "caveat_lines": {
-  "quadrant": "10년 중 3년 양수, 전체 평균 +0.021%p (leading -0.337% vs 전체 -0.358%, n=6757, 4주 선행)",
-  "breadth": "하위 20% 주 이후 QQQ 4주 0.459% vs 나머지 1.441% (전체 차 -0.982%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
-  "drawdown": "하락 직전 leading 수 4.4개 vs 평상시 3.462개 (차 +0.938개), 분산도 차 +0.007 (사건 15주)",
-  "stability": "같은 기준일 두 번 수집 — 표시 자리수 안에서 동일(최근 13주 rs_ratio 2점이 최대 0.0001% 달랐고, 허용 0.005% 이하다. 출처·가격필드·행수는 동일) · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0% (182점)"
+  "quadrant": "10년 중 3년 양수, 전체 평균 +0.01%p (leading -0.354% vs 전체 -0.364%, n=6758, 4주 선행)",
+  "breadth": "하위 20% 주 이후 QQQ 4주 0.367% vs 나머지 1.491% (전체 차 -1.124%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
+  "drawdown": "하락 직전 leading 수 4.4개 vs 평상시 3.469개 (차 +0.931개), 분산도 차 +0.007 (사건 15주)",
+  "stability": "같은 기준일 두 번 수집·재계산 완전 동일 · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0% (182점)"
  }
 }
