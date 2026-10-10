@@ -1,11 +1,11 @@
 {
- "fetched_at": "2026-10-10 01:05",
+ "fetched_at": "2026-10-10 01:52",
  "ISM_manufacturing": {
   "value": 54.5,
   "report_month": "September 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Manufacturing PMI® at 54.5%; September 2026",
-  "fetched_at": "2026-10-10T01:05",
+  "fetched_at": "2026-10-10T01:52",
   "note": "PR Newswire 폴백"
  },
  "ISM_services": {
@@ -13,7 +13,7 @@
   "report_month": "September 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Services PMI® at 54.9%; September 2026",
-  "fetched_at": "2026-10-10T01:05",
+  "fetched_at": "2026-10-10T01:52",
   "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
@@ -21,7 +21,7 @@
   "decided_on": "2026-08-27",
   "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
   "matched": "2026 08월 27일 3.00",
-  "fetched_at": "2026-10-10T01:05"
+  "fetched_at": "2026-10-10T01:52"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
@@ -39,23 +39,11 @@
    "keyword": null,
    "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
   },
-  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/august/": {
-   "status": 200,
-   "len": 922,
-   "keyword": null,
-   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
-  },
   "https://www.prnewswire.com/news/institute-for-supply-management/": {
    "status": 200,
    "len": 242906,
    "keyword": "PMI",
    "around": "er page 100 per page Latest Oct 05, 2026, 10:00 ET Services PMI® at 54.9%; September 2026 ISM® Services PMI® Report Economic activity in the services sector continued to expand in September, say the nation's purchasing a"
-  },
-  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/services/october/": {
-   "status": 200,
-   "len": 922,
-   "keyword": null,
-   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
   },
   "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643": {
    "status": 200,

@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-10 01:05",
+ "fetched_at": "2026-10-10 01:52",
  "basis": null,
  "series_meta": {
   "IC4WSA": {
@@ -345,8 +345,8 @@
   },
   "QQQ_price": {
    "last": [
-    "2026-10-08",
-    747.5800170898438
+    "2026-10-09",
+    751.27001953125
    ],
    "field": "adjclose",
    "source": "Yahoo (B)",
@@ -354,14 +354,14 @@
   },
   "C2_breadth_QQQE_over_QQQ": {
    "now": [
-    "2026-10-08",
-    0.1619
+    "2026-10-09",
+    0.1623
    ],
    "3m_ago": [
-    "2026-07-09",
-    0.1666
+    "2026-07-10",
+    0.1662
    ],
-   "chg_3m_pct": -2.85
+   "chg_3m_pct": -2.34
   },
   "D3_dollar": {
    "source": "FRED DTWEXBGS",
@@ -405,17 +405,17 @@
  "u1_opp": {
   "TQQQ": {
    "last": [
-    "2026-10-08",
-    80.23
+    "2026-10-09",
+    81.28
    ],
    "ath_close": [
     "2026-06-02",
     87.22
    ],
-   "dd_pct": -8.01,
+   "dd_pct": -6.81,
    "signal_price": 43.61,
    "report_price_x0.6": 52.33,
-   "to_signal_pct": -45.64,
+   "to_signal_pct": -46.35,
    "signal": false,
    "report": false,
    "source": "Yahoo close (B)",
@@ -450,18 +450,18 @@
   }
  },
  "vt25": {
-  "as_of": "2026-10-08",
-  "qqq_close": 747.58,
-  "sigma40_pct": 14.59,
+  "as_of": "2026-10-09",
+  "qqq_close": 751.27,
+  "sigma40_pct": 14.37,
   "L": 1.5,
   "tqqq_weight_pct": 50.0,
   "sgov_weight_pct": 50.0,
   "prev_week": {
-   "as_of": "2026-10-01",
-   "sigma40_pct": 14.22,
-   "L": 2.0
+   "as_of": "2026-10-02",
+   "sigma40_pct": 14.36,
+   "L": 1.5
   },
-  "trade_needed": true,
+  "trade_needed": false,
   "rule": "L=min(3, 0.25/σ40) 0.5단위 · TQQQ=L/3 · L 변경 시만 매매 (ALL-009)",
   "source": "Yahoo QQQ 수정종가 (B)",
   "state": null,
