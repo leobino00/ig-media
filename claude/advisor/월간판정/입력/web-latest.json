@@ -1,11 +1,11 @@
 {
- "fetched_at": "2026-10-24 00:58",
+ "fetched_at": "2026-10-31 01:11",
  "ISM_manufacturing": {
   "value": 54.5,
   "report_month": "September 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Manufacturing PMI® at 54.5%; September 2026",
-  "fetched_at": "2026-10-24T00:58",
+  "fetched_at": "2026-10-31T01:11",
   "note": "PR Newswire 폴백"
  },
  "ISM_services": {
@@ -13,7 +13,7 @@
   "report_month": "September 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Services PMI® at 54.9%; September 2026",
-  "fetched_at": "2026-10-24T00:58",
+  "fetched_at": "2026-10-31T01:11",
   "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
@@ -21,12 +21,12 @@
   "decided_on": "2026-08-27",
   "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
   "matched": "2026 08월 27일 3.00",
-  "fetched_at": "2026-10-24T00:58"
+  "fetched_at": "2026-10-31T01:11"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
   "error": "FactSet 요약 문장 미발견",
-  "url": "https://insight.factset.com/sp-500-earnings-season-update-october-23-2026"
+  "url": "https://insight.factset.com/sp-500-earnings-season-update-october-30-2026"
  },
  "not_automated": {
   "FedWatch": "JS 렌더링 — 검색 2출처 일치 규칙",
@@ -47,9 +47,9 @@
   },
   "https://www.prnewswire.com/news/institute-for-supply-management/": {
    "status": 200,
-   "len": 242906,
+   "len": 203448,
    "keyword": "PMI",
-   "around": "er page 100 per page Latest Oct 05, 2026, 10:00 ET Services PMI® at 54.9%; September 2026 ISM® Services PMI® Report Economic activity in the services sector continued to expand in September, say the nation's purchasing a"
+   "around": " 100 per page Update Latest Oct 05, 2026, 10:00 ET Services PMI® at 54.9%; September 2026 ISM® Services PMI® Report Economic activity in the services sector continued to expand in September, say the nation&#39;s purchasi"
   },
   "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/services/october/": {
    "status": 200,
@@ -65,16 +65,16 @@
   },
   "https://insight.factset.com/topic/earnings": {
    "status": 200,
-   "len": 100233,
+   "len": 100112,
    "keyword": null,
    "around": " FactSet Insight - Commentary and research from our desk to yours | Earnings --> (function(){ function isWorkstation() { const workstationRegex = /Chrome\\/\\d+\\.\\d+\\.\\d+\\.\\d+ Workstation\\/\\d+\\.\\d+\\.\\d+"
   },
-  "https://insight.factset.com/sp-500-earnings-season-update-october-23-2026": {
+  "https://insight.factset.com/sp-500-earnings-season-update-october-30-2026": {
    "status": 200,
-   "len": 86979,
+   "len": 86641,
    "keyword": "EPS surprise",
-   "around": " through this point in time. During the past week, positive EPS surprises reported by companies in multiple sectors, partially offset by a negative EPS surprise reported by a company in the Communication Services sector,"
+   "around": " through this point in time. During the past week, positive EPS surprises reported by companies in multiple sectors (led by companies in the Health Care, Information Technology, and Energy sectors), partially offset by a"
   },
-  "https://insight.factset.com/sp-500-earnings-season-update-october-23-2026#eps-sentences": []
+  "https://insight.factset.com/sp-500-earnings-season-update-october-30-2026#eps-sentences": []
  }
 }
