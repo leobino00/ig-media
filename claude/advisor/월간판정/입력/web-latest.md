@@ -1,8 +1,8 @@
-# 1차 출처 자동 수집 — 2026-11-02 06:30 (UTC)
+# 1차 출처 자동 수집 — 2026-11-07 01:10 (UTC)
 
 | 지표 | 값 | 출처 | 일치 문자열 |
 |---|---|---|---|
-| ISM_manufacturing | 54.5 | https://www.prnewswire.com/news/institute-for-supply-management/ | Manufacturing PMI® at 54.5%; September 2026 |
-| ISM_services | 54.9 | https://www.prnewswire.com/news/institute-for-supply-management/ | Services PMI® at 54.9%; September 2026 |
+| ISM_manufacturing | 55.5 | https://www.prnewswire.com/news/institute-for-supply-management/ | Manufacturing PMI® at 55.5%; October 2026 |
+| ISM_services | 54.5 | https://www.prnewswire.com/news/institute-for-supply-management/ | Services PMI® at 54.5%; October 2026 |
 | BOK_base_rate | 3.0 | https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643 | 2026 08월 27일 3.00 |
-| FactSet_EPS_surprise_pct | None | https://insight.factset.com/sp-500-earnings-season-update-october-30-2026 | FactSet 요약 문장 미발견 |
+| FactSet_EPS_surprise_pct | None | https://insight.factset.com/sp-500-earnings-season-update-november-6-2026 | FactSet 요약 문장 미발견 |
