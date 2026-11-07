@@ -1,11 +1,11 @@
 {
- "fetched_at": "2026-11-07 01:10",
+ "fetched_at": "2026-11-07 02:15",
  "ISM_manufacturing": {
   "value": 55.5,
   "report_month": "October 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Manufacturing PMI® at 55.5%; October 2026",
-  "fetched_at": "2026-11-07T01:10",
+  "fetched_at": "2026-11-07T02:15",
   "note": "PR Newswire 폴백"
  },
  "ISM_services": {
@@ -13,7 +13,7 @@
   "report_month": "October 2026",
   "url": "https://www.prnewswire.com/news/institute-for-supply-management/",
   "matched": "Services PMI® at 54.5%; October 2026",
-  "fetched_at": "2026-11-07T01:11",
+  "fetched_at": "2026-11-07T02:15",
   "note": "PR Newswire 폴백"
  },
  "BOK_base_rate": {
@@ -21,7 +21,7 @@
   "decided_on": "2026-08-27",
   "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
   "matched": "2026 08월 27일 3.00",
-  "fetched_at": "2026-11-07T01:11"
+  "fetched_at": "2026-11-07T02:15"
  },
  "FactSet_EPS_surprise_pct": {
   "value": null,
@@ -34,18 +34,6 @@
  },
  "debug": {
   "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/november/": {
-   "status": 200,
-   "len": 922,
-   "keyword": null,
-   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
-  },
-  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/october/": {
-   "status": 200,
-   "len": 922,
-   "keyword": null,
-   "around": " grecaptcha.ready(function() { grecaptcha.execute('6Lf3-A0aAAAAAP72ObXbJOz6cPF-VD6GwP6Zw-oP', {action: 'captcha_resp'}).then(function(token) { document.getElementById('rtoken').value = token; document"
-  },
-  "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/pmi/september/": {
    "status": 200,
    "len": 922,
    "keyword": null,

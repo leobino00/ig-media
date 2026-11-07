@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-07 01:10",
+ "fetched_at": "2026-11-07 02:15",
  "basis": null,
  "series_meta": {
   "IC4WSA": {
@@ -345,8 +345,8 @@
   },
   "QQQ_price": {
    "last": [
-    "2026-11-05",
-    647.0499877929688
+    "2026-11-06",
+    656.0999755859375
    ],
    "field": "adjclose",
    "source": "Yahoo (B)",
@@ -405,17 +405,17 @@
  "u1_opp": {
   "TQQQ": {
    "last": [
-    "2026-11-05",
-    50.47
+    "2026-11-06",
+    52.25
    ],
    "ath_close": [
     "2026-06-02",
     87.22
    ],
-   "dd_pct": -42.13,
+   "dd_pct": -40.09,
    "signal_price": 43.61,
    "report_price_x0.6": 52.33,
-   "to_signal_pct": -13.59,
+   "to_signal_pct": -16.54,
    "signal": false,
    "report": true,
    "source": "Yahoo close (B)",
@@ -450,15 +450,15 @@
   }
  },
  "vt25": {
-  "as_of": "2026-11-05",
-  "qqq_close": 647.05,
-  "sigma40_pct": 25.77,
+  "as_of": "2026-11-06",
+  "qqq_close": 656.1,
+  "sigma40_pct": 25.95,
   "L": 1.0,
   "tqqq_weight_pct": 33.3,
   "sgov_weight_pct": 66.7,
   "prev_week": {
-   "as_of": "2026-10-29",
-   "sigma40_pct": 17.95,
+   "as_of": "2026-10-30",
+   "sigma40_pct": 19.73,
    "L": 1.5
   },
   "trade_needed": true,
