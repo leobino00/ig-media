@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-14 01:11",
+ "fetched_at": "2026-11-14 02:37",
  "basis": null,
  "series_meta": {
   "IC4WSA": {
@@ -345,8 +345,8 @@
   },
   "QQQ_price": {
    "last": [
-    "2026-11-12",
-    688.1699829101562
+    "2026-11-13",
+    679.8900146484375
    ],
    "field": "adjclose",
    "source": "Yahoo (B)",
@@ -354,14 +354,14 @@
   },
   "C2_breadth_QQQE_over_QQQ": {
    "now": [
-    "2026-11-12",
-    0.1694
+    "2026-11-13",
+    0.1704
    ],
    "3m_ago": [
-    "2026-08-13",
-    0.1703
+    "2026-08-14",
+    0.1704
    ],
-   "chg_3m_pct": -0.5
+   "chg_3m_pct": -0.02
   },
   "D3_dollar": {
    "source": "FRED DTWEXBGS",
@@ -405,17 +405,17 @@
  "u1_opp": {
   "TQQQ": {
    "last": [
-    "2026-11-12",
-    59.88
+    "2026-11-13",
+    57.68
    ],
    "ath_close": [
     "2026-06-02",
     87.22
    ],
-   "dd_pct": -31.35,
+   "dd_pct": -33.87,
    "signal_price": 43.61,
    "report_price_x0.6": 52.33,
-   "to_signal_pct": -27.17,
+   "to_signal_pct": -24.39,
    "signal": false,
    "report": false,
    "source": "Yahoo close (B)",
@@ -450,15 +450,15 @@
   }
  },
  "vt25": {
-  "as_of": "2026-11-12",
-  "qqq_close": 688.17,
-  "sigma40_pct": 27.84,
+  "as_of": "2026-11-13",
+  "qqq_close": 679.89,
+  "sigma40_pct": 27.91,
   "L": 1.0,
   "tqqq_weight_pct": 33.3,
   "sgov_weight_pct": 66.7,
   "prev_week": {
-   "as_of": "2026-11-05",
-   "sigma40_pct": 25.77,
+   "as_of": "2026-11-06",
+   "sigma40_pct": 25.95,
    "L": 1.0
   },
   "trade_needed": false,

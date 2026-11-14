@@ -2,14 +2,14 @@
  "program": "us-sector-strength",
  "program_version": "0.1",
  "version": "0.1",
- "as_of": "2026-11-12",
+ "as_of": "2026-11-13",
  "freshness": {
-  "as_of_weekday": "목",
-  "as_of_is_friday": false,
-  "as_of_age_days": 2,
+  "as_of_weekday": "금",
+  "as_of_is_friday": true,
+  "as_of_age_days": 1,
   "rule": "as_of_age_days가 8 이상이면 그 주 수집이 빠진 것이다 — 결측으로 다룬다"
  },
- "generated_at": "2026-11-14T10:14:13+09:00",
+ "generated_at": "2026-11-14T11:38:26+09:00",
  "benchmark": "QQQ",
  "calc": {
   "rs_window_weeks": 26,
@@ -32,7 +32,7 @@
    "grade": "A-",
    "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
    "as_of": null,
-   "fetched_at": "2026-11-14T01:13Z"
+   "fetched_at": "2026-11-14T02:37Z"
   }
  ],
  "missing": [],
@@ -43,16 +43,16 @@
    "ticker": "SMH",
    "group": "nasdaq_sub",
    "ticker_used": "SMH",
-   "as_of": "2026-11-12",
-   "rs_ratio": 0.9094,
-   "rs_chg_4w": -0.0317,
-   "rs_momentum": -3.37,
+   "as_of": "2026-11-13",
+   "rs_ratio": 0.8936,
+   "rs_chg_4w": -0.0475,
+   "rs_momentum": -5.05,
    "quadrant": "lagging",
    "weeks_in_quadrant": 6,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -18.35,
+   "rs_dd_from_26w_high": -19.82,
    "rs_dd_15": true,
-   "rs_up_from_26w_low": 3.1,
+   "rs_up_from_26w_low": 1.24,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -69,7 +69,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.0204,
@@ -84,7 +84,7 @@
      0.9269,
      0.9372,
      0.8796,
-     0.9094
+     0.8936
     ],
     "quadrant": [
      "weakening",
@@ -108,16 +108,16 @@
    "ticker": "IGV",
    "group": "nasdaq_sub",
    "ticker_used": "IGV",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0526,
-   "rs_chg_4w": -0.0238,
-   "rs_momentum": -2.21,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0623,
+   "rs_chg_4w": -0.0141,
+   "rs_momentum": -1.31,
    "quadrant": "weakening",
    "weeks_in_quadrant": 2,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -6.1,
+   "rs_dd_from_26w_high": -5.2,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 22.29,
+   "rs_up_from_26w_low": 23.46,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -134,7 +134,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.0847,
@@ -149,7 +149,7 @@
      1.1405,
      1.0904,
      1.0814,
-     1.0526
+     1.0623
     ],
     "quadrant": [
      "leading",
@@ -173,16 +173,16 @@
    "ticker": "XBI",
    "group": "nasdaq_sub",
    "ticker_used": "XBI",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0352,
-   "rs_chg_4w": 0.0557,
-   "rs_momentum": 5.69,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.043,
+   "rs_chg_4w": 0.0635,
+   "rs_momentum": 6.48,
    "quadrant": "leading",
    "weeks_in_quadrant": 4,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -5.52,
+   "rs_dd_from_26w_high": -4.78,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 20.25,
+   "rs_up_from_26w_low": 21.2,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -199,7 +199,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.1251,
@@ -214,7 +214,7 @@
      1.0206,
      1.0795,
      1.1001,
-     1.0352
+     1.043
     ],
     "quadrant": [
      "leading",
@@ -238,16 +238,16 @@
    "ticker": "XLK",
    "group": "gics",
    "ticker_used": "XLK",
-   "as_of": "2026-11-12",
-   "rs_ratio": 0.9786,
-   "rs_chg_4w": -0.0302,
-   "rs_momentum": -3.0,
+   "as_of": "2026-11-13",
+   "rs_ratio": 0.9709,
+   "rs_chg_4w": -0.0379,
+   "rs_momentum": -3.76,
    "quadrant": "lagging",
    "weeks_in_quadrant": 2,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -5.27,
+   "rs_dd_from_26w_high": -6.04,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 0.57,
+   "rs_up_from_26w_low": 0.0,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -264,7 +264,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.0407,
@@ -279,7 +279,7 @@
      1.0123,
      1.0088,
      0.9737,
-     0.9786
+     0.9709
     ],
     "quadrant": [
      "weakening",
@@ -303,16 +303,16 @@
    "ticker": "XLV",
    "group": "gics",
    "ticker_used": "XLV",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.1707,
-   "rs_chg_4w": 0.0583,
-   "rs_momentum": 5.24,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.1905,
+   "rs_chg_4w": 0.078,
+   "rs_momentum": 7.01,
    "quadrant": "leading",
    "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -3.1,
+   "rs_dd_from_26w_high": -1.38,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 36.13,
+   "rs_up_from_26w_low": 38.54,
    "rs_up_30": true,
    "weeks_used": 236,
    "history_13w": {
@@ -329,7 +329,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.0696,
@@ -344,7 +344,7 @@
      1.1298,
      1.1777,
      1.2222,
-     1.1707
+     1.1905
     ],
     "quadrant": [
      "leading",
@@ -368,16 +368,16 @@
    "ticker": "XLF",
    "group": "gics",
    "ticker_used": "XLF",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.087,
-   "rs_chg_4w": 0.0637,
-   "rs_momentum": 6.23,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.1082,
+   "rs_chg_4w": 0.0849,
+   "rs_momentum": 8.3,
    "quadrant": "leading",
    "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -2.91,
+   "rs_dd_from_26w_high": -0.93,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 21.67,
+   "rs_up_from_26w_low": 24.15,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -394,7 +394,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.0256,
@@ -409,7 +409,7 @@
      1.037,
      1.0666,
      1.1268,
-     1.087
+     1.1082
     ],
     "quadrant": [
      "weakening",
@@ -433,16 +433,16 @@
    "ticker": "XLY",
    "group": "gics",
    "ticker_used": "XLY",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0823,
-   "rs_chg_4w": 0.1038,
-   "rs_momentum": 10.61,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0908,
+   "rs_chg_4w": 0.1122,
+   "rs_momentum": 11.47,
    "quadrant": "leading",
    "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -2.32,
+   "rs_dd_from_26w_high": -1.53,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 19.24,
+   "rs_up_from_26w_low": 20.21,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -459,7 +459,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.962,
@@ -474,7 +474,7 @@
      0.9959,
      1.0385,
      1.111,
-     1.0823
+     1.0908
     ],
     "quadrant": [
      "improving",
@@ -498,16 +498,16 @@
    "ticker": "XLC",
    "group": "gics",
    "ticker_used": "XLC",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0155,
-   "rs_chg_4w": 0.0212,
-   "rs_momentum": 2.13,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0377,
+   "rs_chg_4w": 0.0434,
+   "rs_momentum": 4.37,
    "quadrant": "leading",
    "weeks_in_quadrant": 2,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -2.5,
+   "rs_dd_from_26w_high": -0.28,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 8.03,
+   "rs_up_from_26w_low": 10.5,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -524,7 +524,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.9292,
@@ -539,7 +539,7 @@
      0.9639,
      0.9374,
      1.0359,
-     1.0155
+     1.0377
     ],
     "quadrant": [
      "improving",
@@ -563,16 +563,16 @@
    "ticker": "XLI",
    "group": "gics",
    "ticker_used": "XLI",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0048,
-   "rs_chg_4w": 0.0446,
-   "rs_momentum": 4.64,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0128,
+   "rs_chg_4w": 0.0525,
+   "rs_momentum": 5.47,
    "quadrant": "leading",
    "weeks_in_quadrant": 2,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -7.62,
+   "rs_dd_from_26w_high": -6.86,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 9.29,
+   "rs_up_from_26w_low": 10.19,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -589,7 +589,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.9717,
@@ -604,7 +604,7 @@
      0.9533,
      0.991,
      1.0126,
-     1.0048
+     1.0128
     ],
     "quadrant": [
      "lagging",
@@ -628,16 +628,16 @@
    "ticker": "XLP",
    "group": "gics",
    "ticker_used": "XLP",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.1133,
-   "rs_chg_4w": 0.0604,
-   "rs_momentum": 5.74,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.1415,
+   "rs_chg_4w": 0.0886,
+   "rs_momentum": 8.42,
    "quadrant": "leading",
    "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -3.62,
+   "rs_dd_from_26w_high": -1.07,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 23.17,
+   "rs_up_from_26w_low": 26.43,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -654,7 +654,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.963,
@@ -669,7 +669,7 @@
      1.0682,
      1.1019,
      1.1605,
-     1.1133
+     1.1415
     ],
     "quadrant": [
      "improving",
@@ -693,16 +693,16 @@
    "ticker": "XLE",
    "group": "gics",
    "ticker_used": "XLE",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0975,
-   "rs_chg_4w": -0.0604,
-   "rs_momentum": -5.22,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.1207,
+   "rs_chg_4w": -0.0372,
+   "rs_momentum": -3.21,
    "quadrant": "weakening",
    "weeks_in_quadrant": 1,
    "quadrant_changed": true,
-   "rs_dd_from_26w_high": -7.82,
+   "rs_dd_from_26w_high": -5.78,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 30.18,
+   "rs_up_from_26w_low": 33.05,
    "rs_up_30": true,
    "weeks_used": 236,
    "history_13w": {
@@ -719,7 +719,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      1.04,
@@ -734,7 +734,7 @@
      1.1779,
      1.2053,
      1.1079,
-     1.0975
+     1.1207
     ],
     "quadrant": [
      "leading",
@@ -758,16 +758,16 @@
    "ticker": "XLU",
    "group": "gics",
    "ticker_used": "XLU",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.048,
-   "rs_chg_4w": 0.0738,
-   "rs_momentum": 7.57,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0656,
+   "rs_chg_4w": 0.0913,
+   "rs_momentum": 9.37,
    "quadrant": "leading",
    "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -5.31,
+   "rs_dd_from_26w_high": -3.65,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 19.96,
+   "rs_up_from_26w_low": 22.06,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -784,7 +784,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.8884,
@@ -799,7 +799,7 @@
      0.9951,
      1.0395,
      1.0839,
-     1.048
+     1.0656
     ],
     "quadrant": [
      "lagging",
@@ -823,16 +823,16 @@
    "ticker": "XLRE",
    "group": "gics",
    "ticker_used": "XLRE",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0525,
-   "rs_chg_4w": 0.0808,
-   "rs_momentum": 8.31,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.065,
+   "rs_chg_4w": 0.0933,
+   "rs_momentum": 9.6,
    "quadrant": "leading",
    "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -3.88,
+   "rs_dd_from_26w_high": -2.69,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 18.4,
+   "rs_up_from_26w_low": 19.87,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -849,7 +849,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.9715,
@@ -864,7 +864,7 @@
      0.9916,
      1.0272,
      1.098,
-     1.0525
+     1.065
     ],
     "quadrant": [
      "lagging",
@@ -888,16 +888,16 @@
    "ticker": "XLB",
    "group": "gics",
    "ticker_used": "XLB",
-   "as_of": "2026-11-12",
-   "rs_ratio": 1.0593,
-   "rs_chg_4w": 0.0556,
-   "rs_momentum": 5.54,
+   "as_of": "2026-11-13",
+   "rs_ratio": 1.0695,
+   "rs_chg_4w": 0.0658,
+   "rs_momentum": 6.56,
    "quadrant": "leading",
    "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -3.94,
+   "rs_dd_from_26w_high": -2.98,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 16.68,
+   "rs_up_from_26w_low": 17.85,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
@@ -914,7 +914,7 @@
      "2026-10-23",
      "2026-10-30",
      "2026-11-06",
-     "2026-11-12"
+     "2026-11-13"
     ],
     "rs_ratio": [
      0.9871,
@@ -929,7 +929,7 @@
      1.0218,
      1.071,
      1.1061,
-     1.0593
+     1.0695
     ],
     "quadrant": [
      "improving",
@@ -958,7 +958,7 @@
   "constituents_source": "nasdaq_api",
   "constituents_grade": "A-",
   "constituents_as_of": null,
-  "constituents_fetched_at": "2026-11-14T01:13Z",
+  "constituents_fetched_at": "2026-11-14T02:37Z",
   "constituents_url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
   "constituents_tickers": [
    "AAPL",
@@ -1064,10 +1064,10 @@
    "XEL"
   ],
   "pct_above_sma200": 55.6,
-  "pct_above_sma200_4w_ago": 59.6,
-  "new_highs_5d": 8,
-  "new_lows_5d": 3,
-  "nh_nl_ratio": 2.67,
+  "pct_above_sma200_4w_ago": 57.6,
+  "new_highs_5d": 10,
+  "new_lows_5d": 4,
+  "nh_nl_ratio": 2.5,
   "n_52w_judged": 99,
   "price_fetch_errors": 0,
   "price_fetch_failed": [],
@@ -1077,8 +1077,8 @@
   ]
  },
  "regime": {
-  "dispersion": 0.063,
-  "dispersion_pctile_2y": 44,
+  "dispersion": 0.073,
+  "dispersion_pctile_2y": 69,
   "dispersion_history_weeks": 103,
   "dispersion_universe_n": 14
  },
@@ -1120,8 +1120,7 @@
   "가격 필드는 adjclose — 배당 재투자 반영. Yahoo가 과거 수정종가를 소급 변경하면 과거 값이 바뀔 수 있다.",
   "보유 위성 섹터 태깅은 출처의 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, 반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
   "이 파일은 관측 입력이다. 판정 규칙이 아니고 월간 10지표에 들어가지 않는다 (제안서 §3).",
-  "구성종목 목록 출처 폴백: invesco: 티커 0개 (열=None) 받은 내용 앞머리='<!--\\n* This file is created specifically to update\\n* lang attribute in html tag and\\n* data-language attribute body tag\\n*' → nasdaq_api(A-) 사용.",
-  "기준일 2026-11-12은 금요일이 아니라 그 주의 **마지막 거래일**이다. 휴장이거나 출처에 금요일 값이 아직 없으면 이렇게 된다 — 결측이 아니다. 신선도는 freshness.as_of_age_days로 본다(8일 이상이면 그 주 수집이 빠진 것)."
+  "구성종목 목록 출처 폴백: invesco: 티커 0개 (열=None) 받은 내용 앞머리='<!--\\n* This file is created specifically to update\\n* lang attribute in html tag and\\n* data-language attribute body tag\\n*' → nasdaq_api(A-) 사용."
  ],
  "lint_judgment_words": []
 }
