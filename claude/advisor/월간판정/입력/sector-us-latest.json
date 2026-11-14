@@ -2,14 +2,14 @@
  "program": "us-sector-strength",
  "program_version": "0.1",
  "version": "0.1",
- "as_of": "2026-11-06",
+ "as_of": "2026-11-12",
  "freshness": {
-  "as_of_weekday": "금",
-  "as_of_is_friday": true,
-  "as_of_age_days": 1,
+  "as_of_weekday": "목",
+  "as_of_is_friday": false,
+  "as_of_age_days": 2,
   "rule": "as_of_age_days가 8 이상이면 그 주 수집이 빠진 것이다 — 결측으로 다룬다"
  },
- "generated_at": "2026-11-07T11:16:35+09:00",
+ "generated_at": "2026-11-14T10:14:13+09:00",
  "benchmark": "QQQ",
  "calc": {
   "rs_window_weeks": 26,
@@ -32,36 +32,31 @@
    "grade": "A-",
    "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
    "as_of": null,
-   "fetched_at": "2026-11-07T02:15Z"
+   "fetched_at": "2026-11-14T01:13Z"
   }
  ],
- "missing": [
-  "breadth"
- ],
- "missing_detail": {
-  "breadth": "구성종목 가격 커버리지 73.3% (<80%) — 폭 지표 결측 처리"
- },
+ "missing": [],
+ "missing_detail": {},
  "sectors": [
   {
    "name": "반도체",
    "ticker": "SMH",
    "group": "nasdaq_sub",
    "ticker_used": "SMH",
-   "as_of": "2026-11-06",
-   "rs_ratio": 0.8796,
-   "rs_chg_4w": -0.1162,
-   "rs_momentum": -11.67,
+   "as_of": "2026-11-12",
+   "rs_ratio": 0.9094,
+   "rs_chg_4w": -0.0317,
+   "rs_momentum": -3.37,
    "quadrant": "lagging",
-   "weeks_in_quadrant": 5,
+   "weeks_in_quadrant": 6,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -20.8,
+   "rs_dd_from_26w_high": -18.35,
    "rs_dd_15": true,
-   "rs_up_from_26w_low": 0.0,
+   "rs_up_from_26w_low": 3.1,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -73,10 +68,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     1.0499,
      1.0204,
      0.9979,
      1.0117,
@@ -88,10 +83,10 @@
      0.9411,
      0.9269,
      0.9372,
-     0.8796
+     0.8796,
+     0.9094
     ],
     "quadrant": [
-     "weakening",
      "weakening",
      "lagging",
      "weakening",
@@ -99,6 +94,7 @@
      "weakening",
      "leading",
      "leading",
+     "lagging",
      "lagging",
      "lagging",
      "lagging",
@@ -112,21 +108,20 @@
    "ticker": "IGV",
    "group": "nasdaq_sub",
    "ticker_used": "IGV",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.0814,
-   "rs_chg_4w": -0.0217,
-   "rs_momentum": -1.97,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0526,
+   "rs_chg_4w": -0.0238,
+   "rs_momentum": -2.21,
    "quadrant": "weakening",
-   "weeks_in_quadrant": 1,
-   "quadrant_changed": true,
-   "rs_dd_from_26w_high": -4.01,
+   "weeks_in_quadrant": 2,
+   "quadrant_changed": false,
+   "rs_dd_from_26w_high": -6.1,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 25.02,
+   "rs_up_from_26w_low": 22.29,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -138,10 +133,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     1.0695,
      1.0847,
      1.1383,
      1.0837,
@@ -153,13 +148,13 @@
      1.0764,
      1.1405,
      1.0904,
-     1.0814
+     1.0814,
+     1.0526
     ],
     "quadrant": [
      "leading",
      "leading",
      "leading",
-     "leading",
      "weakening",
      "weakening",
      "weakening",
@@ -168,6 +163,7 @@
      "weakening",
      "leading",
      "leading",
+     "weakening",
      "weakening"
     ]
    }
@@ -177,21 +173,20 @@
    "ticker": "XBI",
    "group": "nasdaq_sub",
    "ticker_used": "XBI",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.1001,
-   "rs_chg_4w": 0.116,
-   "rs_momentum": 11.79,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0352,
+   "rs_chg_4w": 0.0557,
+   "rs_momentum": 5.69,
    "quadrant": "leading",
-   "weeks_in_quadrant": 3,
+   "weeks_in_quadrant": 4,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -0.24,
+   "rs_dd_from_26w_high": -5.52,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 26.98,
+   "rs_up_from_26w_low": 20.25,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -203,10 +198,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     1.0482,
      1.1251,
      1.0944,
      1.0959,
@@ -218,10 +213,10 @@
      0.9795,
      1.0206,
      1.0795,
-     1.1001
+     1.1001,
+     1.0352
     ],
     "quadrant": [
-     "weakening",
      "leading",
      "leading",
      "leading",
@@ -231,6 +226,7 @@
      "lagging",
      "lagging",
      "lagging",
+     "leading",
      "leading",
      "leading",
      "leading"
@@ -242,21 +238,20 @@
    "ticker": "XLK",
    "group": "gics",
    "ticker_used": "XLK",
-   "as_of": "2026-11-06",
-   "rs_ratio": 0.9737,
-   "rs_chg_4w": -0.0622,
-   "rs_momentum": -6.01,
+   "as_of": "2026-11-12",
+   "rs_ratio": 0.9786,
+   "rs_chg_4w": -0.0302,
+   "rs_momentum": -3.0,
    "quadrant": "lagging",
-   "weeks_in_quadrant": 1,
-   "quadrant_changed": true,
-   "rs_dd_from_26w_high": -5.8,
+   "weeks_in_quadrant": 2,
+   "quadrant_changed": false,
+   "rs_dd_from_26w_high": -5.27,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 1.01,
+   "rs_up_from_26w_low": 0.57,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -268,10 +263,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     1.0569,
      1.0407,
      1.0448,
      1.0449,
@@ -283,10 +278,10 @@
      1.0088,
      1.0123,
      1.0088,
-     0.9737
+     0.9737,
+     0.9786
     ],
     "quadrant": [
-     "leading",
      "weakening",
      "weakening",
      "weakening",
@@ -298,6 +293,7 @@
      "weakening",
      "weakening",
      "weakening",
+     "lagging",
      "lagging"
     ]
    }
@@ -307,21 +303,20 @@
    "ticker": "XLV",
    "group": "gics",
    "ticker_used": "XLV",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.2222,
-   "rs_chg_4w": 0.2025,
-   "rs_momentum": 19.86,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.1707,
+   "rs_chg_4w": 0.0583,
+   "rs_momentum": 5.24,
    "quadrant": "leading",
-   "weeks_in_quadrant": 4,
+   "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": 0.0,
+   "rs_dd_from_26w_high": -3.1,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 40.48,
+   "rs_up_from_26w_low": 36.13,
    "rs_up_30": true,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -333,10 +328,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9986,
      1.0696,
      1.0481,
      1.0488,
@@ -348,10 +343,10 @@
      1.1124,
      1.1298,
      1.1777,
-     1.2222
+     1.2222,
+     1.1707
     ],
     "quadrant": [
-     "improving",
      "leading",
      "leading",
      "leading",
@@ -360,6 +355,7 @@
      "weakening",
      "lagging",
      "weakening",
+     "leading",
      "leading",
      "leading",
      "leading",
@@ -372,21 +368,20 @@
    "ticker": "XLF",
    "group": "gics",
    "ticker_used": "XLF",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.1268,
-   "rs_chg_4w": 0.1748,
-   "rs_momentum": 18.36,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.087,
+   "rs_chg_4w": 0.0637,
+   "rs_momentum": 6.23,
    "quadrant": "leading",
-   "weeks_in_quadrant": 4,
+   "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": 0.0,
+   "rs_dd_from_26w_high": -2.91,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 25.32,
+   "rs_up_from_26w_low": 21.67,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -398,10 +393,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     1.0102,
      1.0256,
      1.0339,
      1.0318,
@@ -413,18 +408,19 @@
      1.0233,
      1.037,
      1.0666,
-     1.1268
+     1.1268,
+     1.087
     ],
     "quadrant": [
      "weakening",
      "weakening",
-     "weakening",
      "leading",
      "leading",
      "lagging",
      "lagging",
      "lagging",
      "lagging",
+     "leading",
      "leading",
      "leading",
      "leading",
@@ -437,21 +433,20 @@
    "ticker": "XLY",
    "group": "gics",
    "ticker_used": "XLY",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.111,
-   "rs_chg_4w": 0.1891,
-   "rs_momentum": 20.52,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0823,
+   "rs_chg_4w": 0.1038,
+   "rs_momentum": 10.61,
    "quadrant": "leading",
-   "weeks_in_quadrant": 2,
+   "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": 0.0,
+   "rs_dd_from_26w_high": -2.32,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 22.08,
+   "rs_up_from_26w_low": 19.24,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -463,10 +458,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9346,
      0.962,
      0.9575,
      0.9419,
@@ -478,10 +473,10 @@
      0.9785,
      0.9959,
      1.0385,
-     1.111
+     1.111,
+     1.0823
     ],
     "quadrant": [
-     "improving",
      "improving",
      "lagging",
      "lagging",
@@ -493,6 +488,7 @@
      "improving",
      "improving",
      "leading",
+     "leading",
      "leading"
     ]
    }
@@ -502,86 +498,20 @@
    "ticker": "XLC",
    "group": "gics",
    "ticker_used": "XLC",
-   "as_of": "2026-10-30",
-   "rs_ratio": 0.9374,
-   "rs_chg_4w": 0.011,
-   "rs_momentum": 1.19,
-   "quadrant": "improving",
-   "weeks_in_quadrant": 3,
-   "quadrant_changed": false,
-   "rs_dd_from_26w_high": -11.68,
-   "rs_dd_15": false,
-   "rs_up_from_26w_low": 0.0,
-   "rs_up_30": false,
-   "weeks_used": 235,
-   "history_13w": {
-    "week": [
-     "2026-08-07",
-     "2026-08-14",
-     "2026-08-21",
-     "2026-08-28",
-     "2026-09-04",
-     "2026-09-11",
-     "2026-09-18",
-     "2026-09-25",
-     "2026-10-02",
-     "2026-10-09",
-     "2026-10-16",
-     "2026-10-23",
-     "2026-10-30"
-    ],
-    "rs_ratio": [
-     0.9011,
-     0.9121,
-     0.9292,
-     0.9463,
-     0.9435,
-     0.9615,
-     0.9461,
-     0.9452,
-     0.9264,
-     0.9336,
-     0.9943,
-     0.9639,
-     0.9374
-    ],
-    "quadrant": [
-     "improving",
-     "improving",
-     "improving",
-     "improving",
-     "improving",
-     "improving",
-     "improving",
-     "lagging",
-     "lagging",
-     "lagging",
-     "improving",
-     "improving",
-     "improving"
-    ]
-   }
-  },
-  {
-   "name": "산업재",
-   "ticker": "XLI",
-   "group": "gics",
-   "ticker_used": "XLI",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.0126,
-   "rs_chg_4w": 0.1016,
-   "rs_momentum": 11.16,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0155,
+   "rs_chg_4w": 0.0212,
+   "rs_momentum": 2.13,
    "quadrant": "leading",
-   "weeks_in_quadrant": 1,
-   "quadrant_changed": true,
-   "rs_dd_from_26w_high": -6.97,
+   "weeks_in_quadrant": 2,
+   "quadrant_changed": false,
+   "rs_dd_from_26w_high": -2.5,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 10.05,
+   "rs_up_from_26w_low": 8.03,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -593,10 +523,75 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9758,
+     0.9292,
+     0.9463,
+     0.9435,
+     0.9615,
+     0.9461,
+     0.9452,
+     0.9264,
+     0.9336,
+     0.9943,
+     0.9639,
+     0.9374,
+     1.0359,
+     1.0155
+    ],
+    "quadrant": [
+     "improving",
+     "improving",
+     "improving",
+     "improving",
+     "improving",
+     "lagging",
+     "lagging",
+     "lagging",
+     "improving",
+     "improving",
+     "improving",
+     "leading",
+     "leading"
+    ]
+   }
+  },
+  {
+   "name": "산업재",
+   "ticker": "XLI",
+   "group": "gics",
+   "ticker_used": "XLI",
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0048,
+   "rs_chg_4w": 0.0446,
+   "rs_momentum": 4.64,
+   "quadrant": "leading",
+   "weeks_in_quadrant": 2,
+   "quadrant_changed": false,
+   "rs_dd_from_26w_high": -7.62,
+   "rs_dd_15": false,
+   "rs_up_from_26w_low": 9.29,
+   "rs_up_30": false,
+   "weeks_used": 236,
+   "history_13w": {
+    "week": [
+     "2026-08-21",
+     "2026-08-28",
+     "2026-09-04",
+     "2026-09-11",
+     "2026-09-18",
+     "2026-09-25",
+     "2026-10-02",
+     "2026-10-09",
+     "2026-10-16",
+     "2026-10-23",
+     "2026-10-30",
+     "2026-11-06",
+     "2026-11-12"
+    ],
+    "rs_ratio": [
      0.9717,
      0.9571,
      0.9492,
@@ -608,7 +603,8 @@
      0.9603,
      0.9533,
      0.991,
-     1.0126
+     1.0126,
+     1.0048
     ],
     "quadrant": [
      "lagging",
@@ -619,10 +615,10 @@
      "lagging",
      "lagging",
      "lagging",
-     "lagging",
      "improving",
      "improving",
      "improving",
+     "leading",
      "leading"
     ]
    }
@@ -632,21 +628,20 @@
    "ticker": "XLP",
    "group": "gics",
    "ticker_used": "XLP",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.1605,
-   "rs_chg_4w": 0.214,
-   "rs_momentum": 22.61,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.1133,
+   "rs_chg_4w": 0.0604,
+   "rs_momentum": 5.74,
    "quadrant": "leading",
-   "weeks_in_quadrant": 4,
+   "weeks_in_quadrant": 5,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": 0.0,
+   "rs_dd_from_26w_high": -3.62,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 27.8,
+   "rs_up_from_26w_low": 23.17,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -658,10 +653,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9344,
      0.963,
      0.9611,
      0.955,
@@ -673,10 +668,10 @@
      1.0529,
      1.0682,
      1.1019,
-     1.1605
+     1.1605,
+     1.1133
     ],
     "quadrant": [
-     "lagging",
      "improving",
      "lagging",
      "improving",
@@ -685,6 +680,7 @@
      "lagging",
      "lagging",
      "lagging",
+     "leading",
      "leading",
      "leading",
      "leading",
@@ -697,21 +693,20 @@
    "ticker": "XLE",
    "group": "gics",
    "ticker_used": "XLE",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.1079,
-   "rs_chg_4w": 0.0587,
-   "rs_momentum": 5.59,
-   "quadrant": "leading",
-   "weeks_in_quadrant": 4,
-   "quadrant_changed": false,
-   "rs_dd_from_26w_high": -7.38,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0975,
+   "rs_chg_4w": -0.0604,
+   "rs_momentum": -5.22,
+   "quadrant": "weakening",
+   "weeks_in_quadrant": 1,
+   "quadrant_changed": true,
+   "rs_dd_from_26w_high": -7.82,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 30.79,
+   "rs_up_from_26w_low": 30.18,
    "rs_up_30": true,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -723,10 +718,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9873,
      1.04,
      1.0216,
      1.0424,
@@ -738,10 +733,10 @@
      1.1579,
      1.1779,
      1.2053,
-     1.1079
+     1.1079,
+     1.0975
     ],
     "quadrant": [
-     "improving",
      "leading",
      "leading",
      "leading",
@@ -753,7 +748,8 @@
      "leading",
      "leading",
      "leading",
-     "leading"
+     "leading",
+     "weakening"
     ]
    }
   },
@@ -762,21 +758,20 @@
    "ticker": "XLU",
    "group": "gics",
    "ticker_used": "XLU",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.0839,
-   "rs_chg_4w": 0.187,
-   "rs_momentum": 20.85,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.048,
+   "rs_chg_4w": 0.0738,
+   "rs_momentum": 7.57,
    "quadrant": "leading",
-   "weeks_in_quadrant": 2,
+   "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": -2.22,
+   "rs_dd_from_26w_high": -5.31,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 23.87,
+   "rs_up_from_26w_low": 19.96,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -788,10 +783,10 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.8904,
      0.8884,
      0.8931,
      0.9062,
@@ -803,10 +798,10 @@
      0.9743,
      0.9951,
      1.0395,
-     1.0839
+     1.0839,
+     1.048
     ],
     "quadrant": [
-     "lagging",
      "lagging",
      "lagging",
      "improving",
@@ -818,6 +813,7 @@
      "improving",
      "improving",
      "leading",
+     "leading",
      "leading"
     ]
    }
@@ -827,86 +823,20 @@
    "ticker": "XLRE",
    "group": "gics",
    "ticker_used": "XLRE",
-   "as_of": "2026-10-30",
-   "rs_ratio": 1.0272,
-   "rs_chg_4w": 0.1486,
-   "rs_momentum": 16.91,
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0525,
+   "rs_chg_4w": 0.0808,
+   "rs_momentum": 8.31,
    "quadrant": "leading",
-   "weeks_in_quadrant": 1,
-   "quadrant_changed": true,
-   "rs_dd_from_26w_high": -6.22,
-   "rs_dd_15": false,
-   "rs_up_from_26w_low": 14.84,
-   "rs_up_30": false,
-   "weeks_used": 235,
-   "history_13w": {
-    "week": [
-     "2026-08-07",
-     "2026-08-14",
-     "2026-08-21",
-     "2026-08-28",
-     "2026-09-04",
-     "2026-09-11",
-     "2026-09-18",
-     "2026-09-25",
-     "2026-10-02",
-     "2026-10-09",
-     "2026-10-16",
-     "2026-10-23",
-     "2026-10-30"
-    ],
-    "rs_ratio": [
-     0.9471,
-     0.9479,
-     0.9715,
-     0.9598,
-     0.9499,
-     0.9497,
-     0.9272,
-     0.8922,
-     0.8786,
-     0.9015,
-     0.9717,
-     0.9916,
-     1.0272
-    ],
-    "quadrant": [
-     "improving",
-     "lagging",
-     "lagging",
-     "lagging",
-     "improving",
-     "improving",
-     "lagging",
-     "lagging",
-     "lagging",
-     "lagging",
-     "improving",
-     "improving",
-     "leading"
-    ]
-   }
-  },
-  {
-   "name": "소재",
-   "ticker": "XLB",
-   "group": "gics",
-   "ticker_used": "XLB",
-   "as_of": "2026-11-06",
-   "rs_ratio": 1.1061,
-   "rs_chg_4w": 0.1894,
-   "rs_momentum": 20.66,
-   "quadrant": "leading",
-   "weeks_in_quadrant": 4,
+   "weeks_in_quadrant": 3,
    "quadrant_changed": false,
-   "rs_dd_from_26w_high": 0.0,
+   "rs_dd_from_26w_high": -3.88,
    "rs_dd_15": false,
-   "rs_up_from_26w_low": 21.47,
+   "rs_up_from_26w_low": 18.4,
    "rs_up_30": false,
    "weeks_used": 236,
    "history_13w": {
     "week": [
-     "2026-08-14",
      "2026-08-21",
      "2026-08-28",
      "2026-09-04",
@@ -918,10 +848,75 @@
      "2026-10-16",
      "2026-10-23",
      "2026-10-30",
-     "2026-11-06"
+     "2026-11-06",
+     "2026-11-12"
     ],
     "rs_ratio": [
-     0.9399,
+     0.9715,
+     0.9598,
+     0.9499,
+     0.9497,
+     0.9272,
+     0.8922,
+     0.8786,
+     0.9015,
+     0.9717,
+     0.9916,
+     1.0272,
+     1.098,
+     1.0525
+    ],
+    "quadrant": [
+     "lagging",
+     "lagging",
+     "improving",
+     "improving",
+     "lagging",
+     "lagging",
+     "lagging",
+     "lagging",
+     "improving",
+     "improving",
+     "leading",
+     "leading",
+     "leading"
+    ]
+   }
+  },
+  {
+   "name": "소재",
+   "ticker": "XLB",
+   "group": "gics",
+   "ticker_used": "XLB",
+   "as_of": "2026-11-12",
+   "rs_ratio": 1.0593,
+   "rs_chg_4w": 0.0556,
+   "rs_momentum": 5.54,
+   "quadrant": "leading",
+   "weeks_in_quadrant": 5,
+   "quadrant_changed": false,
+   "rs_dd_from_26w_high": -3.94,
+   "rs_dd_15": false,
+   "rs_up_from_26w_low": 16.68,
+   "rs_up_30": false,
+   "weeks_used": 236,
+   "history_13w": {
+    "week": [
+     "2026-08-21",
+     "2026-08-28",
+     "2026-09-04",
+     "2026-09-11",
+     "2026-09-18",
+     "2026-09-25",
+     "2026-10-02",
+     "2026-10-09",
+     "2026-10-16",
+     "2026-10-23",
+     "2026-10-30",
+     "2026-11-06",
+     "2026-11-12"
+    ],
+    "rs_ratio": [
      0.9871,
      0.983,
      0.9707,
@@ -933,18 +928,19 @@
      1.0037,
      1.0218,
      1.071,
-     1.1061
+     1.1061,
+     1.0593
     ],
     "quadrant": [
      "improving",
      "improving",
      "improving",
      "improving",
-     "improving",
      "lagging",
      "lagging",
      "lagging",
      "lagging",
+     "leading",
      "leading",
      "leading",
      "leading",
@@ -956,13 +952,13 @@
  "breadth": {
   "universe": "NDX-100 constituents",
   "n": 101,
-  "n_priced": 74,
-  "n_sma200_judged": 74,
-  "coverage_pct": 73.3,
+  "n_priced": 101,
+  "n_sma200_judged": 99,
+  "coverage_pct": 98.0,
   "constituents_source": "nasdaq_api",
   "constituents_grade": "A-",
   "constituents_as_of": null,
-  "constituents_fetched_at": "2026-11-07T02:15Z",
+  "constituents_fetched_at": "2026-11-14T01:13Z",
   "constituents_url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100",
   "constituents_tickers": [
    "AAPL",
@@ -1067,42 +1063,28 @@
    "WMT",
    "XEL"
   ],
-  "pct_above_sma200": null,
-  "pct_above_sma200_4w_ago": null,
-  "new_highs_5d": null,
-  "new_lows_5d": null,
-  "nh_nl_ratio": null,
-  "n_52w_judged": 74,
-  "price_fetch_errors": 27,
-  "price_fetch_failed": [
-   "ABNB",
-   "ALAB",
-   "APP",
-   "ARM",
-   "CEG",
-   "CRWD",
-   "CRWV",
-   "DASH",
-   "DDOG",
-   "FANG"
-  ],
-  "excluded_stale_last_bar": 27,
+  "pct_above_sma200": 55.6,
+  "pct_above_sma200_4w_ago": 59.6,
+  "new_highs_5d": 8,
+  "new_lows_5d": 3,
+  "nh_nl_ratio": 2.67,
+  "n_52w_judged": 99,
+  "price_fetch_errors": 0,
+  "price_fetch_failed": [],
+  "excluded_stale_last_bar": 0,
   "constituents_attempt_errors": [
    "invesco: 티커 0개 (열=None) 받은 내용 앞머리='<!--\\n* This file is created specifically to update\\n* lang attribute in html tag and\\n* data-language attribute body tag\\n*'"
   ]
  },
  "regime": {
-  "dispersion": 0.0913,
-  "dispersion_pctile_2y": 87,
-  "dispersion_history_weeks": 104,
+  "dispersion": 0.063,
+  "dispersion_pctile_2y": 44,
+  "dispersion_history_weeks": 103,
   "dispersion_universe_n": 14
  },
  "events": {
   "quadrant_changes": [
-   "IGV",
-   "XLK",
-   "XLI",
-   "XLRE"
+   "XLE"
   ],
   "rs_dd_15": [
    "SMH"
@@ -1119,12 +1101,12 @@
  },
  "validation": {
   "file": "scripts/sector_us/검증결과.md",
-  "run_at": "2026-11-07T10:12:15+09:00",
+  "run_at": "2026-11-14T10:12:52+09:00",
   "summary": {
-   "quadrant": "10년 중 3년 양수, 전체 평균 -0.063%p (leading -0.364% vs 전체 -0.301%, n=6762, 4주 선행)",
-   "breadth": "하위 20% 주 이후 QQQ 4주 0.323% vs 나머지 1.317% (전체 차 -0.994%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
-   "drawdown": "하락 직전 leading 수 4.188개 vs 평상시 3.472개 (차 +0.716개), 분산도 차 +0.007 (사건 16주)",
-   "stability": "같은 기준일 두 번 수집·재계산 완전 동일 · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0% (182점)"
+   "quadrant": "10년 중 3년 양수, 전체 평균 -0.045%p (leading -0.347% vs 전체 -0.302%, n=6763, 4주 선행)",
+   "breadth": "하위 20% 주 이후 QQQ 4주 0.323% vs 나머지 1.311% (전체 차 -0.988%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
+   "drawdown": "하락 직전 leading 수 4.188개 vs 평상시 3.478개 (차 +0.71개), 분산도 차 +0.007 (사건 16주)",
+   "stability": "같은 기준일 두 번 수집·재계산 완전 동일 · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0089% (182점)"
   }
  },
  "caveats": [
@@ -1139,7 +1121,7 @@
   "보유 위성 섹터 태깅은 출처의 자체 섹터 분류를 GICS 11종 ETF에 대응시킨 것이고, 반도체·소프트웨어·바이오 하위섹터로는 매핑되지 않는다.",
   "이 파일은 관측 입력이다. 판정 규칙이 아니고 월간 10지표에 들어가지 않는다 (제안서 §3).",
   "구성종목 목록 출처 폴백: invesco: 티커 0개 (열=None) 받은 내용 앞머리='<!--\\n* This file is created specifically to update\\n* lang attribute in html tag and\\n* data-language attribute body tag\\n*' → nasdaq_api(A-) 사용.",
-  "구성종목 가격 실패: ABNB, ALAB, APP, ARM, CEG, CRWD, CRWV, DASH, DDOG, FANG (총 27종목 — 폭 지표 모집단에서 빠졌다)."
+  "기준일 2026-11-12은 금요일이 아니라 그 주의 **마지막 거래일**이다. 휴장이거나 출처에 금요일 값이 아직 없으면 이렇게 된다 — 결측이 아니다. 신선도는 freshness.as_of_age_days로 본다(8일 이상이면 그 주 수집이 빠진 것)."
  ],
  "lint_judgment_words": []
 }
