@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-21 01:11",
+ "fetched_at": "2026-11-21 03:23",
  "basis": null,
  "series_meta": {
   "IC4WSA": {
@@ -345,8 +345,8 @@
   },
   "QQQ_price": {
    "last": [
-    "2026-11-19",
-    645.0399780273438
+    "2026-11-20",
+    608.4500122070312
    ],
    "field": "adjclose",
    "source": "Yahoo (B)",
@@ -354,14 +354,14 @@
   },
   "C2_breadth_QQQE_over_QQQ": {
    "now": [
-    "2026-11-19",
-    0.1704
+    "2026-11-20",
+    0.1732
    ],
    "3m_ago": [
-    "2026-08-20",
-    0.1719
+    "2026-08-21",
+    0.172
    ],
-   "chg_3m_pct": -0.87
+   "chg_3m_pct": 0.73
   },
   "D3_dollar": {
    "source": "FRED DTWEXBGS",
@@ -405,18 +405,18 @@
  "u1_opp": {
   "TQQQ": {
    "last": [
-    "2026-11-19",
-    49.01
+    "2026-11-20",
+    41.2
    ],
    "ath_close": [
     "2026-06-02",
     87.22
    ],
-   "dd_pct": -43.81,
+   "dd_pct": -52.76,
    "signal_price": 43.61,
    "report_price_x0.6": 52.33,
-   "to_signal_pct": -11.02,
-   "signal": false,
+   "to_signal_pct": 5.85,
+   "signal": true,
    "report": true,
    "source": "Yahoo close (B)",
    "note": "전고점은 2025-01 이후 최고 종가와 원문 시드 87.22 중 큰 값. 탐색 창 2년 — 원문 규칙은 역대 최고 종가"
@@ -450,15 +450,15 @@
   }
  },
  "vt25": {
-  "as_of": "2026-11-19",
-  "qqq_close": 645.04,
-  "sigma40_pct": 27.82,
+  "as_of": "2026-11-20",
+  "qqq_close": 608.45,
+  "sigma40_pct": 30.8,
   "L": 1.0,
   "tqqq_weight_pct": 33.3,
   "sgov_weight_pct": 66.7,
   "prev_week": {
-   "as_of": "2026-11-12",
-   "sigma40_pct": 27.84,
+   "as_of": "2026-11-13",
+   "sigma40_pct": 27.91,
    "L": 1.0
   },
   "trade_needed": false,
