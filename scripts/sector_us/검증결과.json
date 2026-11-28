@@ -1,29 +1,29 @@
 {
- "run_at": "2026-11-21T10:12:07+09:00",
+ "run_at": "2026-11-28T10:12:25+09:00",
  "calc_version": "0.1",
  "range": "10y",
- "first_week": "2016-11-25",
- "last_week": "2026-11-19",
+ "first_week": "2016-12-02",
+ "last_week": "2026-11-25",
  "n_weeks": 522,
  "fetch_errors": {},
  "v1_quadrant": {
-  "n_obs": 6764,
+  "n_obs": 6765,
   "horizon_weeks": 4,
   "mean_excess_by_quadrant_pct": {
-   "improving": -0.554,
-   "lagging": -0.108,
-   "leading": -0.324,
-   "weakening": -0.251
+   "improving": -0.524,
+   "lagging": -0.115,
+   "leading": -0.261,
+   "weakening": -0.259
   },
   "n_by_quadrant": {
-   "improving": 1661,
-   "lagging": 2417,
-   "leading": 1731,
+   "improving": 1654,
+   "lagging": 2418,
+   "leading": 1738,
    "weakening": 955
   },
-  "leading_mean_pct": -0.324,
-  "all_mean_pct": -0.293,
-  "leading_minus_all_pp": -0.031,
+  "leading_mean_pct": -0.261,
+  "all_mean_pct": -0.273,
+  "leading_minus_all_pp": 0.012,
   "by_year_diff_pp": {
    "2017": -0.418,
    "2018": -0.003,
@@ -34,21 +34,21 @@
    "2023": -0.226,
    "2024": -0.648,
    "2025": 0.165,
-   "2026": 0.265
+   "2026": 0.642
   },
   "years": 10,
   "years_positive": 3
  },
  "v3_drawdown": {
   "event_rule": "QQQ 4주 수익률 <= -10.0%",
-  "n_event_weeks": 16,
-  "n_other_weeks": 477,
-  "leading_count_before_event": 4.188,
-  "leading_count_other": 3.488,
-  "leading_diff": 0.7,
-  "dispersion_before_event": 0.063,
+  "n_event_weeks": 17,
+  "n_other_weeks": 476,
+  "leading_count_before_event": 4.353,
+  "leading_count_other": 3.496,
+  "leading_diff": 0.857,
+  "dispersion_before_event": 0.064,
   "dispersion_other": 0.056,
-  "dispersion_diff": 0.007
+  "dispersion_diff": 0.008
  },
  "breadth_meta": {
   "source": "nasdaq_api",
@@ -77,12 +77,12 @@
   ],
   "pooled_and_yearly_sign_conflict": true,
   "qqq_fwd4w_low_pct": 0.511,
-  "qqq_fwd4w_rest_pct": 1.242,
-  "low_minus_rest_pp": -0.731,
+  "qqq_fwd4w_rest_pct": 1.199,
+  "low_minus_rest_pp": -0.688,
   "by_year_diff_pp": {
    "2022": 4.279,
    "2025": 4.182,
-   "2026": 14.572
+   "2026": 14.896
   },
   "years": 3,
   "years_positive": 3
@@ -96,15 +96,15 @@
   "recompute_diffs_sample": [],
   "source_changed_between_runs": null,
   "snapshot_compare": {
-   "file": "sector-us-2026-11-19.json",
+   "file": "sector-us-2026-11-25.json",
    "compared_points": 182,
    "max_abs_rel_change_pct": 0.0089
   }
  },
  "caveat_lines": {
-  "quadrant": "10년 중 3년 양수, 전체 평균 -0.031%p (leading -0.324% vs 전체 -0.293%, n=6764, 4주 선행)",
-  "breadth": "하위 20% 주 이후 QQQ 4주 0.511% vs 나머지 1.242% (전체 차 -0.731%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
-  "drawdown": "하락 직전 leading 수 4.188개 vs 평상시 3.488개 (차 +0.7개), 분산도 차 +0.007 (사건 16주)",
+  "quadrant": "10년 중 3년 양수, 전체 평균 +0.012%p (leading -0.261% vs 전체 -0.273%, n=6765, 4주 선행)",
+  "breadth": "하위 20% 주 이후 QQQ 4주 0.511% vs 나머지 1.199% (전체 차 -0.688%p · 하위 구간이 있던 3개 연도 중 3년 양수) — 전체와 연도별 부호가 반대다(하위 구간이 약세 연도에 몰렸다). 한쪽만 인용하지 않는다",
+  "drawdown": "하락 직전 leading 수 4.353개 vs 평상시 3.496개 (차 +0.857개), 분산도 차 +0.008 (사건 17주)",
   "stability": "같은 기준일 두 번 수집·재계산 완전 동일 · 스냅샷 대비 과거 rs_ratio 최대 변화 0.0089% (182점)"
  }
 }
